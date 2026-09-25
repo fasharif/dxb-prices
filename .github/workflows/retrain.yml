@@ -1,0 +1,77 @@
+name: Monthly retrain
+
+# Downloads this year's DLD transactions, retrains and evaluates the model,
+# and uploads the metrics report as an artefact. It never deploys anything:
+# a person reads the report and decides whether to ship the new model.
+
+on:
+  schedule:
+    # 05:00 UTC on the 3rd of each month, once the previous month is complete.
+    - cron: "0 5 3 * *"
+  workflow_dispatch:
+    inputs:
+      search:
+        description: Run the hyper-parameter search (slower)
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: retrain
+  cancel-in-progress: false
+
+jobs:
+  retrain:
+    name: Download, retrain and report
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          version: "0.12.19"
+          python-version: "3.12"
+          enable-cache: true
+      - name: Install dependencies from the lockfile
+        run: uv sync --frozen --all-extras
+      - name: Download this year's complete months
+        run: uv run dxb-prices download
+      - name: Check there are enough months for a temporal split
+        id: check
+        run: |
+          set +e
+          uv run dxb-prices check-data
+          code=$?
+          set -e
+          if [ "$code" -eq 0 ]; then
+            echo "enough=true" >> "$GITHUB_OUTPUT"
+          elif [ "$code" -eq 3 ]; then
+            echo "enough=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Not enough complete months this year yet; skipping training."
+          else
+            exit "$code"
+          fi
+      - name: Train and evaluate
+        if: steps.check.outputs.enough == 'true'
+        env:
+          SEARCH: ${{ github.event_name != 'workflow_dispatch' || inputs.search }}
+        run: |
+          args=()
+          if [ "$SEARCH" = "false" ]; then args+=(--no-search); fi
+          uv run dxb-prices train "${args[@]}"
+      - name: Add the report to the run summary
+        if: steps.check.outputs.enough == 'true'
+        run: cat reports/metrics.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload the metrics report
+        if: steps.check.outputs.enough == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: metrics-report-${{ github.run_id }}
+          path: |
+            reports/metrics.json
+            reports/metrics.md
+            reports/shap_importance.png
+          if-no-files-found: error
+          retention-days: 90
