@@ -1,0 +1,858 @@
+{
+  "generated_at": "2026-09-25T23:31:34+00:00",
+  "command": "dxb-prices train",
+  "environment": {
+    "python": "3.12.14",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.36",
+    "lightgbm": "4.7.0",
+    "pandas": "3.0.6"
+  },
+  "data": {
+    "source": "https://dubailand.gov.ae/en/open-data/real-estate-data/",
+    "files": [
+      {
+        "file": "transactions_2026-01.csv",
+        "sha256": "95ddc5aebb422c521cba2fe66b6bb9dff5e5963a446a48cf259f5a9cad8ab44a",
+        "bytes": 6875261,
+        "rows": 22492,
+        "period_start": "2026-01-01",
+        "period_end": "2026-01-31",
+        "downloaded_at": "2026-09-25T21:22:00+00:00",
+        "source": "dld-open-data-export"
+      },
+      {
+        "file": "transactions_2026-02.csv",
+        "sha256": "87f66ac2d44ade95a57d3111247e2fab88b9f93f94e55c13bd6fc05929ff508e",
+        "bytes": 6595534,
+        "rows": 21605,
+        "period_start": "2026-02-01",
+        "period_end": "2026-02-28",
+        "downloaded_at": "2026-09-25T21:22:15+00:00",
+        "source": "dld-open-data-export"
+      },
+      {
+        "file": "transactions_2026-03.csv",
+        "sha256": "3eb2f91d45cd2896866e8c03a53ad290d1fbefab650129c0f33ff25ad03bdc08",
+        "bytes": 5265556,
+        "rows": 17340,
+        "period_start": "2026-03-01",
+        "period_end": "2026-03-31",
+        "downloaded_at": "2026-09-25T21:22:28+00:00",
+        "source": "dld-open-data-export"
+      },
+      {
+        "file": "transactions_2026-04.csv",
+        "sha256": "c6edd214861e0c04302adf8378c4ac7dd637596ed539658c0ca9a1bb2d98447a",
+        "bytes": 5767155,
+        "rows": 18851,
+        "period_start": "2026-04-01",
+        "period_end": "2026-04-30",
+        "downloaded_at": "2026-09-25T21:22:41+00:00",
+        "source": "dld-open-data-export"
+      },
+      {
+        "file": "transactions_2026-05.csv",
+        "sha256": "260da4ccc04699de63e66f77ee9ebb8673bd596ea07e0043ee6ed2a4834e225f",
+        "bytes": 4227592,
+        "rows": 13804,
+        "period_start": "2026-05-01",
+        "period_end": "2026-05-31",
+        "downloaded_at": "2026-09-25T21:22:53+00:00",
+        "source": "dld-open-data-export"
+      },
+      {
+        "file": "transactions_2026-06.csv",
+        "sha256": "f74db5ef3e0305dafebce1462bfa62b7e69348df124b2ae758b9d3509f388ead",
+        "bytes": 5695529,
+        "rows": 18640,
+        "period_start": "2026-06-01",
+        "period_end": "2026-06-30",
+        "downloaded_at": "2026-09-25T21:23:07+00:00",
+        "source": "dld-open-data-export"
+      },
+      {
+        "file": "transactions_2026-07.csv",
+        "sha256": "092f8ee4fd6a6064fc80020331b560aafa4b40ddf824831658a5ff017855a085",
+        "bytes": 5888153,
+        "rows": 19167,
+        "period_start": "2026-07-01",
+        "period_end": "2026-07-31",
+        "downloaded_at": "2026-09-25T21:23:21+00:00",
+        "source": "dld-open-data-export"
+      },
+      {
+        "file": "transactions_2026-08.csv",
+        "sha256": "e742dc0fc059e4c65b93803dd318a24e9f6f12ccc0009aec32efca8013f8ce80",
+        "bytes": 4866653,
+        "rows": 15946,
+        "period_start": "2026-08-01",
+        "period_end": "2026-08-31",
+        "downloaded_at": "2026-09-25T21:23:33+00:00",
+        "source": "dld-open-data-export"
+      }
+    ],
+    "period_start": "2026-01-01",
+    "period_end": "2026-08-31",
+    "downloaded_on": "2026-09-25",
+    "raw_rows": 147845,
+    "clean_rows": 87927
+  },
+  "cleaning": [
+    {
+      "step": "Parse",
+      "rule": "drop rows without an id, date, price or size",
+      "rows_in": 147845,
+      "removed": 0,
+      "rows_out": 147845
+    },
+    {
+      "step": "Exact duplicates",
+      "rule": "keep one copy of identical rows",
+      "rows_in": 147845,
+      "removed": 1950,
+      "rows_out": 145895
+    },
+    {
+      "step": "Sales only",
+      "rule": "keep the Sales group (drop mortgages and gifts)",
+      "rows_in": 145895,
+      "removed": 34516,
+      "rows_out": 111379
+    },
+    {
+      "step": "Location duplicates",
+      "rule": "one sale listed twice with different nearest metro/mall/landmark labels: keep one",
+      "rows_in": 111379,
+      "removed": 20,
+      "rows_out": 111359
+    },
+    {
+      "step": "Multi-unit deals",
+      "rule": "drop transaction numbers still on several rows (one value for several units)",
+      "rows_in": 111359,
+      "removed": 0,
+      "rows_out": 111359
+    },
+    {
+      "step": "Market sales",
+      "rule": "keep sale procedures (freehold and non-freehold); drop lease-to-own",
+      "rows_in": 111359,
+      "removed": 456,
+      "rows_out": 110903
+    },
+    {
+      "step": "Apartments",
+      "rule": "units with residential usage, sub-type Flat or Hotel Apartment",
+      "rows_in": 110903,
+      "removed": 22404,
+      "rows_out": 88499
+    },
+    {
+      "step": "Size bounds",
+      "rule": "18 to 3,000 sqm",
+      "rows_in": 88499,
+      "removed": 1,
+      "rows_out": 88498
+    },
+    {
+      "step": "Price bounds",
+      "rule": "100,000 to 500,000,000 AED",
+      "rows_in": 88498,
+      "removed": 507,
+      "rows_out": 87991
+    },
+    {
+      "step": "Price per sqm bounds",
+      "rule": "2,500 to 250,000 AED/sqm",
+      "rows_in": 87991,
+      "removed": 64,
+      "rows_out": 87927
+    },
+    {
+      "step": "Community known",
+      "rule": "drop rows without a community name",
+      "rows_in": 87927,
+      "removed": 0,
+      "rows_out": 87927
+    }
+  ],
+  "split": {
+    "train_months": [
+      "2026-01",
+      "2026-02",
+      "2026-03",
+      "2026-04",
+      "2026-05",
+      "2026-06"
+    ],
+    "valid_months": [
+      "2026-07"
+    ],
+    "test_months": [
+      "2026-08"
+    ],
+    "rows": {
+      "train": 67173,
+      "valid": 11274,
+      "test": 9480,
+      "train_after_trim": 66351,
+      "final_fit": 77488
+    },
+    "final_fit_communities": 118,
+    "final_fit_projects": 2160,
+    "communities_with_own_level": 96,
+    "projects_with_own_level": 389
+  },
+  "search": [
+    {
+      "params": {
+        "objective": "regression",
+        "num_leaves": 31,
+        "min_data_in_leaf": 20
+      },
+      "best_iteration": 1426,
+      "rows": 11274,
+      "mdape": 0.05985971042008265,
+      "within_10pct": 0.6685293595884335,
+      "mae_aed": 251674.4831357635
+    },
+    {
+      "params": {
+        "objective": "regression",
+        "num_leaves": 31,
+        "min_data_in_leaf": 60
+      },
+      "best_iteration": 1766,
+      "rows": 11274,
+      "mdape": 0.06024657855809511,
+      "within_10pct": 0.6686180592513749,
+      "mae_aed": 249777.06470993502
+    },
+    {
+      "params": {
+        "objective": "regression",
+        "num_leaves": 127,
+        "min_data_in_leaf": 20
+      },
+      "best_iteration": 817,
+      "rows": 11274,
+      "mdape": 0.058135928798530474,
+      "within_10pct": 0.6776654248713855,
+      "mae_aed": 247492.48066592182
+    },
+    {
+      "params": {
+        "objective": "regression",
+        "num_leaves": 127,
+        "min_data_in_leaf": 60
+      },
+      "best_iteration": 667,
+      "rows": 11274,
+      "mdape": 0.05922333596056355,
+      "within_10pct": 0.6698598545325528,
+      "mae_aed": 247934.62122420993
+    },
+    {
+      "params": {
+        "objective": "huber",
+        "num_leaves": 31,
+        "min_data_in_leaf": 20,
+        "alpha": 0.15
+      },
+      "best_iteration": 1647,
+      "rows": 11274,
+      "mdape": 0.05830708825255579,
+      "within_10pct": 0.6876884867837503,
+      "mae_aed": 246248.89806790088
+    },
+    {
+      "params": {
+        "objective": "huber",
+        "num_leaves": 31,
+        "min_data_in_leaf": 60,
+        "alpha": 0.15
+      },
+      "best_iteration": 2142,
+      "rows": 11274,
+      "mdape": 0.05776376793949437,
+      "within_10pct": 0.6833422032996275,
+      "mae_aed": 245946.29201347058
+    },
+    {
+      "params": {
+        "objective": "huber",
+        "num_leaves": 127,
+        "min_data_in_leaf": 20,
+        "alpha": 0.15
+      },
+      "best_iteration": 821,
+      "rows": 11274,
+      "mdape": 0.05656848221913945,
+      "within_10pct": 0.6894624800425758,
+      "mae_aed": 241991.1289040088
+    },
+    {
+      "params": {
+        "objective": "huber",
+        "num_leaves": 127,
+        "min_data_in_leaf": 60,
+        "alpha": 0.15
+      },
+      "best_iteration": 897,
+      "rows": 11274,
+      "mdape": 0.056776190149330476,
+      "within_10pct": 0.6881319850984566,
+      "mae_aed": 240835.8206776659
+    },
+    {
+      "params": {
+        "objective": "regression_l1",
+        "num_leaves": 31,
+        "min_data_in_leaf": 20
+      },
+      "best_iteration": 2951,
+      "rows": 11274,
+      "mdape": 0.056875160630374594,
+      "within_10pct": 0.6717225474543197,
+      "mae_aed": 252840.42009410748
+    },
+    {
+      "params": {
+        "objective": "regression_l1",
+        "num_leaves": 31,
+        "min_data_in_leaf": 60
+      },
+      "best_iteration": 3709,
+      "rows": 11274,
+      "mdape": 0.05579804036492593,
+      "within_10pct": 0.671190349476672,
+      "mae_aed": 251060.85569710398
+    },
+    {
+      "params": {
+        "objective": "regression_l1",
+        "num_leaves": 127,
+        "min_data_in_leaf": 20
+      },
+      "best_iteration": 772,
+      "rows": 11274,
+      "mdape": 0.05373539427278984,
+      "within_10pct": 0.6787298208266809,
+      "mae_aed": 249521.9480550836
+    },
+    {
+      "params": {
+        "objective": "regression_l1",
+        "num_leaves": 127,
+        "min_data_in_leaf": 60
+      },
+      "best_iteration": 1693,
+      "rows": 11274,
+      "mdape": 0.05376436799528358,
+      "within_10pct": 0.6783750221749157,
+      "mae_aed": 250293.70112805115
+    }
+  ],
+  "chosen": {
+    "params": {
+      "objective": "regression_l1",
+      "learning_rate": 0.05,
+      "num_leaves": 127,
+      "min_data_in_leaf": 20,
+      "feature_fraction": 0.9,
+      "bagging_fraction": 0.8,
+      "bagging_freq": 1,
+      "lambda_l2": 1.0,
+      "cat_smooth": 10.0,
+      "cat_l2": 10.0,
+      "min_data_per_group": 50,
+      "max_cat_threshold": 64,
+      "metric": "l1",
+      "verbosity": -1,
+      "deterministic": true,
+      "force_col_wise": true,
+      "num_threads": 4,
+      "seed": 42
+    },
+    "num_boost_round": 772
+  },
+  "validation": {
+    "model": {
+      "rows": 11274,
+      "mdape": 0.05373539427278984,
+      "within_10pct": 0.6787298208266809,
+      "mae_aed": 249521.9480550836
+    },
+    "baseline": {
+      "rows": 11274,
+      "mdape": 0.11857701315771108,
+      "within_10pct": 0.4450062089764059,
+      "mae_aed": 353510.43657344615
+    }
+  },
+  "test": {
+    "model": {
+      "rows": 9480,
+      "mdape": 0.05307042569922436,
+      "within_10pct": 0.7039029535864979,
+      "mae_aed": 220774.2522403553
+    },
+    "baseline": {
+      "rows": 9480,
+      "mdape": 0.10853066394355901,
+      "within_10pct": 0.46867088607594937,
+      "mae_aed": 344660.89588723815
+    }
+  },
+  "interval": {
+    "nominal": 0.8,
+    "test_coverage": 0.8267932489451477,
+    "q10": -0.14329673734465728,
+    "q90": 0.16816902292849045
+  },
+  "segments": [
+    {
+      "dimension": "registration",
+      "segment": "off-plan",
+      "estimator": "model",
+      "rows": 7093,
+      "mdape": 0.04282980788561642,
+      "within_10pct": 0.764979557310024,
+      "mae_aed": 200735.1803196614,
+      "range_coverage": 0.8753700831806006
+    },
+    {
+      "dimension": "registration",
+      "segment": "off-plan",
+      "estimator": "baseline",
+      "rows": 7093,
+      "mdape": 0.09229510770686304,
+      "within_10pct": 0.5309460031016495,
+      "mae_aed": 286155.8047124384
+    },
+    {
+      "dimension": "registration",
+      "segment": "ready",
+      "estimator": "model",
+      "rows": 2387,
+      "mdape": 0.09307818001844222,
+      "within_10pct": 0.5224130708001675,
+      "mae_aed": 280320.6021077545,
+      "range_coverage": 0.6824465856723921
+    },
+    {
+      "dimension": "registration",
+      "segment": "ready",
+      "estimator": "baseline",
+      "rows": 2387,
+      "mdape": 0.20374371884890077,
+      "within_10pct": 0.28361960620025134,
+      "mae_aed": 518509.49735470983
+    },
+    {
+      "dimension": "price band",
+      "segment": "under 1.0M AED",
+      "estimator": "model",
+      "rows": 4295,
+      "mdape": 0.04477627999511971,
+      "within_10pct": 0.7483119906868452,
+      "mae_aed": 63816.98165009961,
+      "range_coverage": 0.8549476135040746
+    },
+    {
+      "dimension": "price band",
+      "segment": "under 1.0M AED",
+      "estimator": "baseline",
+      "rows": 4295,
+      "mdape": 0.10657670575617645,
+      "within_10pct": 0.4768335273573923,
+      "mae_aed": 124723.58425297421
+    },
+    {
+      "dimension": "price band",
+      "segment": "1.0M-2.0M AED",
+      "estimator": "model",
+      "rows": 3273,
+      "mdape": 0.055315866145896196,
+      "within_10pct": 0.6972196761380997,
+      "mae_aed": 119404.06542136127,
+      "range_coverage": 0.8414298808432631
+    },
+    {
+      "dimension": "price band",
+      "segment": "1.0M-2.0M AED",
+      "estimator": "baseline",
+      "rows": 3273,
+      "mdape": 0.10385830702521089,
+      "within_10pct": 0.47937671860678277,
+      "mae_aed": 228018.0073271458
+    },
+    {
+      "dimension": "price band",
+      "segment": "2.0M-5.0M AED",
+      "estimator": "model",
+      "rows": 1647,
+      "mdape": 0.06909956995514765,
+      "within_10pct": 0.6296296296296297,
+      "mae_aed": 311425.7738958009,
+      "range_coverage": 0.7589556769884639
+    },
+    {
+      "dimension": "price band",
+      "segment": "2.0M-5.0M AED",
+      "estimator": "baseline",
+      "rows": 1647,
+      "mdape": 0.11529399462030866,
+      "within_10pct": 0.45658773527625984,
+      "mae_aed": 506855.6537004261
+    },
+    {
+      "dimension": "price band",
+      "segment": "5.0M AED and over",
+      "estimator": "model",
+      "rows": 265,
+      "mdape": 0.0911205770336376,
+      "within_10pct": 0.5283018867924528,
+      "mae_aed": 3453276.2993241167,
+      "range_coverage": 0.6113207547169811
+    },
+    {
+      "dimension": "price band",
+      "segment": "5.0M AED and over",
+      "estimator": "baseline",
+      "rows": 265,
+      "mdape": 0.166154856691469,
+      "within_10pct": 0.2792452830188679,
+      "mae_aed": 4341899.241577902
+    },
+    {
+      "dimension": "community data",
+      "segment": "new (no training sales)",
+      "estimator": "model",
+      "rows": 6,
+      "mdape": 0.8110407776835746,
+      "within_10pct": 0.0,
+      "mae_aed": 31929581.08549987,
+      "range_coverage": 0.0
+    },
+    {
+      "dimension": "community data",
+      "segment": "new (no training sales)",
+      "estimator": "baseline",
+      "rows": 6,
+      "mdape": 0.8165953128758907,
+      "within_10pct": 0.0,
+      "mae_aed": 31687341.30202764
+    },
+    {
+      "dimension": "community data",
+      "segment": "thin (1-49 training sales)",
+      "estimator": "model",
+      "rows": 149,
+      "mdape": 0.028626422065856746,
+      "within_10pct": 0.8187919463087249,
+      "mae_aed": 606819.8204294635,
+      "range_coverage": 0.8590604026845637
+    },
+    {
+      "dimension": "community data",
+      "segment": "thin (1-49 training sales)",
+      "estimator": "baseline",
+      "rows": 149,
+      "mdape": 0.028501866981438473,
+      "within_10pct": 0.7919463087248322,
+      "mae_aed": 654359.3813673744
+    },
+    {
+      "dimension": "community data",
+      "segment": "established (50+ training sales)",
+      "estimator": "model",
+      "rows": 9325,
+      "mdape": 0.0538215323627733,
+      "within_10pct": 0.7025201072386059,
+      "mae_aed": 194203.3535100889,
+      "range_coverage": 0.8268096514745308
+    },
+    {
+      "dimension": "community data",
+      "segment": "established (50+ training sales)",
+      "estimator": "baseline",
+      "rows": 9325,
+      "mdape": 0.1094698043663172,
+      "within_10pct": 0.46380697050938335,
+      "mae_aed": 319545.49033513275
+    },
+    {
+      "dimension": "rooms",
+      "segment": "studio",
+      "estimator": "model",
+      "rows": 3544,
+      "mdape": 0.039174107278583475,
+      "within_10pct": 0.801354401805869,
+      "mae_aed": 43950.05850728732,
+      "range_coverage": 0.904627539503386
+    },
+    {
+      "dimension": "rooms",
+      "segment": "studio",
+      "estimator": "baseline",
+      "rows": 3544,
+      "mdape": 0.08689515913346024,
+      "within_10pct": 0.551354401805869,
+      "mae_aed": 82593.75246885353
+    },
+    {
+      "dimension": "rooms",
+      "segment": "1",
+      "estimator": "model",
+      "rows": 3551,
+      "mdape": 0.05907761336127083,
+      "within_10pct": 0.6688256829062236,
+      "mae_aed": 131723.49827263743,
+      "range_coverage": 0.8124471979724022
+    },
+    {
+      "dimension": "rooms",
+      "segment": "1",
+      "estimator": "baseline",
+      "rows": 3551,
+      "mdape": 0.11198283957394524,
+      "within_10pct": 0.45423824274852154,
+      "mae_aed": 233697.6358996443
+    },
+    {
+      "dimension": "rooms",
+      "segment": "2",
+      "estimator": "model",
+      "rows": 1870,
+      "mdape": 0.06428712380103646,
+      "within_10pct": 0.6331550802139038,
+      "mae_aed": 341852.67702199623,
+      "range_coverage": 0.7577540106951872
+    },
+    {
+      "dimension": "rooms",
+      "segment": "2",
+      "estimator": "baseline",
+      "rows": 1870,
+      "mdape": 0.13889701793910128,
+      "within_10pct": 0.3754010695187166,
+      "mae_aed": 544626.4593062236
+    },
+    {
+      "dimension": "rooms",
+      "segment": "3",
+      "estimator": "model",
+      "rows": 448,
+      "mdape": 0.0857086188186701,
+      "within_10pct": 0.5513392857142857,
+      "mae_aed": 1123097.586395574,
+      "range_coverage": 0.65625
+    },
+    {
+      "dimension": "rooms",
+      "segment": "3",
+      "estimator": "baseline",
+      "rows": 448,
+      "mdape": 0.15265201384176758,
+      "within_10pct": 0.35267857142857145,
+      "mae_aed": 1544794.0796309032
+    },
+    {
+      "dimension": "rooms",
+      "segment": "4",
+      "estimator": "model",
+      "rows": 56,
+      "mdape": 0.14085000790759342,
+      "within_10pct": 0.42857142857142855,
+      "mae_aed": 4920277.225198184,
+      "range_coverage": 0.5535714285714286
+    },
+    {
+      "dimension": "rooms",
+      "segment": "4",
+      "estimator": "baseline",
+      "rows": 56,
+      "mdape": 0.18432148055047193,
+      "within_10pct": 0.23214285714285715,
+      "mae_aed": 5888090.724531214
+    },
+    {
+      "dimension": "rooms",
+      "segment": "5+",
+      "estimator": "model",
+      "rows": 6,
+      "mdape": 0.17773758728642744,
+      "within_10pct": 0.3333333333333333,
+      "mae_aed": 7802291.178150531,
+      "range_coverage": 0.3333333333333333
+    },
+    {
+      "dimension": "rooms",
+      "segment": "5+",
+      "estimator": "baseline",
+      "rows": 6,
+      "mdape": 0.2771736720356609,
+      "within_10pct": 0.16666666666666666,
+      "mae_aed": 16609381.109460404
+    },
+    {
+      "dimension": "rooms",
+      "segment": "penthouse",
+      "estimator": "model",
+      "rows": 5,
+      "mdape": 0.13379376344521685,
+      "within_10pct": 0.2,
+      "mae_aed": 933853.0212509984,
+      "range_coverage": 0.6
+    },
+    {
+      "dimension": "rooms",
+      "segment": "penthouse",
+      "estimator": "baseline",
+      "rows": 5,
+      "mdape": 0.29103540961330615,
+      "within_10pct": 0.4,
+      "mae_aed": 980827.0747942381
+    }
+  ],
+  "shap": {
+    "rows": 5000,
+    "max_abs_gap_shap_vs_lightgbm": 0.0,
+    "importance": [
+      {
+        "feature": "community",
+        "label": "Community",
+        "mean_abs_shap": 0.1980235084047718,
+        "share": 0.4248802890749476
+      },
+      {
+        "feature": "project",
+        "label": "Project",
+        "mean_abs_shap": 0.09865261572516419,
+        "share": 0.21166957511746337
+      },
+      {
+        "feature": "area_sqm",
+        "label": "Size (sqm)",
+        "mean_abs_shap": 0.0735464653777361,
+        "share": 0.1578016858799384
+      },
+      {
+        "feature": "is_off_plan",
+        "label": "Off-plan or ready",
+        "mean_abs_shap": 0.03317158996524688,
+        "share": 0.07117313922496941
+      },
+      {
+        "feature": "rooms",
+        "label": "Rooms",
+        "mean_abs_shap": 0.020077037225026562,
+        "share": 0.04307739746990673
+      },
+      {
+        "feature": "nearest_metro",
+        "label": "Nearest metro",
+        "mean_abs_shap": 0.014606565519032288,
+        "share": 0.03133992438631621
+      },
+      {
+        "feature": "month_index",
+        "label": "Month of sale",
+        "mean_abs_shap": 0.01378249229713434,
+        "share": 0.02957178851416899
+      },
+      {
+        "feature": "nearest_landmark",
+        "label": "Nearest landmark",
+        "mean_abs_shap": 0.008836989021219536,
+        "share": 0.018960690476269828
+      },
+      {
+        "feature": "is_freehold",
+        "label": "Freehold",
+        "mean_abs_shap": 0.002318851366553086,
+        "share": 0.00497533978101749
+      },
+      {
+        "feature": "sub_type",
+        "label": "Flat or hotel apartment",
+        "mean_abs_shap": 0.002052847732132125,
+        "share": 0.004404600973296007
+      },
+      {
+        "feature": "nearest_mall",
+        "label": "Nearest mall",
+        "mean_abs_shap": 0.000999983129294447,
+        "share": 0.002145569101705993
+      }
+    ]
+  },
+  "drift": {
+    "drifted_share": 0.42857142857142855,
+    "drifted_count": 3.0,
+    "columns": [
+      {
+        "column": "area_sqm",
+        "method": "Wasserstein distance (normed)",
+        "value": 0.10835543062041776,
+        "threshold": 0.1,
+        "drifted": true
+      },
+      {
+        "column": "log_price_per_sqm",
+        "method": "Wasserstein distance (normed)",
+        "value": 0.15587403638467645,
+        "threshold": 0.1,
+        "drifted": true
+      },
+      {
+        "column": "community",
+        "method": "Jensen-Shannon distance",
+        "value": 0.2262489297712916,
+        "threshold": 0.1,
+        "drifted": true
+      },
+      {
+        "column": "rooms",
+        "method": "Jensen-Shannon distance",
+        "value": 0.054715345834710605,
+        "threshold": 0.1,
+        "drifted": false
+      },
+      {
+        "column": "is_off_plan",
+        "method": "Jensen-Shannon distance",
+        "value": 0.009453925235205232,
+        "threshold": 0.1,
+        "drifted": false
+      },
+      {
+        "column": "is_freehold",
+        "method": "Jensen-Shannon distance",
+        "value": 0.003998399094601953,
+        "threshold": 0.1,
+        "drifted": false
+      },
+      {
+        "column": "sub_type",
+        "method": "Jensen-Shannon distance",
+        "value": 0.013618304531639052,
+        "threshold": 0.1,
+        "drifted": false
+      }
+    ],
+    "reference_rows": 78447,
+    "current_rows": 9480,
+    "reference_months": [
+      "2026-01",
+      "2026-02",
+      "2026-03",
+      "2026-04",
+      "2026-05",
+      "2026-06",
+      "2026-07"
+    ],
+    "current_month": "2026-08"
+  }
+}
