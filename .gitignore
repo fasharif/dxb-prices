@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Data: raw DLD downloads and anything derived from them are never committed
+data/
+
+# Model artefacts, experiment tracking and generated reports
+artifacts/
+mlruns/
+mlflow.db
+reports/drift/
+
+# Environment and editor files
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
