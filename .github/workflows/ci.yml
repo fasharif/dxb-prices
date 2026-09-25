@@ -70,7 +70,7 @@ jobs:
       - name: Train the small synthetic-fixture model (base dependencies only)
         run: |
           uv sync --frozen --no-dev
-          uv run dxb-prices train-fixture --model-dir artifacts/fixture-model
+          uv run --no-dev dxb-prices train-fixture --model-dir artifacts/fixture-model
       - name: Build the API and UI images
         run: |
           docker build --target api -t dxb-prices-api:ci .
