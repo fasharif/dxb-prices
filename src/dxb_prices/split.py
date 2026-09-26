@@ -63,20 +63,21 @@ def trim_training(
 ) -> pd.DataFrame:
     """Drop the extreme price-per-sqm tails from training rows only.
 
-    Communities with at least ``min_group_rows`` rows use their own quantiles;
-    smaller ones use the quantiles of the whole training set. Nothing here
-    looks at validation or test rows.
+    Communities with at least ``min_group_rows`` rows lose the tails of their
+    own distribution. Smaller communities are not trimmed: a few rows give no
+    reliable percentiles, and the percentiles of the whole training set would
+    remove entire luxury communities (in the 2026 data, every training sale in
+    Jumeirah Second is above the overall 99.5th percentile). The fixed validity
+    rules in ``clean`` still apply to them. Nothing here looks at validation or
+    test rows.
     """
     ratio = (train["price_aed"] / train["area_sqm"]).to_numpy(np.float64)
     log_pps = pd.Series(np.log(ratio), index=train.index)
-    g_lo, g_hi = log_pps.quantile([rules.lower_quantile, rules.upper_quantile])
     counts = train["community"].map(train["community"].value_counts())
     grouped = log_pps.groupby(train["community"])
     lo = grouped.transform(lambda s: s.quantile(rules.lower_quantile))
     hi = grouped.transform(lambda s: s.quantile(rules.upper_quantile))
     big = counts >= min_group_rows
-    lower = lo.where(big, g_lo)
-    upper = hi.where(big, g_hi)
-    keep = (log_pps >= lower) & (log_pps <= upper)
+    keep = ~big | ((log_pps >= lo) & (log_pps <= hi))
     kept: pd.DataFrame = train.loc[keep].copy()
     return kept

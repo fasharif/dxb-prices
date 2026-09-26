@@ -49,10 +49,14 @@ def test_trim_removes_only_extreme_training_rows() -> None:
     assert 985 <= len(trimmed) <= 992
 
 
-def test_small_communities_use_global_quantiles() -> None:
+def test_small_communities_are_not_trimmed() -> None:
     big = pd.DataFrame(
         {"community": "A", "area_sqm": 100.0, "price_aed": np.linspace(1.0e6, 2.0e6, 400)}
     )
-    small = pd.DataFrame({"community": "B", "area_sqm": 100.0, "price_aed": [1.5e6] * 5})
+    # A small luxury enclave: every sale is far above the other community's prices.
+    small = pd.DataFrame(
+        {"community": "B", "area_sqm": 100.0, "price_aed": [1.0e7, 1.1e7, 1.2e7, 9.0e6, 5.0e7]}
+    )
     trimmed = split.trim_training(pd.concat([big, small], ignore_index=True), TrainingTrim())
     assert (trimmed["community"] == "B").sum() == 5
+    assert (trimmed["community"] == "A").sum() < 400
