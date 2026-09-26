@@ -18,6 +18,12 @@ def test_mdape_within_and_mae_on_known_values() -> None:
     assert s.within_10pct == pytest.approx(0.75)
 
 
+def test_median_error_keeps_the_sign() -> None:
+    # Signed errors: -10%, -10%, -5%, +30%: the median shows estimates running low.
+    assert metrics.median_error([100.0] * 4, [90.0, 90.0, 95.0, 130.0]) == pytest.approx(-0.075)
+    assert metrics.score([100.0, 100.0], [110.0, 120.0]).median_error == pytest.approx(0.15)
+
+
 def test_within_counts_the_boundary() -> None:
     assert metrics.within([1_000_000.0], [1_100_000.0], 0.10) == 1.0
     assert metrics.within([1_000_000.0], [1_100_001.0], 0.10) == 0.0

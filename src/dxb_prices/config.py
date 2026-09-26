@@ -116,6 +116,13 @@ class FeatureRules:
 
 
 @dataclass(frozen=True)
+class BaselineRules:
+    """The project-median baseline uses a project's own median only with this many sales."""
+
+    min_project_rows: int = 5
+
+
+@dataclass(frozen=True)
 class SplitRules:
     """Temporal split: the newest months are held out."""
 
@@ -141,6 +148,7 @@ class Settings:
     features: FeatureRules = field(default_factory=FeatureRules)
     split: SplitRules = field(default_factory=SplitRules)
     segments: SegmentRules = field(default_factory=SegmentRules)
+    baseline: BaselineRules = field(default_factory=BaselineRules)
     random_seed: int = 42
 
 

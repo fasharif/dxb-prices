@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from dxb_prices.baseline import CommunityMedianBaseline
+from dxb_prices.baseline import CommunityMedianBaseline, ProjectMedianBaseline
 
 
 def sales(community: str, pps: list[float], area: float = 100.0) -> pd.DataFrame:
@@ -46,6 +46,33 @@ def test_test_prices_never_influence_the_baseline(train: pd.DataFrame) -> None:
 def test_round_trip(train: pd.DataFrame) -> None:
     model = CommunityMedianBaseline.fit(train)
     assert CommunityMedianBaseline.from_dict(model.to_dict()) == model
+
+
+def test_project_median_needs_enough_sales_and_falls_back_to_the_community() -> None:
+    train = pd.concat(
+        [
+            sales("A", [10_000, 11_000, 12_000]).assign(project="Tower 1"),
+            sales("A", [30_000, 31_000]).assign(project="Tower 2"),
+            sales("B", [20_000, 22_000, 24_000]).assign(project="Tower 1"),
+        ],
+        ignore_index=True,
+    )
+    model = ProjectMedianBaseline.fit(train, min_rows=3)
+    # Tower 2 has two sales: below the minimum, so community A's median (12,000) applies.
+    assert model.medians == {"A": {"Tower 1": 11_000.0}, "B": {"Tower 1": 22_000.0}}
+    test = pd.DataFrame(
+        {
+            "community": ["A", "A", "B", "A", "C"],
+            "project": ["Tower 1", "Tower 2", "Tower 1", None, "Tower 1"],
+            "area_sqm": [100.0] * 5,
+        }
+    )
+    # The same project name in another community is a different building, and a community
+    # without training sales falls back to the median of all of them (21,000).
+    np.testing.assert_allclose(
+        model.per_sqm(test), [11_000.0, 12_000.0, 22_000.0, 12_000.0, 21_000.0]
+    )
+    np.testing.assert_allclose(model.predict(test)[:1], [1_100_000.0])
 
 
 def test_refuses_empty_training_data() -> None:

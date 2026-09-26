@@ -18,6 +18,8 @@ class Scores:
     mdape: float
     within_10pct: float
     mae_aed: float
+    # Median of (estimate - price) / price: below zero means estimates run low.
+    median_error: float
 
     def as_dict(self) -> dict[str, float | int]:
         return asdict(self)
@@ -46,6 +48,14 @@ def within(actual: npt.ArrayLike, predicted: npt.ArrayLike, tolerance: float = 0
     return float(np.mean(absolute_percentage_errors(actual, predicted) <= tolerance + 1e-12))
 
 
+def median_error(actual: npt.ArrayLike, predicted: npt.ArrayLike) -> float:
+    """Median signed percentage error, as a fraction; shows whether estimates run high or low."""
+    a, p = _as_float(actual), _as_float(predicted)
+    if a.shape != p.shape:
+        raise ValueError(f"shape mismatch: actual {a.shape} vs predicted {p.shape}")
+    return float(np.median((p - a) / a))
+
+
 def mae(actual: npt.ArrayLike, predicted: npt.ArrayLike) -> float:
     a, p = _as_float(actual), _as_float(predicted)
     return float(np.mean(np.abs(p - a)))
@@ -60,6 +70,7 @@ def score(actual: npt.ArrayLike, predicted: npt.ArrayLike) -> Scores:
         mdape=mdape(a, predicted),
         within_10pct=within(a, predicted),
         mae_aed=mae(a, predicted),
+        median_error=median_error(a, predicted),
     )
 
 
