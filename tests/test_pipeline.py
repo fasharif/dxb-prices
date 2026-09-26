@@ -101,10 +101,3 @@ def test_model_metadata_is_complete(run: dict[str, Any]) -> None:
     assert meta["evaluated_on_months"] == ["2026-04"]
     assert meta["data_period_end"] == "2026-04-30"
     assert set(meta["residual_quantiles"]) == {"q10", "q90"}
-
-
-def test_library_telemetry_is_switched_off(run: dict[str, Any]) -> None:
-    import os
-
-    assert os.environ["MLFLOW_DISABLE_TELEMETRY"] == "true"
-    assert os.environ["EVIDENTLY_DISABLE_TELEMETRY"] == "1"

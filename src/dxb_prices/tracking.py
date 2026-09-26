@@ -15,7 +15,10 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
-from dxb_prices import config
+from dxb_prices import config, telemetry
+
+# Before anything below imports mlflow (see dxb_prices.telemetry).
+telemetry.opt_out()
 
 EXPERIMENT = "dxb-prices"
 
@@ -29,8 +32,6 @@ def resolve_uri(uri: str | None = None) -> str:
     # MLflow records the Git commit when it can; without a git binary (slim
     # containers) GitPython prints a long warning instead. Keep it quiet.
     os.environ.setdefault("GIT_PYTHON_REFRESH", "quiet")
-    # MLflow 3 sends anonymous usage telemetry unless told not to.
-    os.environ.setdefault("MLFLOW_DISABLE_TELEMETRY", "true")
     return chosen
 
 

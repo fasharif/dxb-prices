@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-import os
 import warnings
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pandas as pd
+
+from dxb_prices import telemetry
+
+# Before run() imports evidently (see dxb_prices.telemetry).
+telemetry.opt_out()
 
 NUMERIC_COLUMNS: tuple[str, ...] = ("area_sqm", "log_price_per_sqm")
 CATEGORICAL_COLUMNS: tuple[str, ...] = (
@@ -59,8 +63,6 @@ def _parse(snapshot_dict: dict[str, Any]) -> dict[str, Any]:
 
 def run(reference: pd.DataFrame, current: pd.DataFrame, html_path: Path | None) -> dict[str, Any]:
     """Compare ``current`` with ``reference``; write HTML if a path is given; return a summary."""
-    # Evidently reads this when first imported; it sends usage telemetry otherwise.
-    os.environ.setdefault("EVIDENTLY_DISABLE_TELEMETRY", "1")
     from evidently import DataDefinition, Dataset, Report
     from evidently.presets import DataDriftPreset
 
