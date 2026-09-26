@@ -6,8 +6,12 @@ name: Monthly retrain
 
 on:
   schedule:
-    # 05:00 UTC on the 3rd of each month, once the previous month is complete.
-    - cron: "0 5 3 * *"
+    # 05:00 UTC on the 10th of each month. By then the previous month ended more
+    # than 7 days ago, so the downloader treats it as final (late registrations
+    # arrive in the first days after a month ends). A temporal split needs four
+    # complete months (two to train, one to validate, one to test), so the runs
+    # from January to April skip training; the first retrain of a year is in May.
+    - cron: "0 5 10 * *"
   workflow_dispatch:
     inputs:
       search:
@@ -37,6 +41,7 @@ jobs:
       - name: Install dependencies from the lockfile
         run: uv sync --frozen --all-extras
       - name: Download this year's complete months
+        # Exits 0 with a message when no month of the year is complete yet (January).
         run: uv run dxb-prices download
       - name: Check there are enough months for a temporal split
         id: check
@@ -49,7 +54,7 @@ jobs:
             echo "enough=true" >> "$GITHUB_OUTPUT"
           elif [ "$code" -eq 3 ]; then
             echo "enough=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Not enough complete months this year yet; skipping training."
+            echo "::notice::Not enough final months this year yet; skipping training."
           else
             exit "$code"
           fi

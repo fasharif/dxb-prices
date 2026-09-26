@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import sys
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -13,6 +12,11 @@ from typing import Any
 from dxb_prices import config
 
 EXIT_NOT_ENOUGH_DATA = 3
+
+
+def today() -> date:
+    """Today's date (a function so tests can move the calendar)."""
+    return date.today()
 
 
 def _raw_files(raw_dir: Path) -> list[Path]:
@@ -66,34 +70,50 @@ def cmd_download(args: argparse.Namespace) -> int:
     if args.source == "dubai-data-sample":
         download.download_dubai_data_sample()
         return 0
-    today = date.today()
+    now = today()
     months = (
         [download.Month.parse(m) for m in args.months]
         if args.months
-        else download.available_months(today, include_partial=args.include_partial)
+        else download.available_months(now, include_partial=args.include_partial)
     )
     if not months:
+        # Normal in January: the DLD page only offers the current year. Not an error,
+        # so a scheduled run carries on to `check-data`, which decides whether to train.
         print(
-            "No complete month is available yet this year; use --include-partial.", file=sys.stderr
+            f"No complete month of {now.year} is available yet, so there is nothing to "
+            "download. Use --include-partial to fetch the current month so far."
         )
-        return EXIT_NOT_ENOUGH_DATA
-    download.download_months(months, Path(args.raw_dir), today=today, force=args.force)
+        return 0
+    download.download_months(months, Path(args.raw_dir), today=now, force=args.force)
     return 0
 
 
 def cmd_check_data(args: argparse.Namespace) -> int:
-    """Exit 0 when the raw files hold enough months for a temporal split, 3 otherwise."""
-    from dxb_prices import split
-    from dxb_prices.download import Month
+    """Exit 0 when the raw files support a temporal split, 3 otherwise.
 
-    months = sorted(
-        Month.parse(p.stem.removeprefix("transactions_")).label
-        for p in _raw_files(Path(args.raw_dir))
-    )
+    The newest month becomes the test month, so it must also be final: a month
+    downloaded within ``PROVISIONAL_DAYS`` of its end can still gain late
+    registrations.
+    """
+    from dxb_prices import split
+    from dxb_prices.download import MANIFEST_NAME, PROVISIONAL_DAYS, Manifest, Month
+
+    raw_dir = Path(args.raw_dir)
+    files = _raw_files(raw_dir)
+    months = sorted(Month.parse(p.stem.removeprefix("transactions_")).label for p in files)
     try:
         plan = split.plan(months, config.DEFAULT_SETTINGS.split)
     except split.InsufficientDataError as exc:
         print(f"not enough data: {exc}")
+        return EXIT_NOT_ENOUGH_DATA
+    newest = plan.test_months[-1]
+    entry = Manifest(raw_dir / MANIFEST_NAME).entries.get(f"transactions_{newest}.csv")
+    if entry is not None and not entry.final:
+        print(
+            f"not enough data: the newest month, {newest}, was downloaded less than "
+            f"{PROVISIONAL_DAYS} days after it ended and may still gain late registrations; "
+            "run `dxb-prices download` again after that"
+        )
         return EXIT_NOT_ENOUGH_DATA
     print(f"ok: {len(months)} months; {plan.describe()}")
     return 0

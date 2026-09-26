@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import json
+import shutil
+from datetime import date
 from pathlib import Path
 
 import pytest
 
 from dxb_prices import cli, report
 from dxb_prices.download import Manifest, ManifestEntry, sha256_of
+from tests.conftest import FIXTURE_CSV
 
 
 def touch_months(raw: Path, months: list[str]) -> None:
@@ -26,26 +29,86 @@ def test_check_data_exit_codes(tmp_path: Path, capsys: pytest.CaptureFixture[str
     assert "test 2026-04" in capsys.readouterr().out
 
 
+def entry_for(path: Path, *, final: bool) -> ManifestEntry:
+    month = path.stem.removeprefix("transactions_")
+    return ManifestEntry(
+        file=path.name,
+        source="dld-open-data-export",
+        url="u",
+        period_start=f"{month}-01",
+        period_end=f"{month}-28",
+        downloaded_at="2026-05-03T08:00:00+00:00",
+        bytes=path.stat().st_size,
+        sha256=sha256_of(path),
+        rows=0,
+        final=final,
+    )
+
+
+def test_check_data_refuses_a_provisional_newest_month(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    raw = tmp_path / "raw"
+    touch_months(raw, ["2026-01", "2026-02", "2026-03", "2026-04"])
+    manifest = Manifest(raw / "manifest.json")
+    newest = raw / "transactions_2026-04.csv"
+    manifest.entries[newest.name] = entry_for(newest, final=False)
+    manifest.save()
+    assert cli.main(["check-data", "--raw-dir", str(raw)]) == cli.EXIT_NOT_ENOUGH_DATA
+    assert "2026-04, was downloaded less than 7 days" in capsys.readouterr().out
+    manifest.entries[newest.name] = entry_for(newest, final=True)
+    manifest.save()
+    assert cli.main(["check-data", "--raw-dir", str(raw)]) == 0
+
+
+def test_download_in_january_finds_nothing_to_do_and_succeeds(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # The scheduled workflow runs `download` then `check-data`; January must not fail it.
+    monkeypatch.setattr(cli, "today", lambda: date(2027, 1, 10))
+    raw = tmp_path / "raw"
+    assert cli.main(["download", "--raw-dir", str(raw)]) == 0
+    assert "No complete month of 2027" in capsys.readouterr().out
+    assert not raw.exists()
+    raw.mkdir()
+    assert cli.main(["check-data", "--raw-dir", str(raw)]) == cli.EXIT_NOT_ENOUGH_DATA
+
+
+def test_train_command_runs_end_to_end(tmp_path: Path) -> None:
+    raw, model, reports = tmp_path / "raw", tmp_path / "model", tmp_path / "reports"
+    raw.mkdir()
+    shutil.copy(FIXTURE_CSV, raw / "transactions_2026-04.csv")
+    code = cli.main(
+        [
+            "train",
+            "--raw-dir",
+            str(raw),
+            "--model-dir",
+            str(model),
+            "--reports-dir",
+            str(reports),
+            "--no-search",
+            "--no-tracking",
+        ]
+    )
+    assert code == 0
+    assert (model / "model.lgb").exists()
+    results = json.loads((reports / "metrics.json").read_text(encoding="utf-8"))
+    assert results["split"]["test_months"] == ["2026-04"]
+    assert results["data"]["files"][0]["source"] == "not in manifest"
+    assert (reports / "metrics.md").exists()
+    assert (reports / "drift" / "drift_2026-04.html").exists()
+
+
 def test_data_info_uses_the_manifest(tmp_path: Path) -> None:
     raw = tmp_path / "raw"
     touch_months(raw, ["2026-01", "2026-02"])
     manifest = Manifest(raw / "manifest.json")
     first = raw / "transactions_2026-01.csv"
-    manifest.entries[first.name] = ManifestEntry(
-        file=first.name,
-        source="dld-open-data-export",
-        url="u",
-        period_start="2026-01-01",
-        period_end="2026-01-31",
-        downloaded_at="2026-09-26T08:00:00+00:00",
-        bytes=first.stat().st_size,
-        sha256=sha256_of(first),
-        rows=0,
-        final=True,
-    )
+    manifest.entries[first.name] = entry_for(first, final=True)
     manifest.save()
     info = cli.data_info(raw, sorted(raw.glob("transactions_*.csv")))
-    assert info["period_start"] == "2026-01-01" and info["downloaded_on"] == "2026-09-26"
+    assert info["period_start"] == "2026-01-01" and info["downloaded_on"] == "2026-05-03"
     assert info["files"][1]["source"] == "not in manifest"
     assert len(info["files"][1]["sha256"]) == 64
 
