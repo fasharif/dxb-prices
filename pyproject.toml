@@ -6,7 +6,8 @@ readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Farah Sharif" }]
-requires-python = ">=3.12,<3.15"
+# Only 3.12 is tested (CI and the Docker images); widen once CI covers more.
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "fastapi>=0.141,<1",
     "lightgbm>=4.6,<5",
