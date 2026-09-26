@@ -99,6 +99,7 @@ filterwarnings = [
     "ignore::DeprecationWarning:litestar.*",
     "ignore::PendingDeprecationWarning:shap.*",
     "ignore:Using `httpx` with `starlette.testclient` is deprecated",
+    "ignore:invalid escape sequence:SyntaxWarning",
 ]
 
 [tool.coverage.run]
