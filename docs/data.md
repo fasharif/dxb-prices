@@ -11,14 +11,19 @@ with, or endorsed by, DLD, Digital Dubai or the Government of Dubai.
   "Transactions", button "Download as CSV".
 - The button posts a JSON filter to
   `https://gateway.dubailand.gov.ae/open-data/transactions/export/csv` and
-  receives a UTF-8 CSV (with a byte-order mark). `dxb-prices download` sends
-  the same request with all groups, usages and property types selected, one
-  calendar month per request, three seconds apart, with a User-Agent that names
-  this project. The request body is in `dxb_prices.download.export_body`.
+  receives a UTF-8 CSV (with a byte-order mark). `dxb-prices download` fetches
+  the same CSV export a visitor gets from that button, with all groups, usages
+  and property types selected, one calendar month per request, three seconds
+  apart. The request body is in `dxb_prices.download.export_body`. The endpoint
+  is undocumented and may change.
+- Requests carry only a User-Agent that names this project. They do not send
+  the DLD page's Origin or Referer headers; a one-day request without them on
+  26 September 2026 (UTC) returned the normal CSV.
 - The page's date picker only offers dates in the current calendar year, so the
-  downloader only asks for months of the current year.
-- The on-screen search on that page is protected by a reCAPTCHA. The CSV export
-  button does not ask for one, and this tool does not use the search.
+  downloader only asks for months of the current year. The January to August
+  2026 snapshot used for the published results therefore cannot be downloaded
+  again with this tool after 31 December 2026; the file sizes and SHA-256
+  checksums in [reports/metrics.md](../reports/metrics.md) identify it.
 - Each download is cached in `data/raw/dld/transactions_YYYY-MM.csv`, with
   `data/raw/dld/manifest.json` recording the source URL, period, download time,
   size in bytes, SHA-256 and row count. A month downloaded less than seven days
@@ -33,15 +38,18 @@ with, or endorsed by, DLD, Digital Dubai or the Government of Dubai.
   `transactions.csv` download link, now returns a permanent redirect (HTTP 301)
   to <https://data.dubai>.
 - On data.dubai the dataset is "Real Estate Transactions"
-  (<https://data.dubai/en/l/470061>), issued by DLD, tagged Open. Its public
-  download returns 7,000 rows spread across all years (584 of them in 2026 when
-  checked); the page says the full table is available through an API key that
-  is granted on request and subject to approval.
-- `dxb-prices download --source dubai-data-sample` saves that sample to
-  `data/raw/dubai_data/`. Its column layout (lower-case names such as
-  `actual_worth`, `procedure_area`, `meter_sale_price`) is understood by
-  `dxb_prices.schema`, which drops the price-per-metre columns on read.
-- Checked on 25 September 2026 (UTC).
+  (<https://data.dubai/en/l/470061>), issued by DLD, tagged Open. The page says
+  the full table is available through an API key that is granted on request and
+  subject to approval.
+- `dxb-prices download --source dubai-data-sample` saves the public sample to
+  `data/raw/dubai_data/`, and `python scripts/data_audit.py --dubai-data-sample`
+  checks it. On 26 September 2026 (UTC) the sample held 7,000 rows from all
+  years, 556 of them dated 2026; it is refreshed, so the counts change. Its
+  column layout (lower-case names such as `actual_worth`, `procedure_area`,
+  `meter_sale_price`) was read by `dxb_prices.schema` with the date, price,
+  size, community and off-plan columns all filled and the three price-per-area
+  columns dropped, and the cleaning rules kept 2,030 apartment sales. It is too
+  small, and spread over too many years, to train on.
 
 ## Terms of use
 
@@ -83,8 +91,15 @@ read on 25 September 2026 (UTC). In summary:
 - The drift report's HTML (`reports/drift/`) is also ignored, because it embeds
   distributions of the source data.
 - Committed results in `reports/` are this project's own evaluation output:
-  accuracy metrics, error analysis, SHAP importance and drift test statistics.
-  They contain no transaction records.
+  accuracy metrics, error analysis (including a few descriptive figures per
+  segment, such as its median price), SHAP importance and drift test
+  statistics. They contain no transaction records.
+- The README shows one illustrative API response. Like any response, it
+  includes a community's training median price per square metre.
+- A running API serves values derived from the data it was trained on: each
+  community's training median price per square metre, and the number of
+  training sales per community and per project (`/communities`, `/projects`).
+  They come from the model directory, which is not committed.
 - The test fixture (`tests/fixtures/transactions_synthetic.csv`) is generated
   by `scripts/make_fixture.py` from fixed rules and a fixed seed. It uses
   public place names but no DLD values.
@@ -147,8 +162,11 @@ The thresholds live in `dxb_prices.config.CleaningRules`.
 11. **Names.** English and Arabic normalisation (below).
 
 Training rows alone then lose the 0.5% tails of price per square metre within
-each community (communities with fewer than 200 rows use the overall
-percentiles). Validation and test rows are not trimmed.
+each community that has at least 200 training rows. Smaller communities are not
+trimmed: their percentiles are unreliable, and the overall percentiles would
+remove whole luxury communities (every sale in Jumeirah Second, Jumeira Bay and
+Island 2 lies above the overall 99.5th percentile; `scripts/data_audit.py`
+lists them). Validation and test rows are not trimmed.
 
 ## Name normalisation
 
@@ -157,7 +175,10 @@ percentiles). Validation and test rows are not trimmed.
 - Arabic: diacritics and tatweel removed; أ إ آ ٱ become ا, ى becomes ي, ة
   becomes ه, ؤ becomes و, ئ becomes ي; Arabic-Indic digits become ASCII.
 - Communities: English spellings that share an Arabic name are merged and
-  labelled with the most frequent spelling. In the January to August 2026
+  labelled with the most frequent spelling. The mapping is built from every
+  downloaded month, including the validation and test months: it is a lookup of
+  DLD's registry names, not a feature learned from prices, so it carries no
+  price information. A retrain on newer months can change a community's label. In the January to August 2026
   export, one Arabic name carries two different English names ("DUBAI MARITIME
   CITY" and "Madinat Dubai Almelaheyah"), several names differ only in capitals
   ("BUSINESS BAY" and "Business Bay"), and no English name carries two
