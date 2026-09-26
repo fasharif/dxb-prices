@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-25T23:31:34+00:00",
+  "generated_at": "2026-09-26T02:05:18+00:00",
   "command": "dxb-prices train",
   "environment": {
     "python": "3.12.14",
@@ -195,13 +195,13 @@
       "train": 67173,
       "valid": 11274,
       "test": 9480,
-      "train_after_trim": 66351,
-      "final_fit": 77488
+      "train_after_trim": 66481,
+      "final_fit": 77637
     },
-    "final_fit_communities": 118,
-    "final_fit_projects": 2160,
-    "communities_with_own_level": 96,
-    "projects_with_own_level": 389
+    "final_fit_communities": 121,
+    "final_fit_projects": 2172,
+    "communities_with_own_level": 99,
+    "projects_with_own_level": 390
   },
   "search": [
     {
@@ -210,11 +210,12 @@
         "num_leaves": 31,
         "min_data_in_leaf": 20
       },
-      "best_iteration": 1426,
+      "best_iteration": 1563,
       "rows": 11274,
-      "mdape": 0.05985971042008265,
-      "within_10pct": 0.6685293595884335,
-      "mae_aed": 251674.4831357635
+      "mdape": 0.060432010789540525,
+      "within_10pct": 0.6687954585772574,
+      "mae_aed": 209919.9403007816,
+      "median_error": -0.003609025475731081
     },
     {
       "params": {
@@ -222,11 +223,12 @@
         "num_leaves": 31,
         "min_data_in_leaf": 60
       },
-      "best_iteration": 1766,
+      "best_iteration": 1234,
       "rows": 11274,
-      "mdape": 0.06024657855809511,
-      "within_10pct": 0.6686180592513749,
-      "mae_aed": 249777.06470993502
+      "mdape": 0.061357166460344656,
+      "within_10pct": 0.6617881852048962,
+      "mae_aed": 207947.62852825524,
+      "median_error": -0.0037055468102193713
     },
     {
       "params": {
@@ -234,11 +236,12 @@
         "num_leaves": 127,
         "min_data_in_leaf": 20
       },
-      "best_iteration": 817,
+      "best_iteration": 538,
       "rows": 11274,
-      "mdape": 0.058135928798530474,
-      "within_10pct": 0.6776654248713855,
-      "mae_aed": 247492.48066592182
+      "mdape": 0.059030519744598976,
+      "within_10pct": 0.6766897285790314,
+      "mae_aed": 206355.54739078684,
+      "median_error": -0.0028573561354370528
     },
     {
       "params": {
@@ -246,11 +249,12 @@
         "num_leaves": 127,
         "min_data_in_leaf": 60
       },
-      "best_iteration": 667,
+      "best_iteration": 666,
       "rows": 11274,
-      "mdape": 0.05922333596056355,
-      "within_10pct": 0.6698598545325528,
-      "mae_aed": 247934.62122420993
+      "mdape": 0.05871178389150575,
+      "within_10pct": 0.6754479332978535,
+      "mae_aed": 206117.1306147116,
+      "median_error": -0.0033841950146944245
     },
     {
       "params": {
@@ -259,11 +263,12 @@
         "min_data_in_leaf": 20,
         "alpha": 0.15
       },
-      "best_iteration": 1647,
+      "best_iteration": 2913,
       "rows": 11274,
-      "mdape": 0.05830708825255579,
-      "within_10pct": 0.6876884867837503,
-      "mae_aed": 246248.89806790088
+      "mdape": 0.056613180293249375,
+      "within_10pct": 0.6882206847613979,
+      "mae_aed": 203556.72381163252,
+      "median_error": -0.0014712686524832128
     },
     {
       "params": {
@@ -272,11 +277,12 @@
         "min_data_in_leaf": 60,
         "alpha": 0.15
       },
-      "best_iteration": 2142,
+      "best_iteration": 1778,
       "rows": 11274,
-      "mdape": 0.05776376793949437,
-      "within_10pct": 0.6833422032996275,
-      "mae_aed": 245946.29201347058
+      "mdape": 0.05826915669032946,
+      "within_10pct": 0.6844065992549229,
+      "mae_aed": 203840.3582959888,
+      "median_error": -0.0010322278286956478
     },
     {
       "params": {
@@ -285,11 +291,12 @@
         "min_data_in_leaf": 20,
         "alpha": 0.15
       },
-      "best_iteration": 821,
+      "best_iteration": 1055,
       "rows": 11274,
-      "mdape": 0.05656848221913945,
-      "within_10pct": 0.6894624800425758,
-      "mae_aed": 241991.1289040088
+      "mdape": 0.05630747248894457,
+      "within_10pct": 0.6883980840872804,
+      "mae_aed": 200885.56142297978,
+      "median_error": -0.0012553080142900207
     },
     {
       "params": {
@@ -298,11 +305,12 @@
         "min_data_in_leaf": 60,
         "alpha": 0.15
       },
-      "best_iteration": 897,
+      "best_iteration": 963,
       "rows": 11274,
-      "mdape": 0.056776190149330476,
-      "within_10pct": 0.6881319850984566,
-      "mae_aed": 240835.8206776659
+      "mdape": 0.056149857177119275,
+      "within_10pct": 0.6934539648749335,
+      "mae_aed": 197456.03477375224,
+      "median_error": -0.001211605943975627
     },
     {
       "params": {
@@ -310,11 +318,12 @@
         "num_leaves": 31,
         "min_data_in_leaf": 20
       },
-      "best_iteration": 2951,
+      "best_iteration": 3519,
       "rows": 11274,
-      "mdape": 0.056875160630374594,
-      "within_10pct": 0.6717225474543197,
-      "mae_aed": 252840.42009410748
+      "mdape": 0.05558862224586525,
+      "within_10pct": 0.6739400390278517,
+      "mae_aed": 212860.24798320307,
+      "median_error": -0.0009629388628955058
     },
     {
       "params": {
@@ -322,11 +331,12 @@
         "num_leaves": 31,
         "min_data_in_leaf": 60
       },
-      "best_iteration": 3709,
+      "best_iteration": 3658,
       "rows": 11274,
-      "mdape": 0.05579804036492593,
-      "within_10pct": 0.671190349476672,
-      "mae_aed": 251060.85569710398
+      "mdape": 0.056385533776797954,
+      "within_10pct": 0.6807699130743303,
+      "mae_aed": 207379.44945623702,
+      "median_error": 0.00015416995350511878
     },
     {
       "params": {
@@ -334,11 +344,12 @@
         "num_leaves": 127,
         "min_data_in_leaf": 20
       },
-      "best_iteration": 772,
+      "best_iteration": 1281,
       "rows": 11274,
-      "mdape": 0.05373539427278984,
-      "within_10pct": 0.6787298208266809,
-      "mae_aed": 249521.9480550836
+      "mdape": 0.05281474437008403,
+      "within_10pct": 0.6792620188043286,
+      "mae_aed": 207043.24124080307,
+      "median_error": -0.0014344693462773244
     },
     {
       "params": {
@@ -346,11 +357,12 @@
         "num_leaves": 127,
         "min_data_in_leaf": 60
       },
-      "best_iteration": 1693,
+      "best_iteration": 1361,
       "rows": 11274,
-      "mdape": 0.05376436799528358,
-      "within_10pct": 0.6783750221749157,
-      "mae_aed": 250293.70112805115
+      "mdape": 0.052649603679852754,
+      "within_10pct": 0.6815682100408018,
+      "mae_aed": 205880.30815600773,
+      "median_error": -0.0013693601063210876
     }
   ],
   "chosen": {
@@ -358,7 +370,7 @@
       "objective": "regression_l1",
       "learning_rate": 0.05,
       "num_leaves": 127,
-      "min_data_in_leaf": 20,
+      "min_data_in_leaf": 60,
       "feature_fraction": 0.9,
       "bagging_fraction": 0.8,
       "bagging_freq": 1,
@@ -374,41 +386,104 @@
       "num_threads": 4,
       "seed": 42
     },
-    "num_boost_round": 772
+    "num_boost_round": 1361,
+    "num_boost_round_community": 1543
+  },
+  "served": {
+    "test_rows": 9480,
+    "test_rows_project_known": 8287,
+    "min_project_rows_baseline": 5
   },
   "validation": {
     "model": {
       "rows": 11274,
-      "mdape": 0.05373539427278984,
-      "within_10pct": 0.6787298208266809,
-      "mae_aed": 249521.9480550836
+      "mdape": 0.054688666979584924,
+      "within_10pct": 0.6709242504878481,
+      "mae_aed": 210870.52123981566,
+      "median_error": -0.0011453918730498268
+    },
+    "model_no_project": {
+      "rows": 11274,
+      "mdape": 0.06927054359564028,
+      "within_10pct": 0.6192123469930815,
+      "mae_aed": 233337.0183784803,
+      "median_error": -0.0031323908953826713
+    },
+    "project_baseline": {
+      "rows": 11274,
+      "mdape": 0.07389807553345071,
+      "within_10pct": 0.5945538406954054,
+      "mae_aed": 239160.2808469288,
+      "median_error": 0.013347867262297855
     },
     "baseline": {
       "rows": 11274,
-      "mdape": 0.11857701315771108,
-      "within_10pct": 0.4450062089764059,
-      "mae_aed": 353510.43657344615
+      "mdape": 0.11869490970371713,
+      "within_10pct": 0.4444740109987582,
+      "mae_aed": 322625.57770706096,
+      "median_error": 0.00775237061512039
+    },
+    "model_recorded": {
+      "rows": 11274,
+      "mdape": 0.052649603679852754,
+      "within_10pct": 0.6815682100408018,
+      "mae_aed": 205880.30815600773,
+      "median_error": -0.0013693601063210876
     }
   },
   "test": {
     "model": {
       "rows": 9480,
-      "mdape": 0.05307042569922436,
-      "within_10pct": 0.7039029535864979,
-      "mae_aed": 220774.2522403553
+      "mdape": 0.05554858621633915,
+      "within_10pct": 0.6977848101265823,
+      "mae_aed": 209339.51517112774,
+      "median_error": -0.0014989179980861669
+    },
+    "model_no_project": {
+      "rows": 9480,
+      "mdape": 0.06478791167342587,
+      "within_10pct": 0.6367088607594936,
+      "mae_aed": 238898.93528211906,
+      "median_error": -0.001344505318572949
+    },
+    "project_baseline": {
+      "rows": 9480,
+      "mdape": 0.07276965191604531,
+      "within_10pct": 0.6123417721518988,
+      "mae_aed": 241894.77911296644,
+      "median_error": 0.010305871396720614
     },
     "baseline": {
       "rows": 9480,
-      "mdape": 0.10853066394355901,
-      "within_10pct": 0.46867088607594937,
-      "mae_aed": 344660.89588723815
+      "mdape": 0.10847955613091326,
+      "within_10pct": 0.46877637130801686,
+      "mae_aed": 327788.8849615039,
+      "median_error": 0.007730054515223082
+    },
+    "model_recorded": {
+      "rows": 9480,
+      "mdape": 0.05362345784847468,
+      "within_10pct": 0.7077004219409283,
+      "mae_aed": 198400.08227421416,
+      "median_error": -0.0007962245018332114
     }
   },
   "interval": {
     "nominal": 0.8,
-    "test_coverage": 0.8267932489451477,
-    "q10": -0.14329673734465728,
-    "q90": 0.16816902292849045
+    "quantiles": {
+      "full": {
+        "q10": -0.15278494656967392,
+        "q90": 0.11929221782633549
+      },
+      "community": {
+        "q10": -0.1741565882069151,
+        "q90": 0.18573107705585687
+      }
+    },
+    "test_coverage": {
+      "model": 0.7909282700421941,
+      "model_no_project": 0.8106540084388185
+    }
   },
   "segments": [
     {
@@ -416,48 +491,149 @@
       "segment": "off-plan",
       "estimator": "model",
       "rows": 7093,
-      "mdape": 0.04282980788561642,
+      "mdape": 0.0445690367569557,
       "within_10pct": 0.764979557310024,
-      "mae_aed": 200735.1803196614,
-      "range_coverage": 0.8753700831806006
+      "mae_aed": 179715.95901335083,
+      "median_error": -0.0021278942978786844,
+      "range_coverage": 0.8436486677005498,
+      "communities": 89,
+      "largest_project_share": 0.059354292964894965,
+      "median_price_aed": 1036000.0
+    },
+    {
+      "dimension": "registration",
+      "segment": "off-plan",
+      "estimator": "model_no_project",
+      "rows": 7093,
+      "mdape": 0.05295788767795919,
+      "within_10pct": 0.695615395460313,
+      "mae_aed": 199022.00432579385,
+      "median_error": -0.0015979626035464301,
+      "range_coverage": 0.860002819681376,
+      "communities": 89,
+      "largest_project_share": 0.059354292964894965,
+      "median_price_aed": 1036000.0
+    },
+    {
+      "dimension": "registration",
+      "segment": "off-plan",
+      "estimator": "project_baseline",
+      "rows": 7093,
+      "mdape": 0.0613197512743363,
+      "within_10pct": 0.669392358663471,
+      "mae_aed": 202945.925242225,
+      "median_error": 0.0007849785698343842,
+      "communities": 89,
+      "largest_project_share": 0.059354292964894965,
+      "median_price_aed": 1036000.0
     },
     {
       "dimension": "registration",
       "segment": "off-plan",
       "estimator": "baseline",
       "rows": 7093,
-      "mdape": 0.09229510770686304,
-      "within_10pct": 0.5309460031016495,
-      "mae_aed": 286155.8047124384
+      "mdape": 0.09228766064261021,
+      "within_10pct": 0.5310869871704498,
+      "mae_aed": 263928.8706564821,
+      "median_error": -0.013528357385789327,
+      "communities": 89,
+      "largest_project_share": 0.059354292964894965,
+      "median_price_aed": 1036000.0
     },
     {
       "dimension": "registration",
       "segment": "ready",
       "estimator": "model",
       "rows": 2387,
-      "mdape": 0.09307818001844222,
-      "within_10pct": 0.5224130708001675,
-      "mae_aed": 280320.6021077545,
-      "range_coverage": 0.6824465856723921
+      "mdape": 0.10052064344113777,
+      "within_10pct": 0.49811478843736906,
+      "mae_aed": 297366.27839991334,
+      "median_error": 0.005713386885476529,
+      "range_coverage": 0.634268956849602,
+      "communities": 82,
+      "largest_project_share": 0.2320904901550063,
+      "median_price_aed": 1200000.0
+    },
+    {
+      "dimension": "registration",
+      "segment": "ready",
+      "estimator": "model_no_project",
+      "rows": 2387,
+      "mdape": 0.11243306299438469,
+      "within_10pct": 0.46166736489317134,
+      "mae_aed": 357393.72844224254,
+      "median_error": 0.002979206112783982,
+      "range_coverage": 0.6640134059488898,
+      "communities": 82,
+      "largest_project_share": 0.2320904901550063,
+      "median_price_aed": 1200000.0
+    },
+    {
+      "dimension": "registration",
+      "segment": "ready",
+      "estimator": "project_baseline",
+      "rows": 2387,
+      "mdape": 0.11508512603932951,
+      "within_10pct": 0.44281524926686217,
+      "mae_aed": 357631.77974353597,
+      "median_error": 0.06000937646507286,
+      "communities": 82,
+      "largest_project_share": 0.2320904901550063,
+      "median_price_aed": 1200000.0
     },
     {
       "dimension": "registration",
       "segment": "ready",
       "estimator": "baseline",
       "rows": 2387,
-      "mdape": 0.20374371884890077,
+      "mdape": 0.20367892326370288,
       "within_10pct": 0.28361960620025134,
-      "mae_aed": 518509.49735470983
+      "mae_aed": 517549.7066898322,
+      "median_error": 0.16037890174186925,
+      "communities": 82,
+      "largest_project_share": 0.2320904901550063,
+      "median_price_aed": 1200000.0
     },
     {
       "dimension": "price band",
       "segment": "under 1.0M AED",
       "estimator": "model",
       "rows": 4295,
-      "mdape": 0.04477627999511971,
-      "within_10pct": 0.7483119906868452,
-      "mae_aed": 63816.98165009961,
-      "range_coverage": 0.8549476135040746
+      "mdape": 0.047056995416901004,
+      "within_10pct": 0.7329452852153667,
+      "mae_aed": 66433.37182354732,
+      "median_error": 0.005874747853011504,
+      "range_coverage": 0.8321303841676367,
+      "communities": 64,
+      "largest_project_share": 0.07729918509895227,
+      "median_price_aed": 665000.0
+    },
+    {
+      "dimension": "price band",
+      "segment": "under 1.0M AED",
+      "estimator": "model_no_project",
+      "rows": 4295,
+      "mdape": 0.05626998609183886,
+      "within_10pct": 0.6842840512223516,
+      "mae_aed": 75048.83071112298,
+      "median_error": 0.010943542496469848,
+      "range_coverage": 0.8479627473806752,
+      "communities": 64,
+      "largest_project_share": 0.07729918509895227,
+      "median_price_aed": 665000.0
+    },
+    {
+      "dimension": "price band",
+      "segment": "under 1.0M AED",
+      "estimator": "project_baseline",
+      "rows": 4295,
+      "mdape": 0.06280069317592661,
+      "within_10pct": 0.6579743888242142,
+      "mae_aed": 82669.46143903496,
+      "median_error": -0.005355464475602888,
+      "communities": 64,
+      "largest_project_share": 0.07729918509895227,
+      "median_price_aed": 665000.0
     },
     {
       "dimension": "price band",
@@ -466,17 +642,52 @@
       "rows": 4295,
       "mdape": 0.10657670575617645,
       "within_10pct": 0.4768335273573923,
-      "mae_aed": 124723.58425297421
+      "mae_aed": 124723.58425297421,
+      "median_error": -0.009087993853436204,
+      "communities": 64,
+      "largest_project_share": 0.07729918509895227,
+      "median_price_aed": 665000.0
     },
     {
       "dimension": "price band",
       "segment": "1.0M-2.0M AED",
       "estimator": "model",
       "rows": 3273,
-      "mdape": 0.055315866145896196,
-      "within_10pct": 0.6972196761380997,
-      "mae_aed": 119404.06542136127,
-      "range_coverage": 0.8414298808432631
+      "mdape": 0.05564233831581522,
+      "within_10pct": 0.7128017109685304,
+      "mae_aed": 120812.99055041303,
+      "median_error": -0.008242717994966455,
+      "range_coverage": 0.7943782462572564,
+      "communities": 90,
+      "largest_project_share": 0.05224564619615032,
+      "median_price_aed": 1283000.0
+    },
+    {
+      "dimension": "price band",
+      "segment": "1.0M-2.0M AED",
+      "estimator": "model_no_project",
+      "rows": 3273,
+      "mdape": 0.0639305788100402,
+      "within_10pct": 0.6367247173846624,
+      "mae_aed": 139719.65501384382,
+      "median_error": -0.0093488827720549,
+      "range_coverage": 0.8261533761075466,
+      "communities": 90,
+      "largest_project_share": 0.05224564619615032,
+      "median_price_aed": 1283000.0
+    },
+    {
+      "dimension": "price band",
+      "segment": "1.0M-2.0M AED",
+      "estimator": "project_baseline",
+      "rows": 3273,
+      "mdape": 0.08024404138356762,
+      "within_10pct": 0.5805071799572258,
+      "mae_aed": 171883.87855883522,
+      "median_error": 0.04596792936597276,
+      "communities": 90,
+      "largest_project_share": 0.05224564619615032,
+      "median_price_aed": 1283000.0
     },
     {
       "dimension": "price band",
@@ -485,112 +696,268 @@
       "rows": 3273,
       "mdape": 0.10385830702521089,
       "within_10pct": 0.47937671860678277,
-      "mae_aed": 228018.0073271458
+      "mae_aed": 228018.0073271458,
+      "median_error": 0.0529807676620848,
+      "communities": 90,
+      "largest_project_share": 0.05224564619615032,
+      "median_price_aed": 1283000.0
     },
     {
       "dimension": "price band",
       "segment": "2.0M-5.0M AED",
       "estimator": "model",
       "rows": 1647,
-      "mdape": 0.06909956995514765,
-      "within_10pct": 0.6296296296296297,
-      "mae_aed": 311425.7738958009,
-      "range_coverage": 0.7589556769884639
+      "mdape": 0.0764287634793089,
+      "within_10pct": 0.6059502125075895,
+      "mae_aed": 343374.6516906886,
+      "median_error": -0.022726374842970867,
+      "range_coverage": 0.7073466909532483,
+      "communities": 86,
+      "largest_project_share": 0.10686095931997572,
+      "median_price_aed": 2579548.0
+    },
+    {
+      "dimension": "price band",
+      "segment": "2.0M-5.0M AED",
+      "estimator": "model_no_project",
+      "rows": 1647,
+      "mdape": 0.08602819934040094,
+      "within_10pct": 0.546448087431694,
+      "mae_aed": 378861.3160884392,
+      "median_error": -0.026463108484408162,
+      "range_coverage": 0.7194899817850637,
+      "communities": 86,
+      "largest_project_share": 0.10686095931997572,
+      "median_price_aed": 2579548.0
+    },
+    {
+      "dimension": "price band",
+      "segment": "2.0M-5.0M AED",
+      "estimator": "project_baseline",
+      "rows": 1647,
+      "mdape": 0.08065483012613653,
+      "within_10pct": 0.5786278081360049,
+      "mae_aed": 392214.37110744254,
+      "median_error": 0.010669518028396894,
+      "communities": 86,
+      "largest_project_share": 0.10686095931997572,
+      "median_price_aed": 2579548.0
     },
     {
       "dimension": "price band",
       "segment": "2.0M-5.0M AED",
       "estimator": "baseline",
       "rows": 1647,
-      "mdape": 0.11529399462030866,
-      "within_10pct": 0.45658773527625984,
-      "mae_aed": 506855.6537004261
+      "mdape": 0.1157700570590197,
+      "within_10pct": 0.4559805707346691,
+      "mae_aed": 513463.98130061297,
+      "median_error": 0.006018947784263616,
+      "communities": 86,
+      "largest_project_share": 0.10686095931997572,
+      "median_price_aed": 2579548.0
     },
     {
       "dimension": "price band",
       "segment": "5.0M AED and over",
       "estimator": "model",
       "rows": 265,
-      "mdape": 0.0911205770336376,
-      "within_10pct": 0.5283018867924528,
-      "mae_aed": 3453276.2993241167,
-      "range_coverage": 0.6113207547169811
+      "mdape": 0.09414659689526932,
+      "within_10pct": 0.5132075471698113,
+      "mae_aed": 2785842.6506946743,
+      "median_error": -0.0601179925187443,
+      "range_coverage": 0.6,
+      "communities": 41,
+      "largest_project_share": 0.17358490566037735,
+      "median_price_aed": 7799000.0
+    },
+    {
+      "dimension": "price band",
+      "segment": "5.0M AED and over",
+      "estimator": "model_no_project",
+      "rows": 265,
+      "mdape": 0.12420534352643912,
+      "within_10pct": 0.42641509433962266,
+      "mae_aed": 3249585.5098575293,
+      "median_error": -0.06771980831557019,
+      "range_coverage": 0.5811320754716981,
+      "communities": 41,
+      "largest_project_share": 0.17358490566037735,
+      "median_price_aed": 7799000.0
+    },
+    {
+      "dimension": "price band",
+      "segment": "5.0M AED and over",
+      "estimator": "project_baseline",
+      "rows": 265,
+      "mdape": 0.10571138516629766,
+      "within_10pct": 0.47547169811320755,
+      "mae_aed": 2752996.8504650616,
+      "median_error": -0.06438276059515398,
+      "communities": 41,
+      "largest_project_share": 0.17358490566037735,
+      "median_price_aed": 7799000.0
     },
     {
       "dimension": "price band",
       "segment": "5.0M AED and over",
       "estimator": "baseline",
       "rows": 265,
-      "mdape": 0.166154856691469,
-      "within_10pct": 0.2792452830188679,
-      "mae_aed": 4341899.241577902
-    },
-    {
-      "dimension": "community data",
-      "segment": "new (no training sales)",
-      "estimator": "model",
-      "rows": 6,
-      "mdape": 0.8110407776835746,
-      "within_10pct": 0.0,
-      "mae_aed": 31929581.08549987,
-      "range_coverage": 0.0
-    },
-    {
-      "dimension": "community data",
-      "segment": "new (no training sales)",
-      "estimator": "baseline",
-      "rows": 6,
-      "mdape": 0.8165953128758907,
-      "within_10pct": 0.0,
-      "mae_aed": 31687341.30202764
+      "mdape": 0.16223743161762116,
+      "within_10pct": 0.28679245283018867,
+      "mae_aed": 3697255.5467346236,
+      "median_error": -0.1319333419447979,
+      "communities": 41,
+      "largest_project_share": 0.17358490566037735,
+      "median_price_aed": 7799000.0
     },
     {
       "dimension": "community data",
       "segment": "thin (1-49 training sales)",
       "estimator": "model",
-      "rows": 149,
-      "mdape": 0.028626422065856746,
-      "within_10pct": 0.8187919463087249,
-      "mae_aed": 606819.8204294635,
-      "range_coverage": 0.8590604026845637
+      "rows": 145,
+      "mdape": 0.028605620159613564,
+      "within_10pct": 0.8482758620689655,
+      "mae_aed": 471040.9410477024,
+      "median_error": -0.011835171588537094,
+      "range_coverage": 0.896551724137931,
+      "communities": 18,
+      "largest_project_share": 0.7034482758620689,
+      "median_price_aed": 1042046.0
+    },
+    {
+      "dimension": "community data",
+      "segment": "thin (1-49 training sales)",
+      "estimator": "model_no_project",
+      "rows": 145,
+      "mdape": 0.02876196428017951,
+      "within_10pct": 0.8413793103448276,
+      "mae_aed": 528936.5236895692,
+      "median_error": -0.011456381885799817,
+      "range_coverage": 0.8620689655172413,
+      "communities": 18,
+      "largest_project_share": 0.7034482758620689,
+      "median_price_aed": 1042046.0
+    },
+    {
+      "dimension": "community data",
+      "segment": "thin (1-49 training sales)",
+      "estimator": "project_baseline",
+      "rows": 145,
+      "mdape": 0.02850193331397472,
+      "within_10pct": 0.8275862068965517,
+      "mae_aed": 224948.72595334105,
+      "median_error": -6.132059268532201e-06,
+      "communities": 18,
+      "largest_project_share": 0.7034482758620689,
+      "median_price_aed": 1042046.0
     },
     {
       "dimension": "community data",
       "segment": "thin (1-49 training sales)",
       "estimator": "baseline",
-      "rows": 149,
-      "mdape": 0.028501866981438473,
-      "within_10pct": 0.7919463087248322,
-      "mae_aed": 654359.3813673744
+      "rows": 145,
+      "mdape": 0.02849934111058242,
+      "within_10pct": 0.8206896551724138,
+      "mae_aed": 430676.8469284075,
+      "median_error": -6.132059268532201e-06,
+      "communities": 18,
+      "largest_project_share": 0.7034482758620689,
+      "median_price_aed": 1042046.0
     },
     {
       "dimension": "community data",
       "segment": "established (50+ training sales)",
       "estimator": "model",
-      "rows": 9325,
-      "mdape": 0.0538215323627733,
-      "within_10pct": 0.7025201072386059,
-      "mae_aed": 194203.3535100889,
-      "range_coverage": 0.8268096514745308
+      "rows": 9335,
+      "mdape": 0.05609982470633056,
+      "within_10pct": 0.6954472415640064,
+      "mae_aed": 205274.5224820968,
+      "median_error": -0.0014841646845868395,
+      "range_coverage": 0.7892876272094269,
+      "communities": 93,
+      "largest_project_share": 0.05848955543652919,
+      "median_price_aed": 1093950.0
+    },
+    {
+      "dimension": "community data",
+      "segment": "established (50+ training sales)",
+      "estimator": "model_no_project",
+      "rows": 9335,
+      "mdape": 0.06579470009335804,
+      "within_10pct": 0.6335297268344938,
+      "mae_aed": 234393.7986651849,
+      "median_error": -0.0012742265343517547,
+      "range_coverage": 0.8098553829673273,
+      "communities": 93,
+      "largest_project_share": 0.05848955543652919,
+      "median_price_aed": 1093950.0
+    },
+    {
+      "dimension": "community data",
+      "segment": "established (50+ training sales)",
+      "estimator": "project_baseline",
+      "rows": 9335,
+      "mdape": 0.07388519090941013,
+      "within_10pct": 0.6089983931440814,
+      "mae_aed": 242158.00114918986,
+      "median_error": 0.010857586905766596,
+      "communities": 93,
+      "largest_project_share": 0.05848955543652919,
+      "median_price_aed": 1093950.0
     },
     {
       "dimension": "community data",
       "segment": "established (50+ training sales)",
       "estimator": "baseline",
-      "rows": 9325,
-      "mdape": 0.1094698043663172,
-      "within_10pct": 0.46380697050938335,
-      "mae_aed": 319545.49033513275
+      "rows": 9335,
+      "mdape": 0.10961706035339655,
+      "within_10pct": 0.4633101231922871,
+      "mae_aed": 326190.7323653389,
+      "median_error": 0.00839493455324044,
+      "communities": 93,
+      "largest_project_share": 0.05848955543652919,
+      "median_price_aed": 1093950.0
     },
     {
       "dimension": "rooms",
       "segment": "studio",
       "estimator": "model",
       "rows": 3544,
-      "mdape": 0.039174107278583475,
-      "within_10pct": 0.801354401805869,
-      "mae_aed": 43950.05850728732,
-      "range_coverage": 0.904627539503386
+      "mdape": 0.03984981168611791,
+      "within_10pct": 0.7863995485327314,
+      "mae_aed": 45162.733288728836,
+      "median_error": 0.0008942275866749696,
+      "range_coverage": 0.8797968397291196,
+      "communities": 56,
+      "largest_project_share": 0.09198645598194131,
+      "median_price_aed": 649170.725
+    },
+    {
+      "dimension": "rooms",
+      "segment": "studio",
+      "estimator": "model_no_project",
+      "rows": 3544,
+      "mdape": 0.047712723311146246,
+      "within_10pct": 0.7404063205417607,
+      "mae_aed": 51456.21025879652,
+      "median_error": 0.0024420257829798437,
+      "range_coverage": 0.9015237020316027,
+      "communities": 56,
+      "largest_project_share": 0.09198645598194131,
+      "median_price_aed": 649170.725
+    },
+    {
+      "dimension": "rooms",
+      "segment": "studio",
+      "estimator": "project_baseline",
+      "rows": 3544,
+      "mdape": 0.05274432451359509,
+      "within_10pct": 0.7291196388261851,
+      "mae_aed": 54855.04366113139,
+      "median_error": -0.0214018851756942,
+      "communities": 56,
+      "largest_project_share": 0.09198645598194131,
+      "median_price_aed": 649170.725
     },
     {
       "dimension": "rooms",
@@ -599,17 +966,52 @@
       "rows": 3544,
       "mdape": 0.08689515913346024,
       "within_10pct": 0.551354401805869,
-      "mae_aed": 82593.75246885353
+      "mae_aed": 82593.75246885353,
+      "median_error": -0.03970799498649036,
+      "communities": 56,
+      "largest_project_share": 0.09198645598194131,
+      "median_price_aed": 649170.725
     },
     {
       "dimension": "rooms",
       "segment": "1",
       "estimator": "model",
       "rows": 3551,
-      "mdape": 0.05907761336127083,
-      "within_10pct": 0.6688256829062236,
-      "mae_aed": 131723.49827263743,
-      "range_coverage": 0.8124471979724022
+      "mdape": 0.05950412572658374,
+      "within_10pct": 0.6761475640664601,
+      "mae_aed": 138162.13422118282,
+      "median_error": -0.007000921087957832,
+      "range_coverage": 0.7614756406646015,
+      "communities": 99,
+      "largest_project_share": 0.0698394818361025,
+      "median_price_aed": 1200000.0
+    },
+    {
+      "dimension": "rooms",
+      "segment": "1",
+      "estimator": "model_no_project",
+      "rows": 3551,
+      "mdape": 0.07113407280383373,
+      "within_10pct": 0.6009574767671079,
+      "mae_aed": 157154.28718960838,
+      "median_error": -0.005156220257320793,
+      "range_coverage": 0.7904815544916924,
+      "communities": 99,
+      "largest_project_share": 0.0698394818361025,
+      "median_price_aed": 1200000.0
+    },
+    {
+      "dimension": "rooms",
+      "segment": "1",
+      "estimator": "project_baseline",
+      "rows": 3551,
+      "mdape": 0.08154573541446744,
+      "within_10pct": 0.5756125035201352,
+      "mae_aed": 171876.044018561,
+      "median_error": 0.04665383982955248,
+      "communities": 99,
+      "largest_project_share": 0.0698394818361025,
+      "median_price_aed": 1200000.0
     },
     {
       "dimension": "rooms",
@@ -618,74 +1020,214 @@
       "rows": 3551,
       "mdape": 0.11198283957394524,
       "within_10pct": 0.45423824274852154,
-      "mae_aed": 233697.6358996443
+      "mae_aed": 230680.69331225316,
+      "median_error": 0.056971839859705505,
+      "communities": 99,
+      "largest_project_share": 0.0698394818361025,
+      "median_price_aed": 1200000.0
     },
     {
       "dimension": "rooms",
       "segment": "2",
       "estimator": "model",
       "rows": 1870,
-      "mdape": 0.06428712380103646,
-      "within_10pct": 0.6331550802139038,
-      "mae_aed": 341852.67702199623,
-      "range_coverage": 0.7577540106951872
+      "mdape": 0.07196392939072553,
+      "within_10pct": 0.6112299465240641,
+      "mae_aed": 322168.40760914946,
+      "median_error": -0.0009624851717270452,
+      "range_coverage": 0.7155080213903743,
+      "communities": 104,
+      "largest_project_share": 0.09037433155080214,
+      "median_price_aed": 2047174.8399999999
+    },
+    {
+      "dimension": "rooms",
+      "segment": "2",
+      "estimator": "model_no_project",
+      "rows": 1870,
+      "mdape": 0.081420326754814,
+      "within_10pct": 0.5550802139037433,
+      "mae_aed": 355518.00456953613,
+      "median_error": -0.0025141416914339055,
+      "range_coverage": 0.7240641711229947,
+      "communities": 104,
+      "largest_project_share": 0.09037433155080214,
+      "median_price_aed": 2047174.8399999999
+    },
+    {
+      "dimension": "rooms",
+      "segment": "2",
+      "estimator": "project_baseline",
+      "rows": 1870,
+      "mdape": 0.10185759009168605,
+      "within_10pct": 0.49358288770053477,
+      "mae_aed": 365040.9128869656,
+      "median_error": 0.05130414910300506,
+      "communities": 104,
+      "largest_project_share": 0.09037433155080214,
+      "median_price_aed": 2047174.8399999999
     },
     {
       "dimension": "rooms",
       "segment": "2",
       "estimator": "baseline",
       "rows": 1870,
-      "mdape": 0.13889701793910128,
-      "within_10pct": 0.3754010695187166,
-      "mae_aed": 544626.4593062236
+      "mdape": 0.1393984597066194,
+      "within_10pct": 0.3748663101604278,
+      "mae_aed": 505283.872748127,
+      "median_error": 0.06341988301305737,
+      "communities": 104,
+      "largest_project_share": 0.09037433155080214,
+      "median_price_aed": 2047174.8399999999
     },
     {
       "dimension": "rooms",
       "segment": "3",
       "estimator": "model",
       "rows": 448,
-      "mdape": 0.0857086188186701,
-      "within_10pct": 0.5513392857142857,
-      "mae_aed": 1123097.586395574,
-      "range_coverage": 0.65625
+      "mdape": 0.08560293582196932,
+      "within_10pct": 0.5714285714285714,
+      "mae_aed": 959371.5144008541,
+      "median_error": -0.0130438393126751,
+      "range_coverage": 0.6741071428571429,
+      "communities": 73,
+      "largest_project_share": 0.09375,
+      "median_price_aed": 3600444.0
+    },
+    {
+      "dimension": "rooms",
+      "segment": "3",
+      "estimator": "model_no_project",
+      "rows": 448,
+      "mdape": 0.10804431546121437,
+      "within_10pct": 0.48660714285714285,
+      "mae_aed": 1074634.0321917771,
+      "median_error": -0.015729694979675184,
+      "range_coverage": 0.6517857142857143,
+      "communities": 73,
+      "largest_project_share": 0.09375,
+      "median_price_aed": 3600444.0
+    },
+    {
+      "dimension": "rooms",
+      "segment": "3",
+      "estimator": "project_baseline",
+      "rows": 448,
+      "mdape": 0.09864783054043486,
+      "within_10pct": 0.5111607142857143,
+      "mae_aed": 1093527.1950011791,
+      "median_error": 0.0008764431200931556,
+      "communities": 73,
+      "largest_project_share": 0.09375,
+      "median_price_aed": 3600444.0
     },
     {
       "dimension": "rooms",
       "segment": "3",
       "estimator": "baseline",
       "rows": 448,
-      "mdape": 0.15265201384176758,
-      "within_10pct": 0.35267857142857145,
-      "mae_aed": 1544794.0796309032
+      "mdape": 0.1488796946505333,
+      "within_10pct": 0.35714285714285715,
+      "mae_aed": 1427241.1277563958,
+      "median_error": 0.001006850711793269,
+      "communities": 73,
+      "largest_project_share": 0.09375,
+      "median_price_aed": 3600444.0
     },
     {
       "dimension": "rooms",
       "segment": "4",
       "estimator": "model",
       "rows": 56,
-      "mdape": 0.14085000790759342,
-      "within_10pct": 0.42857142857142855,
-      "mae_aed": 4920277.225198184,
-      "range_coverage": 0.5535714285714286
+      "mdape": 0.12200747264035078,
+      "within_10pct": 0.4107142857142857,
+      "mae_aed": 4542772.206784768,
+      "median_error": -0.06403321315204434,
+      "range_coverage": 0.5535714285714286,
+      "communities": 24,
+      "largest_project_share": 0.17857142857142858,
+      "median_price_aed": 13039500.0
+    },
+    {
+      "dimension": "rooms",
+      "segment": "4",
+      "estimator": "model_no_project",
+      "rows": 56,
+      "mdape": 0.1512427187436251,
+      "within_10pct": 0.35714285714285715,
+      "mae_aed": 4987332.792464209,
+      "median_error": -0.06621630177509721,
+      "range_coverage": 0.5535714285714286,
+      "communities": 24,
+      "largest_project_share": 0.17857142857142858,
+      "median_price_aed": 13039500.0
+    },
+    {
+      "dimension": "rooms",
+      "segment": "4",
+      "estimator": "project_baseline",
+      "rows": 56,
+      "mdape": 0.13798470585646844,
+      "within_10pct": 0.375,
+      "mae_aed": 4649051.63976047,
+      "median_error": -0.08950203154925872,
+      "communities": 24,
+      "largest_project_share": 0.17857142857142858,
+      "median_price_aed": 13039500.0
     },
     {
       "dimension": "rooms",
       "segment": "4",
       "estimator": "baseline",
       "rows": 56,
-      "mdape": 0.18432148055047193,
+      "mdape": 0.17479906299782844,
       "within_10pct": 0.23214285714285715,
-      "mae_aed": 5888090.724531214
+      "mae_aed": 5428862.446943625,
+      "median_error": -0.12124295848124264,
+      "communities": 24,
+      "largest_project_share": 0.17857142857142858,
+      "median_price_aed": 13039500.0
     },
     {
       "dimension": "rooms",
       "segment": "5+",
       "estimator": "model",
       "rows": 6,
-      "mdape": 0.17773758728642744,
-      "within_10pct": 0.3333333333333333,
-      "mae_aed": 7802291.178150531,
-      "range_coverage": 0.3333333333333333
+      "mdape": 0.13046053305481353,
+      "within_10pct": 0.5,
+      "mae_aed": 7031106.412524,
+      "median_error": -0.08365188089096512,
+      "range_coverage": 0.5,
+      "communities": 5,
+      "largest_project_share": 0.16666666666666666,
+      "median_price_aed": 33371944.0
+    },
+    {
+      "dimension": "rooms",
+      "segment": "5+",
+      "estimator": "model_no_project",
+      "rows": 6,
+      "mdape": 0.3558400349699579,
+      "within_10pct": 0.0,
+      "mae_aed": 15771953.513588542,
+      "median_error": -0.12026176195003536,
+      "range_coverage": 0.5,
+      "communities": 5,
+      "largest_project_share": 0.16666666666666666,
+      "median_price_aed": 33371944.0
+    },
+    {
+      "dimension": "rooms",
+      "segment": "5+",
+      "estimator": "project_baseline",
+      "rows": 6,
+      "mdape": 0.18860216093281507,
+      "within_10pct": 0.16666666666666666,
+      "mae_aed": 8509714.231596174,
+      "median_error": -0.1272257734955723,
+      "communities": 5,
+      "largest_project_share": 0.16666666666666666,
+      "median_price_aed": 33371944.0
     },
     {
       "dimension": "rooms",
@@ -694,17 +1236,52 @@
       "rows": 6,
       "mdape": 0.2771736720356609,
       "within_10pct": 0.16666666666666666,
-      "mae_aed": 16609381.109460404
+      "mae_aed": 17062321.50949208,
+      "median_error": 0.12373981582977091,
+      "communities": 5,
+      "largest_project_share": 0.16666666666666666,
+      "median_price_aed": 33371944.0
     },
     {
       "dimension": "rooms",
       "segment": "penthouse",
       "estimator": "model",
       "rows": 5,
-      "mdape": 0.13379376344521685,
-      "within_10pct": 0.2,
-      "mae_aed": 933853.0212509984,
-      "range_coverage": 0.6
+      "mdape": 0.12803974135285123,
+      "within_10pct": 0.4,
+      "mae_aed": 1006579.1383664377,
+      "median_error": 0.08857507948965052,
+      "range_coverage": 0.4,
+      "communities": 4,
+      "largest_project_share": 0.4,
+      "median_price_aed": 3250000.0
+    },
+    {
+      "dimension": "rooms",
+      "segment": "penthouse",
+      "estimator": "model_no_project",
+      "rows": 5,
+      "mdape": 0.10179467048624359,
+      "within_10pct": 0.4,
+      "mae_aed": 833830.2161077654,
+      "median_error": 0.10179467048624359,
+      "range_coverage": 0.6,
+      "communities": 4,
+      "largest_project_share": 0.4,
+      "median_price_aed": 3250000.0
+    },
+    {
+      "dimension": "rooms",
+      "segment": "penthouse",
+      "estimator": "project_baseline",
+      "rows": 5,
+      "mdape": 0.08602333291367659,
+      "within_10pct": 0.6,
+      "mae_aed": 898506.2541290277,
+      "median_error": 0.08602333291367659,
+      "communities": 4,
+      "largest_project_share": 0.4,
+      "median_price_aed": 3250000.0
     },
     {
       "dimension": "rooms",
@@ -713,7 +1290,283 @@
       "rows": 5,
       "mdape": 0.29103540961330615,
       "within_10pct": 0.4,
-      "mae_aed": 980827.0747942381
+      "mae_aed": 980827.0747942381,
+      "median_error": 0.29103540961330615,
+      "communities": 4,
+      "largest_project_share": 0.4,
+      "median_price_aed": 3250000.0
+    }
+  ],
+  "backtest": [
+    {
+      "test_month": "2026-04",
+      "train_months": [
+        "2026-01",
+        "2026-02"
+      ],
+      "valid_months": [
+        "2026-03"
+      ],
+      "rows": 11227,
+      "rounds": {
+        "full": 981,
+        "community": 1561
+      },
+      "scores": {
+        "model": {
+          "rows": 11227,
+          "mdape": 0.05396755408856056,
+          "within_10pct": 0.6919034470472967,
+          "mae_aed": 255764.9317082645,
+          "median_error": -0.00346104174537047
+        },
+        "model_no_project": {
+          "rows": 11227,
+          "mdape": 0.07034381275857683,
+          "within_10pct": 0.6142335441346753,
+          "mae_aed": 296901.4800712438,
+          "median_error": -0.009510837528979023
+        },
+        "project_baseline": {
+          "rows": 11227,
+          "mdape": 0.07083955693579318,
+          "within_10pct": 0.5936581455419969,
+          "mae_aed": 297998.5768435186,
+          "median_error": 0.0019256579182898902
+        },
+        "baseline": {
+          "rows": 11227,
+          "mdape": 0.12284563760831521,
+          "within_10pct": 0.429945666696357,
+          "mae_aed": 417362.1273479513,
+          "median_error": -0.02238165629835724
+        },
+        "model_recorded": {
+          "rows": 11227,
+          "mdape": 0.050351654691922404,
+          "within_10pct": 0.7050859535049434,
+          "mae_aed": 254738.16791436338,
+          "median_error": -0.0039056054002333967
+        }
+      }
+    },
+    {
+      "test_month": "2026-05",
+      "train_months": [
+        "2026-01",
+        "2026-02",
+        "2026-03"
+      ],
+      "valid_months": [
+        "2026-04"
+      ],
+      "rows": 8649,
+      "rounds": {
+        "full": 1552,
+        "community": 2062
+      },
+      "scores": {
+        "model": {
+          "rows": 8649,
+          "mdape": 0.06854858016153913,
+          "within_10pct": 0.6200716845878136,
+          "mae_aed": 218616.88790124992,
+          "median_error": 0.008951252032339619
+        },
+        "model_no_project": {
+          "rows": 8649,
+          "mdape": 0.08205576613715033,
+          "within_10pct": 0.5672332061510001,
+          "mae_aed": 244461.18708073645,
+          "median_error": 0.01194691081471893
+        },
+        "project_baseline": {
+          "rows": 8649,
+          "mdape": 0.07566242683686016,
+          "within_10pct": 0.5948664585501214,
+          "mae_aed": 239180.13822845713,
+          "median_error": 0.014792761817014298
+        },
+        "baseline": {
+          "rows": 8649,
+          "mdape": 0.11859126198887775,
+          "within_10pct": 0.42548271476471267,
+          "mae_aed": 361848.7924950853,
+          "median_error": 0.0036062629625445534
+        },
+        "model_recorded": {
+          "rows": 8649,
+          "mdape": 0.06433763092102401,
+          "within_10pct": 0.6367210082090415,
+          "mae_aed": 196887.88375442158,
+          "median_error": 0.006515410302282455
+        }
+      }
+    },
+    {
+      "test_month": "2026-06",
+      "train_months": [
+        "2026-01",
+        "2026-02",
+        "2026-03",
+        "2026-04"
+      ],
+      "valid_months": [
+        "2026-05"
+      ],
+      "rows": 11592,
+      "rounds": {
+        "full": 1069,
+        "community": 1627
+      },
+      "scores": {
+        "model": {
+          "rows": 11592,
+          "mdape": 0.06206125680762102,
+          "within_10pct": 0.6733091787439613,
+          "mae_aed": 209844.01078531885,
+          "median_error": -0.0005127993296453274
+        },
+        "model_no_project": {
+          "rows": 11592,
+          "mdape": 0.07158641511547094,
+          "within_10pct": 0.6352657004830918,
+          "mae_aed": 230863.5647984641,
+          "median_error": -0.002701203872417862
+        },
+        "project_baseline": {
+          "rows": 11592,
+          "mdape": 0.06986814271277653,
+          "within_10pct": 0.6190476190476191,
+          "mae_aed": 239156.64865448838,
+          "median_error": 0.01313642752351162
+        },
+        "baseline": {
+          "rows": 11592,
+          "mdape": 0.11130056004724828,
+          "within_10pct": 0.46549344375431334,
+          "mae_aed": 308401.27820421127,
+          "median_error": -0.012974225314439009
+        },
+        "model_recorded": {
+          "rows": 11592,
+          "mdape": 0.05790552519592787,
+          "within_10pct": 0.6972049689440993,
+          "mae_aed": 192716.10334790894,
+          "median_error": 0.00014416529359929323
+        }
+      }
+    },
+    {
+      "test_month": "2026-07",
+      "train_months": [
+        "2026-01",
+        "2026-02",
+        "2026-03",
+        "2026-04",
+        "2026-05"
+      ],
+      "valid_months": [
+        "2026-06"
+      ],
+      "rows": 11274,
+      "rounds": {
+        "full": 793,
+        "community": 832
+      },
+      "scores": {
+        "model": {
+          "rows": 11274,
+          "mdape": 0.05929866550463489,
+          "within_10pct": 0.6589497959907752,
+          "mae_aed": 218882.28233372254,
+          "median_error": -0.005142688592699787
+        },
+        "model_no_project": {
+          "rows": 11274,
+          "mdape": 0.0781573024677151,
+          "within_10pct": 0.5897640588965762,
+          "mae_aed": 245591.3262987836,
+          "median_error": -0.007561928587422615
+        },
+        "project_baseline": {
+          "rows": 11274,
+          "mdape": 0.07389807553345071,
+          "within_10pct": 0.5945538406954054,
+          "mae_aed": 239160.2808469288,
+          "median_error": 0.013347867262297855
+        },
+        "baseline": {
+          "rows": 11274,
+          "mdape": 0.11869490970371713,
+          "within_10pct": 0.4444740109987582,
+          "mae_aed": 322625.57770706096,
+          "median_error": 0.00775237061512039
+        },
+        "model_recorded": {
+          "rows": 11274,
+          "mdape": 0.05950129668930344,
+          "within_10pct": 0.6716338477913784,
+          "mae_aed": 208854.66328984548,
+          "median_error": -0.0026888564360791484
+        }
+      }
+    },
+    {
+      "test_month": "2026-08",
+      "train_months": [
+        "2026-01",
+        "2026-02",
+        "2026-03",
+        "2026-04",
+        "2026-05",
+        "2026-06"
+      ],
+      "valid_months": [
+        "2026-07"
+      ],
+      "rows": 9480,
+      "rounds": {
+        "full": 946,
+        "community": 1107
+      },
+      "scores": {
+        "model": {
+          "rows": 9480,
+          "mdape": 0.06005389668627305,
+          "within_10pct": 0.685337552742616,
+          "mae_aed": 211092.9965076366,
+          "median_error": -0.006293128515196816
+        },
+        "model_no_project": {
+          "rows": 9480,
+          "mdape": 0.07111561300020912,
+          "within_10pct": 0.615506329113924,
+          "mae_aed": 239889.069227012,
+          "median_error": -0.009475143787612364
+        },
+        "project_baseline": {
+          "rows": 9480,
+          "mdape": 0.07276965191604531,
+          "within_10pct": 0.6123417721518988,
+          "mae_aed": 241894.77911296644,
+          "median_error": 0.010305871396720614
+        },
+        "baseline": {
+          "rows": 9480,
+          "mdape": 0.10847955613091326,
+          "within_10pct": 0.46877637130801686,
+          "mae_aed": 327788.8849615039,
+          "median_error": 0.007730054515223082
+        },
+        "model_recorded": {
+          "rows": 9480,
+          "mdape": 0.05814160926591433,
+          "within_10pct": 0.705590717299578,
+          "mae_aed": 197843.3967468894,
+          "median_error": -0.005250694620971559
+        }
+      }
     }
   ],
   "shap": {
@@ -723,68 +1576,68 @@
       {
         "feature": "community",
         "label": "Community",
-        "mean_abs_shap": 0.1980235084047718,
-        "share": 0.4248802890749476
+        "mean_abs_shap": 0.19761534525442886,
+        "share": 0.4246968534937125
       },
       {
         "feature": "project",
         "label": "Project",
-        "mean_abs_shap": 0.09865261572516419,
-        "share": 0.21166957511746337
+        "mean_abs_shap": 0.09212487555020107,
+        "share": 0.19798636955190294
       },
       {
         "feature": "area_sqm",
         "label": "Size (sqm)",
-        "mean_abs_shap": 0.0735464653777361,
-        "share": 0.1578016858799384
+        "mean_abs_shap": 0.07755282475504852,
+        "share": 0.16666944872430267
       },
       {
         "feature": "is_off_plan",
         "label": "Off-plan or ready",
-        "mean_abs_shap": 0.03317158996524688,
-        "share": 0.07117313922496941
+        "mean_abs_shap": 0.03552549538811856,
+        "share": 0.07634815044709294
       },
       {
         "feature": "rooms",
         "label": "Rooms",
-        "mean_abs_shap": 0.020077037225026562,
-        "share": 0.04307739746990673
+        "mean_abs_shap": 0.021700829423457302,
+        "share": 0.046637440844890764
       },
       {
         "feature": "nearest_metro",
         "label": "Nearest metro",
-        "mean_abs_shap": 0.014606565519032288,
-        "share": 0.03133992438631621
+        "mean_abs_shap": 0.015326090421220235,
+        "share": 0.03293743393192531
       },
       {
         "feature": "month_index",
         "label": "Month of sale",
-        "mean_abs_shap": 0.01378249229713434,
-        "share": 0.02957178851416899
+        "mean_abs_shap": 0.012107186528243337,
+        "share": 0.026019659640228128
       },
       {
         "feature": "nearest_landmark",
         "label": "Nearest landmark",
-        "mean_abs_shap": 0.008836989021219536,
-        "share": 0.018960690476269828
-      },
-      {
-        "feature": "is_freehold",
-        "label": "Freehold",
-        "mean_abs_shap": 0.002318851366553086,
-        "share": 0.00497533978101749
-      },
-      {
-        "feature": "sub_type",
-        "label": "Flat or hotel apartment",
-        "mean_abs_shap": 0.002052847732132125,
-        "share": 0.004404600973296007
+        "mean_abs_shap": 0.007465555781948029,
+        "share": 0.01604429072091031
       },
       {
         "feature": "nearest_mall",
         "label": "Nearest mall",
-        "mean_abs_shap": 0.000999983129294447,
-        "share": 0.002145569101705993
+        "mean_abs_shap": 0.001992206249837296,
+        "share": 0.004281467740913944
+      },
+      {
+        "feature": "is_freehold",
+        "label": "Freehold",
+        "mean_abs_shap": 0.0019766584981724114,
+        "share": 0.004248053932879569
+      },
+      {
+        "feature": "sub_type",
+        "label": "Flat or hotel apartment",
+        "mean_abs_shap": 0.0019221135778477304,
+        "share": 0.004130830971240976
       }
     ]
   },
@@ -809,14 +1662,14 @@
       {
         "column": "community",
         "method": "Jensen-Shannon distance",
-        "value": 0.2262489297712916,
+        "value": 0.22624892977129155,
         "threshold": 0.1,
         "drifted": true
       },
       {
         "column": "rooms",
         "method": "Jensen-Shannon distance",
-        "value": 0.054715345834710605,
+        "value": 0.05471534583471062,
         "threshold": 0.1,
         "drifted": false
       },
