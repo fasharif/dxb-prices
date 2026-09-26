@@ -217,6 +217,13 @@ def _is_fresh(entry: ManifestEntry | None, path: Path) -> bool:
     )
 
 
+def export_client() -> httpx.Client:
+    """HTTP client for the export. It identifies this project and does not pose as the DLD page."""
+    return httpx.Client(
+        timeout=httpx.Timeout(180.0, connect=30.0), headers={"User-Agent": config.USER_AGENT}
+    )
+
+
 def download_months(
     months: Iterable[Month],
     raw_dir: Path = config.RAW_DIR,
@@ -235,14 +242,7 @@ def download_months(
     raw_dir.mkdir(parents=True, exist_ok=True)
     manifest = Manifest(raw_dir / MANIFEST_NAME)
     own_client = client is None
-    client = client or httpx.Client(
-        timeout=httpx.Timeout(180.0, connect=30.0),
-        headers={
-            "User-Agent": config.USER_AGENT,
-            "Origin": "https://dubailand.gov.ae",
-            "Referer": config.DLD_PAGE_URL,
-        },
-    )
+    client = client or export_client()
     results: list[ManifestEntry] = []
     fetched = 0
     try:

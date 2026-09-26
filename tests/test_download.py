@@ -56,6 +56,13 @@ def test_months_outside_the_current_year_or_in_the_future_are_refused() -> None:
         download.check_in_window([Month(2026, 10)], date(2026, 9, 26))
 
 
+def test_the_export_client_names_the_project_and_nothing_else() -> None:
+    with download.export_client() as client:
+        assert client.headers["User-Agent"].startswith("dxb-prices/")
+        assert "Origin" not in client.headers
+        assert "Referer" not in client.headers
+
+
 def test_month_parse() -> None:
     assert Month.parse("2026-03") == Month(2026, 3)
     assert Month(2026, 2).last_day == date(2026, 2, 28)
