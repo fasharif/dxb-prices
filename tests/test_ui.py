@@ -68,6 +68,15 @@ def test_client_summarises_validation_errors() -> None:
         mock_client(handler).estimate({})
 
 
+def test_client_asks_for_a_communitys_projects() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/projects"
+        assert request.url.params["community"] == "Business Bay"
+        return httpx.Response(200, json=[{"name": "Canal Heights", "training_sales": 40}])
+
+    assert mock_client(handler).projects("Business Bay")[0]["name"] == "Canal Heights"
+
+
 def test_client_reports_an_unreachable_api() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         raise httpx.ConnectError("refused")
@@ -114,8 +123,16 @@ def test_page_shows_an_estimate_from_the_api(
     at = AppTest.from_file(str(PAGE), default_timeout=30)
     at.run()
     assert not at.exception
-    assert "Business Bay" in at.selectbox[0].options
-    at.selectbox[0].select("Marsa Dubai")
+    community, project = at.selectbox[0], at.selectbox[1]
+    assert "Business Bay" in community.options
+    assert "Canal Heights" in project.options
+    community.select("Marsa Dubai")
+    at.run()
+    # The project list follows the community.
+    project = at.selectbox[1]
+    assert project.options[0] == "Not given"
+    assert "Marina Crest" in project.options and "Canal Heights" not in project.options
+    project.select("Marina Crest")
     at.number_input[0].set_value(90.0)
     at.button[0].click()
     at.run()
@@ -123,6 +140,22 @@ def test_page_shows_an_estimate_from_the_api(
     assert at.metric[0].label == "Estimated price"
     assert at.metric[0].value.startswith("AED ")
     assert len(at.table) == 1
+    assert "the model that knows the project" in at.caption[-1].value
+
+
+def test_page_says_when_the_community_level_model_answers(
+    live_api: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from streamlit.testing.v1 import AppTest
+
+    monkeypatch.setenv("DXB_API_URL", live_api)
+    at = AppTest.from_file(str(PAGE), default_timeout=30)
+    at.run()
+    at.button[0].click()
+    at.run()
+    assert not at.exception
+    assert any("No project given" in w.value for w in at.warning)
+    assert "community-level model" in at.caption[-1].value
 
 
 def test_page_explains_when_the_api_is_down(monkeypatch: pytest.MonkeyPatch) -> None:

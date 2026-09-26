@@ -26,10 +26,10 @@ class ApiClient:
     def _client(self) -> httpx.Client:
         return httpx.Client(base_url=self.base_url, timeout=self.timeout, transport=self.transport)
 
-    def _get(self, path: str) -> Any:
+    def _get(self, path: str, params: dict[str, str] | None = None) -> Any:
         try:
             with self._client() as c:
-                r = c.get(path)
+                r = c.get(path, params=params)
         except httpx.HTTPError as exc:
             raise ApiError(f"cannot reach the API at {self.base_url}: {exc}") from exc
         if r.status_code != 200:
@@ -40,6 +40,12 @@ class ApiClient:
         data = self._get("/communities")
         if not isinstance(data, list):
             raise ApiError("unexpected /communities response")
+        return data
+
+    def projects(self, community: str) -> list[dict[str, Any]]:
+        data = self._get("/projects", params={"community": community})
+        if not isinstance(data, list):
+            raise ApiError("unexpected /projects response")
         return data
 
     def model_info(self) -> dict[str, Any]:
