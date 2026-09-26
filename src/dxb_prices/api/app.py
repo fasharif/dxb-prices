@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import math
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -10,6 +11,8 @@ from typing import Any
 
 import lightgbm as lgb
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from dxb_prices import config
@@ -18,6 +21,17 @@ from dxb_prices.api.schemas import EstimateRequest, EstimateResponse, Problem
 from dxb_prices.model import PriceModel
 
 log = logging.getLogger(__name__)
+
+
+def json_safe(value: Any) -> Any:
+    """Replace NaN and infinities (which JSON cannot carry) with their names."""
+    if isinstance(value, float) and not math.isfinite(value):
+        return str(value)
+    if isinstance(value, dict):
+        return {k: json_safe(v) for k, v in value.items()}
+    if isinstance(value, list | tuple):
+        return [json_safe(v) for v in value]
+    return value
 
 
 def create_app(model_dir: Path | None = None) -> FastAPI:
@@ -46,6 +60,14 @@ def create_app(model_dir: Path | None = None) -> FastAPI:
         summary="Sale price estimates for Dubai apartments, with the factors behind each one.",
         lifespan=lifespan,
     )
+
+    @app.exception_handler(RequestValidationError)
+    async def invalid_request(request: Request, exc: RequestValidationError) -> JSONResponse:
+        # The default handler echoes the rejected input, and a NaN or Infinity size
+        # (which Python's JSON parser accepts) would make that response unencodable.
+        return JSONResponse(
+            status_code=422, content={"detail": json_safe(jsonable_encoder(exc.errors()))}
+        )
 
     def estimator(request: Request) -> Estimator:
         est: Estimator | None = request.app.state.estimator

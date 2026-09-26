@@ -11,6 +11,9 @@ from dxb_prices.config import DEFAULT_SETTINGS
 
 RoomsLabel = Literal["studio", "1", "2", "3", "4", "5+", "penthouse"]
 _RULES = DEFAULT_SETTINGS.cleaning
+# Dates outside this window are almost certainly typing mistakes.
+EARLIEST_DATE = date(2000, 1, 1)
+LATEST_DATE = date(2099, 12, 31)
 
 
 class EstimateRequest(BaseModel):
@@ -38,7 +41,10 @@ class EstimateRequest(BaseModel):
         description="DLD area name in English or Arabic, e.g. 'Marsa Dubai'",
     )
     size_sqm: float = Field(
-        ge=_RULES.min_area_sqm, le=_RULES.max_area_sqm, description="Internal area in square metres"
+        ge=_RULES.min_area_sqm,
+        le=_RULES.max_area_sqm,
+        allow_inf_nan=False,
+        description="Internal area in square metres",
     )
     rooms: RoomsLabel = Field(description="studio, 1-4, 5+ or penthouse")
     off_plan: bool = Field(description="true for an off-plan sale, false for a ready unit")
@@ -50,7 +56,10 @@ class EstimateRequest(BaseModel):
         default=None, description="Leave empty to use the usual status for the area"
     )
     transaction_date: date | None = Field(
-        default=None, description="Date to value at; defaults to today"
+        default=None,
+        ge=EARLIEST_DATE,
+        le=LATEST_DATE,
+        description="Date to value at; defaults to today",
     )
 
     @field_validator("rooms", mode="before")
@@ -66,13 +75,16 @@ class EstimateRequest(BaseModel):
             return value.strip().casefold()
         return value
 
-    @field_validator("community", "project", mode="after")
+    @field_validator("community", "project", mode="before")
     @classmethod
-    def _strip(cls, value: str | None) -> str | None:
-        if value is None:
-            return None
-        stripped = value.strip()
-        return stripped or None
+    def _strip(cls, value: object) -> object:
+        # Strip before the length checks run, so "   " counts as empty.
+        return value.strip() if isinstance(value, str) else value
+
+    @field_validator("project", mode="after")
+    @classmethod
+    def _blank_project_is_none(cls, value: str | None) -> str | None:
+        return value or None
 
 
 class Factor(BaseModel):

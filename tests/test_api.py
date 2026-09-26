@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
@@ -78,13 +79,34 @@ def test_unknown_community_gets_suggestions(client: TestClient) -> None:
         {"rooms": "7"},
         {"rooms": -1},
         {"community": ""},
+        {"community": "   "},
+        {"community": " x "},
         {"sub_type": "Villa"},
         {"transaction_date": "next week"},
+        {"transaction_date": "1500-01-01"},
+        {"transaction_date": "9999-12-31"},
         {"unexpected": 1},
     ],
 )
 def test_invalid_input_is_rejected_with_422(client: TestClient, change: dict[str, Any]) -> None:
     assert client.post("/estimate", json=VALID | change).status_code == 422
+
+
+@pytest.mark.parametrize("size", ["NaN", "Infinity", "-Infinity"])
+def test_non_finite_sizes_are_rejected_with_422(client: TestClient, size: str) -> None:
+    # Python's JSON parser accepts these literals; the error body must still be valid JSON.
+    body = json.dumps(VALID).replace('"size_sqm": 80', f'"size_sqm": {size}')
+    r = client.post("/estimate", content=body, headers={"content-type": "application/json"})
+    assert r.status_code == 422
+    detail = r.json()["detail"]
+    assert detail[0]["loc"] == ["body", "size_sqm"]
+    assert "finite" in detail[0]["msg"]
+
+
+def test_blank_project_counts_as_not_given(client: TestClient) -> None:
+    r = client.post("/estimate", json=VALID | {"project": "   "})
+    assert r.status_code == 200
+    assert r.json()["project"] is None
 
 
 def test_missing_required_field_is_rejected(client: TestClient) -> None:
