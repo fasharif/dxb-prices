@@ -1,9 +1,11 @@
 name: dxb-prices
 
-# API on http://localhost:58000 (docs at /docs), Streamlit page on
-# http://localhost:58001. The API reads a trained model from the host;
+# API on http://127.0.0.1:58000 (docs at /docs), Streamlit page on
+# http://127.0.0.1:58001. The API reads a trained model from the host;
 # train one first with `dxb-prices train` (real data) or
 # `dxb-prices train-fixture` (synthetic) and point DXB_MODEL_DIR_HOST at it.
+# Both ports are published on the loopback interface only, because the API has
+# no authentication; set DXB_BIND_ADDRESS=0.0.0.0 to reach them from other machines.
 
 services:
   api:
@@ -11,9 +13,8 @@ services:
       context: .
       target: api
     image: dxb-prices-api:local
-    container_name: dxb-prices-api
     ports:
-      - "${DXB_API_PORT:-58000}:8000"
+      - "${DXB_BIND_ADDRESS:-127.0.0.1}:${DXB_API_PORT:-58000}:8000"
     volumes:
       - "${DXB_MODEL_DIR_HOST:-./artifacts/model}:/model:ro"
     mem_limit: 768m
@@ -25,11 +26,10 @@ services:
       context: .
       target: ui
     image: dxb-prices-ui:local
-    container_name: dxb-prices-ui
     environment:
       DXB_API_URL: http://api:8000
     ports:
-      - "${DXB_UI_PORT:-58001}:8501"
+      - "${DXB_BIND_ADDRESS:-127.0.0.1}:${DXB_UI_PORT:-58001}:8501"
     depends_on:
       api:
         condition: service_healthy
