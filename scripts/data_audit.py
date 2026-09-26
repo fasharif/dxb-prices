@@ -6,16 +6,24 @@ Prints, for the cached raw files:
 * how the apartment sale procedures split between freehold and non-freehold,
 * which groups share a transaction number (lease-to-own contracts),
 * how often the optional columns are empty,
-* the most expensive apartment sales per square metre that pass the cleaning rules.
+* the most expensive apartment sales per square metre that pass the cleaning rules,
+* the sales in the newest month whose community had no sales in the earlier months,
+* small communities whose every sale lies outside the overall 0.5% to 99.5% range of
+  price per square metre (a trim against those percentiles would remove them entirely).
 
-Usage: python scripts/data_audit.py [RAW_DIR]
+With ``--dubai-data-sample`` it instead checks the data.dubai public sample saved by
+``dxb-prices download --source dubai-data-sample``: its size, its years, and what
+the schema adapter and the cleaning rules make of the Dubai Pulse layout.
+
+Usage: python scripts/data_audit.py [RAW_DIR] [--dubai-data-sample [CSV]]
 """
 
 from __future__ import annotations
 
-import sys
+import argparse
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from dxb_prices import clean, config, normalise, schema
@@ -86,6 +94,53 @@ def luxury(df: pd.DataFrame) -> None:
     print("Largest size (sqm):", f"{cleaned['area_sqm'].max():,.0f}")
 
 
+def new_communities(df: pd.DataFrame) -> None:
+    cleaned, _ = clean.clean(df, config.DEFAULT_SETTINGS.cleaning)
+    newest = cleaned["month"].max()
+    earlier = set(cleaned.loc[cleaned["month"] < newest, "community"])
+    fresh = cleaned[(cleaned["month"] == newest) & ~cleaned["community"].isin(earlier)]
+    print(f"\nSales in {newest} in communities with no earlier sales: {len(fresh)}")
+    if not fresh.empty:
+        print(f"  communities: {fresh['community'].nunique()}")
+        low, high = fresh["price_aed"].min(), fresh["price_aed"].max()
+        print(f"  price range (AED): {low:,.0f} to {high:,.0f}")
+        print(f"  off-plan: {fresh['is_off_plan'].astype('boolean').mean():.0%}")
+
+
+def small_outlying_communities(df: pd.DataFrame, min_rows: int = 200) -> None:
+    cleaned, _ = clean.clean(df, config.DEFAULT_SETTINGS.cleaning)
+    ratio = (cleaned["price_aed"] / cleaned["area_sqm"]).to_numpy(np.float64)
+    log_pps = pd.Series(np.log(ratio), index=cleaned.index)
+    trim = config.DEFAULT_SETTINGS.trim
+    lo, hi = log_pps.quantile([trim.lower_quantile, trim.upper_quantile])
+    counts = cleaned["community"].value_counts()
+    print(
+        f"\nCommunities with fewer than {min_rows} sales that lie entirely outside the overall "
+        f"{trim.lower_quantile:.1%} to {trim.upper_quantile:.1%} range "
+        f"({np.exp(lo):,.0f} to {np.exp(hi):,.0f} AED per sqm):"
+    )
+    for community, n in counts[counts < min_rows].items():
+        part = log_pps[cleaned["community"] == community]
+        if ((part < lo) | (part > hi)).all():
+            print(f"  {community}: {n} sales, median {np.exp(part.median()):,.0f} AED per sqm")
+
+
+def dubai_data_sample(path: Path) -> None:
+    raw = schema.read_raw_csvs([path])
+    print(f"data.dubai sample {path.name}: {len(raw):,} rows")
+    print("Layout detected:", schema.detect_layout(raw.columns))
+    years = pd.to_datetime(raw["instance_date"], errors="coerce").dt.year
+    print("Rows per year (last five):", years.value_counts().sort_index().tail(5).to_dict())
+    print(
+        "Price-per-area columns dropped on read:", sorted(set(raw.columns) & schema.LEAKY_COLUMNS)
+    )
+    canonical = schema.to_canonical(raw)
+    for col in ("transaction_date", "price_aed", "area_sqm", "community_en", "is_off_plan"):
+        print(f"  {col}: {canonical[col].notna().mean():.1%} filled")
+    cleaned, _ = clean.clean(canonical, config.DEFAULT_SETTINGS.cleaning)
+    print(f"Apartment sales after the cleaning rules: {len(cleaned):,}")
+
+
 def main(raw_dir: Path) -> None:
     raw = schema.read_raw_csvs(sorted(raw_dir.glob("transactions_*.csv")))
     df = schema.to_canonical(raw)
@@ -95,7 +150,22 @@ def main(raw_dir: Path) -> None:
     shared_numbers(df)
     empty_columns(df)
     luxury(df)
+    new_communities(df)
+    small_outlying_communities(df)
 
 
 if __name__ == "__main__":
-    main(Path(sys.argv[1]) if len(sys.argv) > 1 else config.RAW_DIR)
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("raw_dir", nargs="?", type=Path, default=config.RAW_DIR)
+    parser.add_argument(
+        "--dubai-data-sample",
+        nargs="?",
+        type=Path,
+        const=config.DATA_DIR / "raw" / "dubai_data" / "real_estate_transactions_sample.csv",
+        help="check the data.dubai sample instead of the DLD export",
+    )
+    args = parser.parse_args()
+    if args.dubai_data_sample:
+        dubai_data_sample(args.dubai_data_sample)
+    else:
+        main(args.raw_dir)
