@@ -8,9 +8,16 @@ from typing import Any
 
 import pandas as pd
 
-from dxb_prices import normalise
-from dxb_prices.api.schemas import EstimateRequest, EstimateResponse, Factor, ModelInfo, PriceRange
-from dxb_prices.features import POI_COLUMNS, month_number
+from dxb_prices import normalise, serving
+from dxb_prices.api.schemas import (
+    EstimateRequest,
+    EstimateResponse,
+    Factor,
+    ModelInfo,
+    PriceRange,
+    ProjectInfo,
+)
+from dxb_prices.features import FULL, month_number
 from dxb_prices.model import PriceModel
 
 FEATURE_LABELS: dict[str, str] = {
@@ -28,16 +35,6 @@ FEATURE_LABELS: dict[str, str] = {
 }
 # Beyond this many months after the newest training month, say so.
 STALE_MONTHS = 3
-_UNSPECIFIED = "__unspecified__"
-
-
-def factor_value(feature: str, value: str, used_project: str, requested: str | None) -> str:
-    """Wording for a factor's value; explains a missing or unrecognised project."""
-    if feature == "project" and used_project == _UNSPECIFIED:
-        if requested:
-            return f"'{requested}' not recognised (treated as a less common project)"
-        return "not given (treated as a less common project)"
-    return value
 
 
 class UnknownCommunityError(LookupError):
@@ -45,6 +42,10 @@ class UnknownCommunityError(LookupError):
         super().__init__(f"unknown community {name!r}")
         self.name = name
         self.suggestions = suggestions
+
+
+def _pct(value: Any) -> str | None:
+    return f"{float(value) * 100:.1f}%" if isinstance(value, int | float) else None
 
 
 class Estimator:
@@ -57,6 +58,21 @@ class Estimator:
         self._first_month = month_number(pd.Series([min(trained)]))[0]
         self._last_month = month_number(pd.Series([max(trained)]))[0]
         self._thin = int(model.metadata.get("thin_community_rows", 50))
+        self._community_model_note = self._accuracy_note()
+
+    def _accuracy_note(self) -> str:
+        """How much less accurate the community-level model was on the test month."""
+        meta = self.model.metadata
+        scores = meta.get("test_scores") or {}
+        months = meta.get("evaluated_on_months") or []
+        without = _pct((scores.get("model_no_project") or {}).get("mdape"))
+        with_project = _pct((scores.get("model") or {}).get("mdape"))
+        if not (without and with_project and months):
+            return ""
+        return (
+            f" On the {months[-1]} test month its median error was {without}, "
+            f"against {with_project} with the project."
+        )
 
     def community_rows(self) -> dict[str, int]:
         return {c: int(self.spec.community_rows.get(c, 0)) for c in self.communities}
@@ -74,27 +90,37 @@ class Estimator:
             raise UnknownCommunityError(name, close[:5])
         return found
 
-    def _row(
-        self, req: EstimateRequest, community: str, warnings: list[str]
-    ) -> tuple[pd.DataFrame, str | None]:
-        project: str | None = None
-        context: dict[str, Any] = self.spec.community_context.get(community, {})
-        if req.project:
-            project = normalise.resolve_name(req.project, self.spec.project_names)
-            if project is None:
-                warnings.append(
-                    f"Project '{req.project}' is not in the training data; "
-                    "the estimate uses community-level information."
-                )
-            else:
-                pctx = self.spec.project_context.get(project, {})
-                if pctx.get("community") and pctx["community"] != community:
-                    warnings.append(
-                        f"Project '{project}' is recorded in {pctx['community']}, not {community}."
-                    )
-                context = {k: v for k, v in pctx.items() if v is not None} | {
-                    k: v for k, v in context.items() if pctx.get(k) is None
-                }
+    def projects(self, community_name: str) -> list[ProjectInfo]:
+        """Training projects recorded in a community, by name, with their training sales."""
+        community = self.resolve_community(community_name)
+        names = sorted(
+            p for p, ctx in self.spec.project_context.items() if ctx.get("community") == community
+        )
+        return [
+            ProjectInfo(name=p, training_sales=int(self.spec.project_rows.get(p, 0))) for p in names
+        ]
+
+    def _project(self, req: EstimateRequest, community: str, warnings: list[str]) -> str | None:
+        if not req.project:
+            warnings.append(
+                "No project given, so the estimate comes from the community-level model, "
+                "which does not know the building." + self._community_model_note
+            )
+            return None
+        project = normalise.resolve_name(req.project, self.spec.project_names)
+        if project is None:
+            warnings.append(
+                f"Project '{req.project}' is not in the training data, so the estimate comes "
+                "from the community-level model, which does not know the building."
+                + self._community_model_note
+            )
+            return None
+        recorded = self.spec.project_context.get(project, {}).get("community")
+        if recorded and recorded != community:
+            warnings.append(f"Project '{project}' is recorded in {recorded}, not {community}.")
+        return project
+
+    def _date(self, req: EstimateRequest, warnings: list[str]) -> date:
         when = req.transaction_date or date.today()
         m = when.year * 12 + when.month - 1
         if m > self._last_month + STALE_MONTHS:
@@ -104,20 +130,7 @@ class Estimator:
             )
         if m < self._first_month:
             warnings.append("The date is before the training period.")
-        freehold = req.freehold if req.freehold is not None else context.get("is_freehold")
-        row: dict[str, Any] = {
-            "community": community,
-            "project": project if project is not None else _UNSPECIFIED,
-            "rooms": req.rooms,
-            "sub_type": req.sub_type,
-            "area_sqm": float(req.size_sqm),
-            "is_off_plan": req.off_plan,
-            "is_freehold": freehold,
-            "month": f"{when.year:04d}-{when.month:02d}",
-        }
-        for col in POI_COLUMNS:
-            row[col] = context.get(col)
-        return pd.DataFrame([row]), project
+        return when
 
     def estimate(self, req: EstimateRequest) -> EstimateResponse:
         warnings: list[str] = []
@@ -127,21 +140,27 @@ class Estimator:
             warnings.append(
                 f"Only {rows} training sales in {community}; treat the estimate with extra caution."
             )
-        frame, project = self._row(req, community, warnings)
-        price = float(self.model.predict(frame)[0])
-        low, high = self.model.interval(frame)
-        factors = self.model.explain(frame, top_k=5)[0]
-        top = []
-        used_project = str(frame.loc[0, "project"])
-        for f in factors:
-            top.append(
-                Factor(
-                    feature=f.feature,
-                    label=FEATURE_LABELS[f.feature],
-                    value=factor_value(f.feature, f.value, used_project, req.project),
-                    effect_pct=f.effect_pct,
-                )
-            )
+        project = self._project(req, community, warnings)
+        when = self._date(req, warnings)
+        request = pd.DataFrame(
+            [
+                {
+                    "community": community,
+                    "project": project,
+                    "rooms": req.rooms,
+                    "sub_type": req.sub_type,
+                    "area_sqm": float(req.size_sqm),
+                    "is_off_plan": req.off_plan,
+                    "is_freehold": req.freehold,
+                    "month": f"{when.year:04d}-{when.month:02d}",
+                }
+            ]
+        )
+        frame = serving.model_rows(request, self.spec)
+        variant = str(frame["variant"].iloc[0])
+        price = float(self.model.predict(frame, variant)[0])
+        low, high = self.model.interval(frame, variant)
+        explanation = self.model.explain(frame, top_k=5, variant=variant)[0]
         median = self._baseline.get(community)
         meta = self.model.metadata
         return EstimateResponse(
@@ -152,8 +171,18 @@ class Estimator:
             ),
             community=community,
             project=project,
-            top_factors=top,
-            base_per_sqm_aed=int(round(self.model.base_per_sqm(), -1)),
+            model_variant="full" if variant == FULL else "community",
+            top_factors=[
+                Factor(
+                    feature=f.feature,
+                    label=FEATURE_LABELS[f.feature],
+                    value=f.value,
+                    effect_pct=f.effect_pct,
+                )
+                for f in explanation.factors
+            ],
+            other_factors_effect_pct=explanation.other_effect_pct,
+            base_per_sqm_aed=int(round(self.model.base_per_sqm(variant), -1)),
             community_median_per_sqm_aed=int(round(median, -1)) if median else None,
             warnings=warnings,
             model=ModelInfo(

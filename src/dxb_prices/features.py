@@ -4,6 +4,11 @@ Everything learned here (which categories are common enough to keep, the
 reference month, the lookup tables used to fill in location details at
 serving time) comes from the training period. Validation and test rows are
 only transformed, never used to fit.
+
+There are two feature sets. The full model uses everything, including the
+project and DLD's nearest metro, mall and landmark. The community-level model
+leaves out the project and the location labels; it serves requests whose
+project is not given or not in the training data (see ``serving``).
 """
 
 from __future__ import annotations
@@ -33,7 +38,15 @@ CATEGORICAL_FEATURES: tuple[str, ...] = (
 )
 FEATURES: tuple[str, ...] = NUMERIC_FEATURES + CATEGORICAL_FEATURES
 POI_COLUMNS: tuple[str, ...] = ("nearest_metro", "nearest_mall", "nearest_landmark")
+COMMUNITY_FEATURES: tuple[str, ...] = tuple(
+    f for f in FEATURES if f != "project" and f not in POI_COLUMNS
+)
 SUB_TYPES: tuple[str, ...] = ("Flat", "Hotel Apartment")
+
+# The two models: "full" knows the project, "community" does not.
+FULL = "full"
+COMMUNITY = "community"
+VARIANT_FEATURES: dict[str, tuple[str, ...]] = {FULL: FEATURES, COMMUNITY: COMMUNITY_FEATURES}
 
 
 @dataclass
@@ -47,6 +60,7 @@ class FeatureSpec:
     community_context: dict[str, dict[str, Any]] = field(default_factory=dict)
     community_names: dict[str, str] = field(default_factory=dict)
     project_names: dict[str, str] = field(default_factory=dict)
+    project_rows: dict[str, int] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -116,6 +130,7 @@ def fit(train: pd.DataFrame, rules: FeatureRules) -> FeatureSpec:
             train.get("community_ar"),
         ),
         project_names=normalise.lookup_table(train["project"], train["project"], None),
+        project_rows={str(k): int(v) for k, v in train["project"].value_counts().items()},
     )
 
 
@@ -130,8 +145,13 @@ def _categorical(values: pd.Series, levels: list[str]) -> pd.Series:
     return pd.Series(pd.Categorical(mapped, categories=levels), index=values.index)
 
 
-def transform(frame: pd.DataFrame, spec: FeatureSpec) -> pd.DataFrame:
-    """Build the model matrix. Unseen or rare categories become OTHER; missing become MISSING."""
+def transform(
+    frame: pd.DataFrame, spec: FeatureSpec, columns: tuple[str, ...] = FEATURES
+) -> pd.DataFrame:
+    """Build the model matrix with ``columns`` (a subset of FEATURES, in that order).
+
+    Unseen or rare categories become OTHER; missing ones become MISSING.
+    """
     missing = {"area_sqm", "is_off_plan", "is_freehold", "month", *CATEGORICAL_FEATURES} - set(
         frame.columns
     )
@@ -144,4 +164,4 @@ def transform(frame: pd.DataFrame, spec: FeatureSpec) -> pd.DataFrame:
     x["month_index"] = month_index(frame["month"], spec.reference_month)
     for col in CATEGORICAL_FEATURES:
         x[col] = _categorical(frame[col], spec.levels[col])
-    return x[list(FEATURES)]
+    return x[list(columns)]

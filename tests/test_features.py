@@ -99,6 +99,15 @@ def test_matrix_has_fixed_columns_and_category_order() -> None:
         assert a[col].dtype == np.float64
 
 
+def test_community_level_features_leave_out_project_and_location_labels() -> None:
+    spec = features.fit(training_frame(), RULES)
+    x = features.transform(frame([{}]), spec, features.COMMUNITY_FEATURES)
+    assert list(x.columns) == list(features.COMMUNITY_FEATURES)
+    assert "project" not in x.columns
+    assert not set(features.POI_COLUMNS) & set(x.columns)
+    assert spec.project_rows == {"Canal Heights": 3, "Marina Crest": 3, "Tiny Project": 1}
+
+
 def test_no_price_information_reaches_the_features() -> None:
     assert not any("price" in f for f in features.FEATURES)
     spec = features.fit(training_frame(), RULES)

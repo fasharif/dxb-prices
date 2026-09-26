@@ -89,6 +89,7 @@ def test_train_command_runs_end_to_end(tmp_path: Path) -> None:
             str(reports),
             "--no-search",
             "--no-tracking",
+            "--no-backtest",
         ]
     )
     assert code == 0
@@ -116,7 +117,12 @@ def test_data_info_uses_the_manifest(tmp_path: Path) -> None:
 def test_train_fixture_command_writes_a_model(tmp_path: Path) -> None:
     out = tmp_path / "model"
     assert cli.main(["train-fixture", "--model-dir", str(out)]) == 0
-    assert {p.name for p in out.iterdir()} == {"model.lgb", "features.json", "metadata.json"}
+    assert {p.name for p in out.iterdir()} == {
+        "model.lgb",
+        "model_community.lgb",
+        "features.json",
+        "metadata.json",
+    }
 
 
 def test_render_docs(tmp_path: Path) -> None:

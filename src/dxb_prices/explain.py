@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from dxb_prices import features
+from dxb_prices.features import FULL, VARIANT_FEATURES
 from dxb_prices.model import PriceModel
 
 FEATURE_LABELS: dict[str, str] = {
@@ -24,7 +24,7 @@ FEATURE_LABELS: dict[str, str] = {
     "nearest_landmark": "Nearest landmark",
 }
 
-# Reference palette, light mode (see docs/decisions.md, "Charts").
+# One series colour on a light surface; values are printed at the bar ends.
 _SURFACE = "#fcfcfb"
 _SERIES = "#2a78d6"
 _TEXT = "#0b0b0b"
@@ -32,7 +32,9 @@ _TEXT_SECONDARY = "#52514e"
 _AXIS = "#d9d8d4"
 
 
-def shap_values(model: PriceModel, frame: pd.DataFrame) -> tuple[np.ndarray, float]:
+def shap_values(
+    model: PriceModel, frame: pd.DataFrame, variant: str = FULL
+) -> tuple[np.ndarray, float]:
     """SHAP values from the ``shap`` library, and their largest gap to LightGBM's own values.
 
     Serving uses LightGBM's ``pred_contrib`` so the API image does not need
@@ -40,22 +42,26 @@ def shap_values(model: PriceModel, frame: pd.DataFrame) -> tuple[np.ndarray, flo
     """
     import shap
 
-    x = model.matrix(frame)
-    explainer = shap.TreeExplainer(model.booster)
+    x = model.matrix(frame, variant)
+    explainer = shap.TreeExplainer(model.boosters[variant])
     values = np.asarray(explainer.shap_values(x), dtype=np.float64)
-    native = model.contributions(frame)[list(features.FEATURES)].to_numpy()
+    native = model.contributions(frame, variant)[list(VARIANT_FEATURES[variant])].to_numpy()
     return values, float(np.max(np.abs(values - native)))
 
 
 def global_importance(
-    model: PriceModel, frame: pd.DataFrame, sample: int = 5000, seed: int = 42
+    model: PriceModel,
+    frame: pd.DataFrame,
+    sample: int = 5000,
+    seed: int = 42,
+    variant: str = FULL,
 ) -> tuple[pd.DataFrame, float]:
     rows = (
         frame.sample(n=min(sample, len(frame)), random_state=seed) if len(frame) > sample else frame
     )
-    values, gap = shap_values(model, rows)
+    values, gap = shap_values(model, rows, variant)
     mean_abs = np.abs(values).mean(axis=0)
-    table = pd.DataFrame({"feature": list(features.FEATURES), "mean_abs_shap": mean_abs})
+    table = pd.DataFrame({"feature": list(VARIANT_FEATURES[variant]), "mean_abs_shap": mean_abs})
     table["label"] = table["feature"].map(FEATURE_LABELS)
     table["share"] = table["mean_abs_shap"] / table["mean_abs_shap"].sum()
     return table.sort_values("mean_abs_shap", ascending=False).reset_index(drop=True), gap

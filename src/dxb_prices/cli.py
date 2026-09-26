@@ -136,6 +136,7 @@ def cmd_train(args: argparse.Namespace) -> int:
         model_dir=Path(args.model_dir),
         reports_dir=reports_dir,
         search=not args.no_search,
+        run_backtest=not args.no_backtest,
         cleaning_report=cleaning_report,
         data_info=info,
         track=not args.no_tracking,
@@ -218,6 +219,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--model-dir", default=str(config.MODEL_DIR))
     p.add_argument("--reports-dir", default=str(config.REPORTS_DIR))
     p.add_argument("--no-search", action="store_true", help="skip the hyper-parameter search")
+    p.add_argument("--no-backtest", action="store_true", help="skip the rolling-origin backtest")
     p.add_argument("--no-tracking", action="store_true", help="do not log to MLflow")
     p.add_argument("--tracking-uri", default=None, help="MLflow URI (default: ./mlruns)")
     p.set_defaults(func=cmd_train)

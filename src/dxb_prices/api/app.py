@@ -10,14 +10,14 @@ from pathlib import Path
 from typing import Any
 
 import lightgbm as lgb
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from dxb_prices import config
 from dxb_prices.api.estimator import Estimator, UnknownCommunityError
-from dxb_prices.api.schemas import EstimateRequest, EstimateResponse, Problem
+from dxb_prices.api.schemas import EstimateRequest, EstimateResponse, Problem, ProjectInfo
 from dxb_prices.model import PriceModel
 
 log = logging.getLogger(__name__)
@@ -110,6 +110,30 @@ def create_app(model_dir: Path | None = None) -> FastAPI:
         rows = estimator(request).community_rows()
         return [{"name": name, "training_sales": n} for name, n in rows.items()]
 
+    def unknown_community(exc: UnknownCommunityError) -> JSONResponse:
+        return JSONResponse(
+            status_code=404,
+            content=Problem(
+                detail=f"Community '{exc.name}' is not in the training data.",
+                suggestions=exc.suggestions,
+            ).model_dump(),
+        )
+
+    @app.get(
+        "/projects",
+        response_model=list[ProjectInfo],
+        responses={404: {"model": Problem}, 503: {"model": Problem}},
+    )
+    def projects(
+        request: Request,
+        community: str = Query(min_length=2, max_length=120, description="DLD area name"),
+    ) -> list[ProjectInfo] | JSONResponse:
+        """Projects the model knows in a community; giving one makes the estimate more accurate."""
+        try:
+            return estimator(request).projects(community.strip())
+        except UnknownCommunityError as exc:
+            return unknown_community(exc)
+
     @app.post(
         "/estimate",
         response_model=EstimateResponse,
@@ -120,13 +144,7 @@ def create_app(model_dir: Path | None = None) -> FastAPI:
         try:
             return est.estimate(body)
         except UnknownCommunityError as exc:
-            return JSONResponse(
-                status_code=404,
-                content=Problem(
-                    detail=f"Community '{exc.name}' is not in the training data.",
-                    suggestions=exc.suggestions,
-                ).model_dump(),
-            )
+            return unknown_community(exc)
 
     return app
 

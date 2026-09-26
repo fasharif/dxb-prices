@@ -110,14 +110,28 @@ class EstimateResponse(BaseModel):
     estimate_per_sqm_aed: int
     range_80_aed: PriceRange
     community: str
-    project: str | None
-    top_factors: list[Factor]
+    project: str | None = Field(description="The project used, or null if none was recognised")
+    model_variant: Literal["full", "community"] = Field(
+        description=(
+            "full: the model that knows the project; community: the community-level model, "
+            "used when the project is not given or not in the training data"
+        )
+    )
+    top_factors: list[Factor] = Field(description="The five largest effects, largest first")
+    other_factors_effect_pct: float = Field(
+        description="Combined effect of all the remaining factors, in percent"
+    )
     base_per_sqm_aed: int = Field(description="Starting point before any factor is applied")
     community_median_per_sqm_aed: int | None = Field(
         description="Median price per sqm of this community's training sales (the baseline)"
     )
     warnings: list[str]
     model: ModelInfo
+
+
+class ProjectInfo(BaseModel):
+    name: str
+    training_sales: int
 
 
 class Problem(BaseModel):

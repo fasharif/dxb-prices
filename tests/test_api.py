@@ -5,11 +5,12 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
+import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
 
 from dxb_prices.api.app import create_app
-from dxb_prices.api.estimator import Estimator, factor_value
+from dxb_prices.api.estimator import Estimator
 from dxb_prices.api.schemas import EstimateRequest, EstimateResponse
 from dxb_prices.model import PriceModel
 
@@ -47,6 +48,52 @@ def test_estimate_returns_price_range_and_top_factors(client: TestClient) -> Non
     assert all(f.label and f.value for f in body.top_factors)
     assert body.community_median_per_sqm_aed is not None
     assert body.model.trained_on_months[-1] == "2026-03"
+
+
+@pytest.mark.parametrize(("project", "variant"), [(None, "community"), ("Canal Heights", "full")])
+def test_factors_multiply_up_to_the_estimate(
+    client: TestClient, project: str | None, variant: str
+) -> None:
+    body = client.post("/estimate", json=VALID | {"project": project}).json()
+    assert body["model_variant"] == variant
+    per_sqm = body["base_per_sqm_aed"] * (1 + body["other_factors_effect_pct"] / 100)
+    for f in body["top_factors"]:
+        per_sqm *= 1 + f["effect_pct"] / 100
+    # Rounding: base to 10 AED, effects to 0.1 percentage points, estimate to 10 AED.
+    assert per_sqm == pytest.approx(body["estimate_per_sqm_aed"], rel=0.005)
+
+
+def test_without_a_project_the_community_level_model_answers_and_says_so(
+    client: TestClient,
+) -> None:
+    body = client.post("/estimate", json=VALID).json()
+    assert body["model_variant"] == "community"
+    assert body["project"] is None
+    note = next(w for w in body["warnings"] if w.startswith("No project given"))
+    assert "community-level model" in note
+    assert "test month its median error was" in note
+    assert all(f["feature"] != "project" for f in body["top_factors"])
+
+
+def test_a_known_project_uses_the_full_model_without_a_warning(client: TestClient) -> None:
+    body = client.post("/estimate", json=VALID | {"project": "canal heights"}).json()
+    assert body["model_variant"] == "full"
+    assert body["project"] == "Canal Heights"
+    assert body["warnings"] == []
+
+
+def test_projects_are_listed_per_community(client: TestClient) -> None:
+    r = client.get("/projects", params={"community": "business bay"})
+    assert r.status_code == 200
+    names = [p["name"] for p in r.json()]
+    assert names == sorted(names)
+    assert {"Canal Heights", "Bay Square", "Peninsula One"} <= set(names)
+    assert "Marina Crest" not in names
+    assert all(p["training_sales"] > 0 for p in r.json())
+    unknown = client.get("/projects", params={"community": "Busines Bay"})
+    assert unknown.status_code == 404
+    assert "Business Bay" in unknown.json()["suggestions"]
+    assert client.get("/projects").status_code == 422
 
 
 def test_names_resolve_in_either_language_and_any_case(client: TestClient) -> None:
@@ -119,22 +166,13 @@ def test_rooms_accepts_numbers(client: TestClient) -> None:
     assert client.post("/estimate", json=VALID | {"rooms": 6}).status_code == 200
 
 
-def test_project_factor_wording() -> None:
-    unspecified = "__unspecified__"
-    assert factor_value("project", "x", unspecified, None).startswith("not given")
-    assert factor_value("project", "x", unspecified, "Nowhere").startswith(
-        "'Nowhere' not recognised"
-    )
-    assert (
-        factor_value("project", "Canal Heights", "Canal Heights", "canal heights")
-        == "Canal Heights"
-    )
-    assert factor_value("rooms", "1", unspecified, None) == "1"
-
-
 def test_warnings_explain_weak_inputs(client: TestClient) -> None:
     unknown = client.post("/estimate", json=VALID | {"project": "Nowhere Towers"}).json()
-    assert any("not in the training data" in w for w in unknown["warnings"])
+    assert unknown["model_variant"] == "community"
+    assert any(
+        "not in the training data, so the estimate comes from the community-level model" in w
+        for w in unknown["warnings"]
+    )
     elsewhere = client.post("/estimate", json=VALID | {"project": "Marina Crest"}).json()
     assert any("is recorded in Marsa Dubai" in w for w in elsewhere["warnings"])
     later = client.post("/estimate", json=VALID | {"transaction_date": "2027-06-01"}).json()
@@ -145,6 +183,39 @@ def test_known_project_is_used(client: TestClient) -> None:
     r = client.post("/estimate", json=VALID | {"project": "canal heights"}).json()
     assert r["project"] == "Canal Heights"
     assert not any("not in the training data" in w for w in r["warnings"])
+
+
+@pytest.mark.parametrize("with_project", [True, False])
+def test_the_api_answers_what_the_evaluation_scores(
+    client: TestClient, tiny_model: PriceModel, clean_fixture: pd.DataFrame, with_project: bool
+) -> None:
+    """Each test-month sale sent to the API gets the estimate the pipeline scored for it."""
+    from dxb_prices import serving
+
+    sales = clean_fixture[
+        (clean_fixture["month"] == "2026-04")
+        & clean_fixture["community"].isin(tiny_model.spec.community_rows)
+        & (clean_fixture["rooms"] != "unknown")  # the API only takes known room counts
+    ].head(60)
+    rows = serving.model_rows(
+        serving.requests_from_sales(sales, with_project=with_project), tiny_model.spec
+    )
+    expected = serving.estimate(tiny_model, rows)["estimate"]
+    variants, estimates = rows["variant"].tolist(), expected.tolist()
+    for sale, variant, estimate in zip(sales.to_dict("records"), variants, estimates, strict=True):
+        project = sale["project"] if isinstance(sale["project"], str) else None
+        body = {
+            "community": sale["community"],
+            "project": project if with_project else None,
+            "size_sqm": float(sale["area_sqm"]),
+            "rooms": sale["rooms"],
+            "off_plan": bool(sale["is_off_plan"]),
+            "sub_type": sale["sub_type"],
+            "transaction_date": str(sale["transaction_date"].date()),
+        }
+        answer = client.post("/estimate", json=body).json()
+        assert answer["model_variant"] == variant
+        assert answer["estimate_aed"] == round(estimate, -3)
 
 
 def test_thin_communities_are_flagged(tiny_model_dir: Path) -> None:

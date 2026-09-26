@@ -1,16 +1,24 @@
-"""LightGBM price model: training, persistence, prediction and per-estimate factors.
+"""LightGBM price models: training, persistence, prediction and per-estimate factors.
 
-The model predicts the natural log of price per square metre. The price
-estimate is ``exp(prediction) * size``. Per-estimate factors are TreeSHAP
-contributions, which LightGBM computes exactly with ``pred_contrib=True``;
-they add up (with the bias term) to the log prediction, so each factor can be
-read as a multiplicative effect on price per square metre.
+A saved model holds two boosters that share one feature spec:
+
+* ``full`` uses every feature, including the project and DLD's nearest metro,
+  mall and landmark;
+* ``community`` leaves those out. It serves requests whose project is not
+  given or not in the training data (see ``dxb_prices.serving``).
+
+Both predict the natural log of price per square metre. The price estimate is
+``exp(prediction) * size``. Per-estimate factors are TreeSHAP contributions,
+which LightGBM computes exactly with ``pred_contrib=True``; all of them
+together with the bias term add up to the log prediction, so each factor can
+be read as a multiplicative effect on price per square metre.
 """
 
 from __future__ import annotations
 
 import json
 import math
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
@@ -21,9 +29,9 @@ import numpy.typing as npt
 import pandas as pd
 
 from dxb_prices import features
-from dxb_prices.features import OTHER, FeatureSpec
+from dxb_prices.features import COMMUNITY, FULL, OTHER, VARIANT_FEATURES, FeatureSpec
 
-MODEL_FILE = "model.lgb"
+MODEL_FILES: dict[str, str] = {FULL: "model.lgb", COMMUNITY: "model_community.lgb"}
 SPEC_FILE = "features.json"
 META_FILE = "metadata.json"
 
@@ -77,11 +85,9 @@ def train_booster(
     early_stopping_rounds: int = 100,
 ) -> lgb.Booster:
     full = BASE_PARAMS | params
+    categorical = [c for c in features.CATEGORICAL_FEATURES if c in x_train.columns]
     dtrain = lgb.Dataset(
-        x_train,
-        label=y_train,
-        categorical_feature=list(features.CATEGORICAL_FEATURES),
-        free_raw_data=False,
+        x_train, label=y_train, categorical_feature=categorical, free_raw_data=False
     )
     callbacks: list[Any] = []
     valid_sets: list[lgb.Dataset] = []
@@ -102,6 +108,18 @@ class Factor:
 
     def as_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+
+@dataclass(frozen=True)
+class Explanation:
+    """The largest factors of one estimate, and the combined effect of all the others."""
+
+    factors: list[Factor]
+    other_contribution: float
+
+    @property
+    def other_effect_pct(self) -> float:
+        return round((math.exp(self.other_contribution) - 1) * 100, 1)
 
 
 def _is_missing(value: Any) -> bool:
@@ -126,63 +144,73 @@ def _display_value(feature: str, raw: Any, encoded: Any) -> str:
 
 
 class PriceModel:
-    def __init__(self, booster: lgb.Booster, spec: FeatureSpec, metadata: dict[str, Any]) -> None:
-        self.booster = booster
+    def __init__(
+        self, boosters: Mapping[str, lgb.Booster], spec: FeatureSpec, metadata: dict[str, Any]
+    ) -> None:
+        missing = [v for v in VARIANT_FEATURES if v not in boosters]
+        if missing:
+            raise ValueError(f"a price model needs a booster for each variant; missing {missing}")
+        self.boosters = dict(boosters)
         self.spec = spec
         self.metadata = metadata
 
     # --- prediction ---------------------------------------------------------
 
-    def matrix(self, frame: pd.DataFrame) -> pd.DataFrame:
-        return features.transform(frame, self.spec)
+    def matrix(self, frame: pd.DataFrame, variant: str = FULL) -> pd.DataFrame:
+        return features.transform(frame, self.spec, VARIANT_FEATURES[variant])
 
-    def predict_log_pps(self, frame: pd.DataFrame) -> FloatArray:
-        return np.asarray(self.booster.predict(self.matrix(frame)), dtype=np.float64)
+    def predict_log_pps(self, frame: pd.DataFrame, variant: str = FULL) -> FloatArray:
+        booster = self.boosters[variant]
+        return np.asarray(booster.predict(self.matrix(frame, variant)), dtype=np.float64)
 
-    def predict(self, frame: pd.DataFrame) -> FloatArray:
+    def predict(self, frame: pd.DataFrame, variant: str = FULL) -> FloatArray:
         area = np.asarray(frame["area_sqm"], dtype=np.float64)
-        return np.asarray(np.exp(self.predict_log_pps(frame)) * area, dtype=np.float64)
+        return np.asarray(np.exp(self.predict_log_pps(frame, variant)) * area, dtype=np.float64)
 
-    def interval(self, frame: pd.DataFrame) -> tuple[FloatArray, FloatArray]:
-        """80% range from validation residual quantiles (see metadata["residual_quantiles"])."""
-        q = self.metadata["residual_quantiles"]
-        log_pps = self.predict_log_pps(frame)
+    def interval(self, frame: pd.DataFrame, variant: str = FULL) -> tuple[FloatArray, FloatArray]:
+        """80% range from each variant's validation residual quantiles (see metadata)."""
+        q = self.metadata["residual_quantiles"][variant]
+        log_pps = self.predict_log_pps(frame, variant)
         area = frame["area_sqm"].to_numpy(np.float64)
         return np.exp(log_pps + q["q10"]) * area, np.exp(log_pps + q["q90"]) * area
 
     # --- explanations ---------------------------------------------------------
 
-    def contributions(self, frame: pd.DataFrame) -> pd.DataFrame:
+    def contributions(self, frame: pd.DataFrame, variant: str = FULL) -> pd.DataFrame:
         """TreeSHAP contributions in log space, one column per feature plus "bias"."""
-        x = self.matrix(frame)
-        raw = np.asarray(self.booster.predict(x, pred_contrib=True), dtype=np.float64)
-        return pd.DataFrame(raw, columns=[*features.FEATURES, "bias"], index=frame.index)
+        x = self.matrix(frame, variant)
+        raw = np.asarray(self.boosters[variant].predict(x, pred_contrib=True), dtype=np.float64)
+        return pd.DataFrame(raw, columns=[*VARIANT_FEATURES[variant], "bias"], index=frame.index)
 
-    def explain(self, frame: pd.DataFrame, top_k: int = 5) -> list[list[Factor]]:
-        x = self.matrix(frame)
-        contrib = self.contributions(frame)
-        out: list[list[Factor]] = []
+    def explain(
+        self, frame: pd.DataFrame, top_k: int = 5, variant: str = FULL
+    ) -> list[Explanation]:
+        x = self.matrix(frame, variant)
+        contrib = self.contributions(frame, variant)
+        names = list(VARIANT_FEATURES[variant])
+        out: list[Explanation] = []
         for idx in frame.index:
-            row = contrib.loc[idx, list(features.FEATURES)]
-            order = row.abs().sort_values(ascending=False).index[:top_k]
+            row = contrib.loc[idx, names]
+            order = row.abs().sort_values(ascending=False).index
             factors = []
-            for feat in order:
+            for feat in order[:top_k]:
                 raw_value = frame.loc[idx, "month" if feat == "month_index" else feat]
                 value = _display_value(str(feat), raw_value, x.loc[idx, feat])
                 c = float(row[feat])
                 factors.append(Factor(str(feat), value, round((math.exp(c) - 1) * 100, 1), c))
-            out.append(factors)
+            out.append(Explanation(factors, float(row[order[top_k:]].sum())))
         return out
 
-    def base_per_sqm(self) -> float:
+    def base_per_sqm(self, variant: str = FULL) -> float:
         """Price per sqm before any feature effect: exp of the TreeSHAP bias term."""
-        return float(self.metadata["base_per_sqm"])
+        return float(self.metadata["base_per_sqm"][variant])
 
     # --- persistence ----------------------------------------------------------
 
     def save(self, directory: Path) -> None:
         directory.mkdir(parents=True, exist_ok=True)
-        self.booster.save_model(str(directory / MODEL_FILE))
+        for variant, name in MODEL_FILES.items():
+            self.boosters[variant].save_model(str(directory / name))
         (directory / SPEC_FILE).write_text(
             json.dumps(self.spec.to_dict(), ensure_ascii=False, indent=1), encoding="utf-8"
         )
@@ -192,15 +220,19 @@ class PriceModel:
 
     @classmethod
     def load(cls, directory: Path) -> PriceModel:
-        missing = [f for f in (MODEL_FILE, SPEC_FILE, META_FILE) if not (directory / f).exists()]
+        needed = [*MODEL_FILES.values(), SPEC_FILE, META_FILE]
+        missing = [f for f in needed if not (directory / f).exists()]
         if missing:
             raise FileNotFoundError(
                 f"model directory {directory} is missing {missing}; train one with "
                 "`dxb-prices train` (real data) or `dxb-prices train-fixture` (synthetic)"
             )
-        booster = lgb.Booster(model_file=str(directory / MODEL_FILE))
+        boosters = {
+            variant: lgb.Booster(model_file=str(directory / name))
+            for variant, name in MODEL_FILES.items()
+        }
         spec = FeatureSpec.from_dict(
             json.loads((directory / SPEC_FILE).read_text(encoding="utf-8"))
         )
         metadata = json.loads((directory / META_FILE).read_text(encoding="utf-8"))
-        return cls(booster, spec, metadata)
+        return cls(boosters, spec, metadata)
