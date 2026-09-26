@@ -112,7 +112,6 @@ class FeatureRules:
     # anything rarer (or unseen) is mapped to OTHER.
     min_rows_community: int = 30
     min_rows_project: int = 40
-    min_rows_master_project: int = 30
     min_rows_poi: int = 30
 
 

@@ -11,9 +11,7 @@ from dxb_prices import features
 from dxb_prices.config import FeatureRules
 from dxb_prices.features import MISSING, OTHER
 
-RULES = FeatureRules(
-    min_rows_community=3, min_rows_project=3, min_rows_master_project=3, min_rows_poi=3
-)
+RULES = FeatureRules(min_rows_community=3, min_rows_project=3, min_rows_poi=3)
 
 
 def frame(rows: Sequence[Mapping[str, object]]) -> pd.DataFrame:

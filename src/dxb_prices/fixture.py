@@ -25,9 +25,7 @@ from dxb_prices.config import FeatureRules, SegmentRules, Settings
 from dxb_prices.schema import EXPORT_COLUMNS
 
 SETTINGS = Settings(
-    features=FeatureRules(
-        min_rows_community=5, min_rows_project=5, min_rows_master_project=5, min_rows_poi=5
-    ),
+    features=FeatureRules(min_rows_community=5, min_rows_project=5, min_rows_poi=5),
     segments=SegmentRules(thin_community_rows=20),
 )
 
