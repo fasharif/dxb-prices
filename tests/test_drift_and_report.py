@@ -226,7 +226,7 @@ def test_readme_blocks_are_replaced_in_place() -> None:
     assert updated.startswith("# Title") and updated.endswith("More text\n")
     assert (
         "On the 2 sales of March 2026, which the models had not seen, the median error was 5.0% "
-        "when the building is known and 5.0% when it is not, against 10.0%"
+        "with the building named in the request and 5.0% without it, against 10.0%"
     ) in updated
     assert "| LightGBM, project given | 10 | 5.0% | 80.0% | 100,000 | -2.0% | 79.0% |" in updated
     assert "<summary>What each row means</summary>" in updated

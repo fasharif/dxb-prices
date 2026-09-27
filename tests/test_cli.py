@@ -154,9 +154,7 @@ def test_render_docs(tmp_path: Path) -> None:
         == 0
     )
     assert "LightGBM" in readme.read_text(encoding="utf-8")
-    assert "the median error was 5.0% when the building is known" in readme.read_text(
-        encoding="utf-8"
-    )
+    assert "the median error was 5.0% with the building named" in readme.read_text(encoding="utf-8")
     assert "Test month by community data" in card.read_text(encoding="utf-8")
     assert (tmp_path / "metrics.md").read_text(encoding="utf-8").startswith("# Training")
 

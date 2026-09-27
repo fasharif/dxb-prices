@@ -377,9 +377,9 @@ def headline(results: dict[str, Any]) -> str:
     return (
         f"On the {split['rows']['test']:,} sales of {_month_name(split['test_months'][-1])}, "
         f"which the models had not seen, the median error was {_pct(test['model']['mdape'])} "
-        f"when the building is known and {_pct(test['model_no_project']['mdape'])} when it is "
-        f"not, against {_pct(test['baseline']['mdape'])} for the community's median price per "
-        "square metre."
+        f"with the building named in the request and {_pct(test['model_no_project']['mdape'])} "
+        f"without it, against {_pct(test['baseline']['mdape'])} for the community's median "
+        "price per square metre."
     )
 
 
