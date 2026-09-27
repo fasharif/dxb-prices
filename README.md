@@ -3,11 +3,16 @@
 Estimates the sale price of a Dubai apartment from Dubai Land Department open
 data, and shows the factors behind each estimate.
 
+<!-- headline:start -->
+On the 9,480 sales of August 2026, which the models had not seen, the median error was 5.4% with the building named in the request and 6.5% without it, against 10.8% for the community's median price per square metre.
+<!-- headline:end -->
+
 [![CI](https://github.com/fasharif/dxb-prices/actions/workflows/ci.yml/badge.svg)](https://github.com/fasharif/dxb-prices/actions/workflows/ci.yml)
 
 ## Results
 
-Generated from `reports/metrics.json` by `dxb-prices render-docs`.
+Generated from `reports/metrics.json` by `dxb-prices render-docs`, like the
+sentence under the title.
 
 <!-- results:start -->
 Data: DLD open data transaction export, sales registered 2026-01-01 to 2026-08-31, downloaded 2026-09-25 (UTC) (147,845 raw rows in 8 monthly files).
@@ -16,22 +21,46 @@ Test month 2026-08 (9,480 sales, scored once, after the models were refitted on 
 
 | Estimator | Rows | MdAPE | Within 10% | MAE (AED) | Median error | In 80% range |
 |---|---:|---:|---:|---:|---:|---:|
-| LightGBM, project given | 9,480 | 5.6% | 69.8% | 209,340 | -0.1% | 79.1% |
+| LightGBM, project given | 9,480 | 5.4% | 69.6% | 209,530 | -0.2% | 79.0% |
 | LightGBM, no project (community-level model) | 9,480 | 6.5% | 63.7% | 238,899 | -0.1% | 81.1% |
 | Baseline: project median | 9,480 | 7.3% | 61.2% | 241,895 | +1.0% | n/a |
 | Baseline: community median | 9,480 | 10.8% | 46.9% | 327,789 | +0.8% | n/a |
-| LightGBM with DLD's recorded location labels (reference) | 9,480 | 5.4% | 70.8% | 198,400 | -0.1% | n/a |
+| LightGBM with DLD's recorded location labels (reference) | 9,480 | 5.2% | 70.4% | 198,826 | -0.1% | n/a |
 
-*Project given*: the request a user sends (community, project, size, rooms, off-plan or ready, date); the nearest metro, mall and landmark and the freehold flag are filled in from the training data, as the API does. Sales whose project had no training sales (1,193 of 9,480) get the community-level model, as they would from the API. *No project*: the same request without the project, answered by the community-level model, which was trained without the project and the location labels. *Project median*: the project's training median price per sqm when it has at least 5 training sales, otherwise the community's, times the size. *Community median*: the community's training median price per sqm times the size (the baseline the brief asks for). *Recorded location labels*: the full model given DLD's own nearest metro, mall, landmark and freehold flag for each sale, which an API user cannot supply. Median error below zero means estimates run low.
+<details>
+<summary>What each row means</summary>
 
-With the project, LightGBM beats both the community-median and the project-median baseline on all three test metrics. Without the project, the community-level model beats the community-median baseline on all three test metrics. Most of the gain over the community median comes from knowing the building: the project median alone moves MdAPE from 10.8% to 7.3%, and the model with the project reaches 5.6%. The 80% range contained 79.1% of test prices with the project and 81.1% without it (80% nominal).
+*Project given*: the request a user sends (community, project, size, rooms, off-plan or ready, date); the nearest metro, mall and landmark and the freehold flag are filled in from the training data, as the API does. Sales whose project had no training sales in its community, or none recorded (1,193 of 9,480), get the community-level model, as they would from the API. *No project*: the same request without the project, answered by the community-level model, which was trained without the project and the location labels. *Project median*: the project's training median price per sqm when it has at least 5 training sales, otherwise the community's, times the size. *Community median*: the community's training median price per sqm times the size (the baseline the brief asks for). *Recorded location labels*: the full model given DLD's own nearest metro, mall, landmark and freehold flag for each sale, which an API user cannot supply. Median error below zero means estimates run low. The API would have answered every test sale.
 
-Rolling-origin backtest over 5 test months (2026-04 to 2026-08, default settings, each month scored by models trained only on earlier months): MdAPE 5.4% to 6.9% with the project and 7.0% to 8.2% without it, against 7.0% to 7.6% for the project median and 10.8% to 12.3% for the community median.
+</details>
+
+With the project, LightGBM beats both the community-median and the project-median baseline on all three test metrics. Without the project, the community-level model beats the community-median baseline on all three test metrics. Most of the gain over the community median comes from knowing the building: the project median alone moves MdAPE from 10.8% to 7.3%, and the model with the project reaches 5.4%. The 80% range contained 79.0% of test prices with the project and 81.1% without it (80% nominal).
+
+Rolling-origin backtest over 5 test months (2026-04 to 2026-08, default settings, each month scored by models trained only on earlier months): MdAPE 5.2% to 6.9% with the project and 7.0% to 8.2% without it, against 7.0% to 7.6% for the project median and 10.8% to 12.3% for the community median.
+
+Simulated cold start (each community in turn cut to 10 training sales, models refitted): MdAPE 14.0% with the project and 16.0% without it, against 11.3% for the community median (with all the data: 5.4%, 6.5% and 10.8%). The API refuses a community without training sales; had it answered, MdAPE would have been 18.8%.
 
 The DLD page only offers dates in the current calendar year, so this 2026 snapshot cannot be downloaded again with this tool after 31 December 2026. The file sizes and SHA-256 checksums in [reports/metrics.md](reports/metrics.md) identify it.
 
 Environment: Python 3.12.14, LightGBM 4.7.0. Reproduce with `dxb-prices train`; the validation month, backtest and error analysis are in [reports/metrics.md](reports/metrics.md).
 <!-- results:end -->
+
+What the numbers show (details in [reports/metrics.md](reports/metrics.md)
+and the [model card](docs/model-card.md)):
+
+- **Knowing the building is most of the gain.** The project median alone
+  closes most of the gap between the community median and the model.
+- **The model is strongest where it knows the building well.** For buildings
+  with 40 or more training sales its error is far below both baselines'. For
+  rare buildings, new buildings and communities with little data, a simple
+  median of past sales did as well or better, so the API warns there and
+  refuses communities it has never seen.
+- **Ready units are harder.** Resale of ready units has more than twice the
+  median error of off-plan sales, most of which are priced from developers'
+  lists.
+- **The market moves.** The test month differed from the training months in
+  size, price per square metre and community mix, which is why the retraining
+  workflow runs monthly.
 
 A real response from the API, using the model trained in that run
 (`python scripts/readme_sample.py` regenerates it):
@@ -43,15 +72,17 @@ Request, `POST /estimate`:
 {"community": "Business Bay", "project": "Peninsula Three", "size_sqm": 65, "rooms": "1", "off_plan": false, "transaction_date": "2026-08-15"}
 ```
 
-Response:
+Response, without `community_median_per_sqm_aed` (the community's median price per
+square metre over the training months, which this repository does not
+publish; see [docs/data.md](docs/data.md#terms-of-use)):
 
 ```json
 {
-  "estimate_aed": 1744000,
-  "estimate_per_sqm_aed": 26830,
+  "estimate_aed": 1750000,
+  "estimate_per_sqm_aed": 26930,
   "range_80_aed": {
-    "low": 1497000,
-    "high": 1965000
+    "low": 1503000,
+    "high": 1972000
   },
   "community": "Business Bay",
   "project": "Peninsula Three",
@@ -61,39 +92,38 @@ Response:
       "feature": "community",
       "label": "Community",
       "value": "Business Bay",
-      "effect_pct": 35.6
+      "effect_pct": 33.6
     },
     {
       "feature": "project",
       "label": "Project",
       "value": "Peninsula Three",
-      "effect_pct": 12.8
+      "effect_pct": 14.4
     },
     {
       "feature": "is_off_plan",
       "label": "Off-plan",
       "value": "no",
-      "effect_pct": -4.4
+      "effect_pct": -3.7
     },
     {
       "feature": "month_index",
       "label": "Month of sale",
       "value": "2026-08",
-      "effect_pct": -2.2
+      "effect_pct": -2.3
     },
     {
-      "feature": "nearest_landmark",
-      "label": "Nearest landmark",
-      "value": "Downtown Dubai",
-      "effect_pct": -1.4
+      "feature": "rooms",
+      "label": "Rooms",
+      "value": "1",
+      "effect_pct": -1.0
     }
   ],
-  "other_factors_effect_pct": -0.8,
+  "other_factors_effect_pct": -1.2,
   "base_per_sqm_aed": 19160,
-  "community_median_per_sqm_aed": 26320,
   "warnings": [],
   "model": {
-    "version": "2026-08-20260926020518",
+    "version": "2026-08-20260927202431",
     "trained_on_months": [
       "2026-01",
       "2026-02",
@@ -112,7 +142,7 @@ The same request without the project
 (`{"community": "Business Bay", "size_sqm": 65, "rooms": "1", "off_plan": false, "transaction_date": "2026-08-15"}`) is answered by the
 community-level model: AED 1,359,000, 80% range AED 1,142,000 to 1,636,000, with this warning:
 
-> No project given, so the estimate comes from the community-level model, which does not know the building. On the 2026-08 test month its median error was 6.5%, against 5.6% with the project.
+> No project given, so the estimate comes from the community-level model, which does not know the building. On the 2026-08 test month its median error was 6.5%, against 5.4% with the project.
 <!-- sample:end -->
 
 What drives the estimates of the model that knows the project (mean absolute
@@ -145,19 +175,23 @@ would answer, and compared with the simple rules of thumb it has to beat.
   training data. Both predict log price per square metre.
 - **Scored as served.** Each test sale is sent through the same code the API
   uses, with and without its project, so the published accuracy is what a user
-  gets.
+  gets. The report also counts the test sales the API would refuse.
 - **Two baselines.** The community's median price per square metre (the one the
   brief asks for) and the project's median, both from the training months only.
 - **Metrics that matter for pricing:** median absolute percentage error, share
   of estimates within 10%, mean absolute error and median signed error, overall
-  and by off-plan or ready, price band, rooms and how much data a community has,
-  plus a rolling-origin backtest over five months.
+  and by off-plan or ready, price band (by the recorded price and by the
+  estimate), rooms, and how much data the community and the building have.
+- **Thin data, measured.** A rolling-origin backtest over five months, and a
+  simulated cold start that refits the models with each community cut to 10
+  training sales, or none, and scores its test sales.
 - **Explanations.** SHAP values for every estimate (top five factors and the
   combined rest) and a global importance chart.
 - **Tracking and monitoring.** MLflow runs in a local file store; an Evidently
   drift report compares the newest month with the training months.
 - **Serving.** FastAPI `POST /estimate` and `GET /projects` with pydantic
-  validation, in Docker; a Streamlit page that calls it.
+  validation and warnings for weak inputs, in Docker; a Streamlit page that
+  calls it.
 - **Automation.** CI for lint, types, tests, the lockfile and a Docker smoke
   test; a monthly retraining workflow that uploads the metrics report and never
   deploys.
@@ -232,13 +266,17 @@ but the whole path works.
 |---|---|
 | `dxb-prices download [--months 2026-03 ...] [--force]` | Fetch monthly exports into the cache; `--source dubai-data-sample` fetches the data.dubai sample instead. |
 | `dxb-prices check-data` | Exit 0 if there are enough final months for a temporal split, 3 if not. |
-| `dxb-prices train [--no-search] [--no-backtest] [--no-tracking]` | Full training and evaluation; writes `artifacts/model/` and `reports/`. |
+| `dxb-prices train [--no-search] [--no-backtest] [--no-cold-start] [--no-tracking]` | Full training and evaluation; writes `artifacts/model/` and `reports/`. |
 | `dxb-prices train-fixture` | Small model on the synthetic fixture. |
 | `dxb-prices render-docs` | Re-render `reports/metrics.md` and the results blocks in this README and the model card from `reports/metrics.json`. |
 | `dxb-prices serve` | Run the API without Docker on port 8000. |
 | `python scripts/readme_sample.py` | Regenerate the sample response above from the trained model. |
 | `python scripts/data_audit.py [--dubai-data-sample]` | Re-check the data facts quoted in the docs. |
 | `MLFLOW_ALLOW_FILE_STORE=true MLFLOW_DISABLE_TELEMETRY=true DO_NOT_TRACK=true uv run mlflow ui --backend-store-uri ./mlruns` | Browse the tracked runs. |
+
+When an input is missing or unusable (no downloaded months, a malformed month,
+a response that is not the expected CSV), a command prints one line saying what
+to do and exits with status 1.
 
 ### API
 
@@ -252,12 +290,15 @@ but the whole path works.
 `community` accepts DLD area names in English or Arabic, in any case. `rooms`
 is `studio`, `1` to `4`, `5+` or `penthouse`. `project` is optional but makes
 the estimate much more accurate (see Results); `GET /projects?community=...`
-lists the projects the model knows in a community. The response says which
-model answered (`model_variant`: `full` or `community`), gives the five largest
-factors and the combined effect of the rest, and carries warnings for weak
-inputs. Unknown communities return 404 with suggestions; invalid input returns
-422. Also `GET /health`, `GET /model` and `GET /communities`. Interactive docs
-at `/docs`.
+lists the projects with training sales in a community. A project is looked up
+within the community given, because a few names belong to different buildings
+in different communities. The response says which model answered
+(`model_variant`: `full` or `community`), gives the five largest factors and
+the combined effect of the rest, and carries warnings for weak inputs: no
+project, a project the model has too few sales to know, a thin community or a
+date far from the training months. Unknown communities return 404 with
+suggestions; invalid input returns 422. Also `GET /health`, `GET /model` and
+`GET /communities`. Interactive docs at `/docs`.
 
 ## Configuration
 
@@ -299,11 +340,13 @@ cover the downloader against a mocked HTTP server (cache, checksums, retries,
 HTML error pages), each cleaning rule, name normalisation in both languages,
 feature fitting on training rows only, the temporal split and trimming, both
 baselines, the metrics, SHAP additivity and agreement with the `shap` library,
-the serving rows and the routing between the two models, the full pipeline with
-the backtest, MLflow and Evidently, the command line (including `train` end to
-end and the January case of `download`), the telemetry switches, the API
-(validation, suggestions, warnings, `/projects`, and that its answers equal the
-estimates the evaluation scores) and the Streamlit page against a live API.
+the serving rows and the routing between the two models (including one project
+name in two communities), the full pipeline with the backtest and the cold
+start, MLflow and Evidently, the command line (including `train` end to end,
+the January case of `download` and one-line errors), the telemetry switches,
+the API (validation, suggestions, warnings, `/projects`, and that its answers
+equal the estimates the evaluation scores), the Streamlit page against a live
+API, and that the README and model card agree with `reports/metrics.json`.
 
 ## Folder structure
 
@@ -325,6 +368,7 @@ src/dxb_prices/
   tracking.py       MLflow helpers
   telemetry.py      switches off MLflow and Evidently telemetry
   report.py         Markdown rendering of results
+  errors.py         errors the command line reports without a traceback
   cli.py            dxb-prices command
   fixture.py        synthetic data generator
   api/              FastAPI app, schemas, estimator
@@ -342,10 +386,11 @@ See [docs/decisions.md](docs/decisions.md). In short: data comes from the DLD
 export month by month and is never committed; the models predict log price per
 square metre; selection uses the validation month and the test month is scored
 once, the way the API answers; a community-level model serves requests without
-a known project; only large communities' training rows are percentile-trimmed;
-high-cardinality fields use LightGBM categoricals with a minimum count; the API
-explains estimates with LightGBM's own TreeSHAP. The
-[model card](docs/model-card.md) covers intended use and limitations.
+a known project; a project is identified by its community and its name; only
+large communities' training rows are percentile-trimmed; high-cardinality fields
+use LightGBM categoricals with a minimum count; thin data is measured with a
+simulated cold start; the API explains estimates with LightGBM's own TreeSHAP.
+The [model card](docs/model-card.md) covers intended use and limitations.
 
 ## Limitations and roadmap
 
@@ -359,16 +404,26 @@ explains estimates with LightGBM's own TreeSHAP. The
 - **Without the project, estimates are less accurate.** The community-level
   model beats both baselines but is clearly behind the model that knows the
   building (see Results), and its 80% range is wider.
-- **Harder segments.** Errors are larger for ready (resale) units and for sales
-  above AED 5 million, and the 80% range has the same relative width for every
-  estimate, so it is too narrow there (see the model card). Segment-aware
-  ranges, for example with quantile regression, are the next step.
+- **Little data, weak estimates.** For rare or new buildings and for
+  communities with few training sales, the project or community median did
+  better than the model (error analysis and cold start in
+  [reports/metrics.md](reports/metrics.md)). The next step is to fall back to,
+  or blend with, those medians there, with the rule chosen on the validation
+  month rather than on the published test results.
+- **Harder segments.** Errors are larger for ready (resale) units and for the
+  most expensive homes, whether banded by the recorded price or by the
+  estimate, and the 80% range has the same relative width for every estimate,
+  so it is too narrow there (see the model card). Segment-aware ranges, for
+  example with quantile regression, are a further step.
 - **Missing unit details.** Floor, view and condition are not in the open data.
 - **Not yet run on GitHub.** The CI and retraining workflows are written and
   linted with actionlint, and every CI command (lint, types, lockfile, tests,
   fixture check, image builds and the API smoke test) was run locally in the
   `dev` container. Neither workflow has run on GitHub yet; whether the DLD
-  export answers requests from GitHub's runners is untested.
+  export answers requests from GitHub's runners is untested. GitHub also
+  switches off scheduled workflows in a public repository after 60 days
+  without activity; after that the monthly retrain has to be re-enabled or run
+  by hand (`workflow_dispatch`).
 - No performance or latency figures are published yet; they need a measured
   run on a quiet machine.
 
@@ -378,6 +433,12 @@ On Windows, a repository in a deeply nested folder can exceed the path length
 limit for compiled packages inside `.venv`. The `dev` image avoids that:
 `docker build --target dev -t dxb-prices-dev .`, then run any command with
 `docker run --rm -v "$PWD:/app" -w /app dxb-prices-dev uv run --frozen --all-extras <command>`.
+
+On Docker Desktop for Windows, the API container, which runs as a non-root
+user, can fail to read a model bind-mounted from some folders (seen under
+`AppData\Roaming`): `/health` then answers 503 with an `Input/output error`
+in its detail. Copy the model directory to an ordinary folder and point
+`DXB_MODEL_DIR_HOST` at the copy.
 
 ## Data and licence
 

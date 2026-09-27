@@ -12,29 +12,29 @@ Test month 2026-08 (9,480 sales, scored once, after the models were refitted on 
 
 | Estimator | Rows | MdAPE | Within 10% | MAE (AED) | Median error | In 80% range |
 |---|---:|---:|---:|---:|---:|---:|
-| LightGBM, project given | 9,480 | 5.6% | 69.8% | 209,340 | -0.1% | 79.1% |
+| LightGBM, project given | 9,480 | 5.4% | 69.6% | 209,530 | -0.2% | 79.0% |
 | LightGBM, no project (community-level model) | 9,480 | 6.5% | 63.7% | 238,899 | -0.1% | 81.1% |
 | Baseline: project median | 9,480 | 7.3% | 61.2% | 241,895 | +1.0% | n/a |
 | Baseline: community median | 9,480 | 10.8% | 46.9% | 327,789 | +0.8% | n/a |
-| LightGBM with DLD's recorded location labels (reference) | 9,480 | 5.4% | 70.8% | 198,400 | -0.1% | n/a |
+| LightGBM with DLD's recorded location labels (reference) | 9,480 | 5.2% | 70.4% | 198,826 | -0.1% | n/a |
 
-*Project given*: the request a user sends (community, project, size, rooms, off-plan or ready, date); the nearest metro, mall and landmark and the freehold flag are filled in from the training data, as the API does. Sales whose project had no training sales (1,193 of 9,480) get the community-level model, as they would from the API. *No project*: the same request without the project, answered by the community-level model, which was trained without the project and the location labels. *Project median*: the project's training median price per sqm when it has at least 5 training sales, otherwise the community's, times the size. *Community median*: the community's training median price per sqm times the size (the baseline the brief asks for). *Recorded location labels*: the full model given DLD's own nearest metro, mall, landmark and freehold flag for each sale, which an API user cannot supply. Median error below zero means estimates run low.
+*Project given*: the request a user sends (community, project, size, rooms, off-plan or ready, date); the nearest metro, mall and landmark and the freehold flag are filled in from the training data, as the API does. Sales whose project had no training sales in its community, or none recorded (1,193 of 9,480), get the community-level model, as they would from the API. *No project*: the same request without the project, answered by the community-level model, which was trained without the project and the location labels. *Project median*: the project's training median price per sqm when it has at least 5 training sales, otherwise the community's, times the size. *Community median*: the community's training median price per sqm times the size (the baseline the brief asks for). *Recorded location labels*: the full model given DLD's own nearest metro, mall, landmark and freehold flag for each sale, which an API user cannot supply. Median error below zero means estimates run low. The API would have answered every test sale.
 
-With the project, LightGBM beats both the community-median and the project-median baseline on all three test metrics. Without the project, the community-level model beats the community-median baseline on all three test metrics. Most of the gain over the community median comes from knowing the building: the project median alone moves MdAPE from 10.8% to 7.3%, and the model with the project reaches 5.6%. The 80% range contained 79.1% of test prices with the project and 81.1% without it (80% nominal).
+With the project, LightGBM beats both the community-median and the project-median baseline on all three test metrics. Without the project, the community-level model beats the community-median baseline on all three test metrics. Most of the gain over the community median comes from knowing the building: the project median alone moves MdAPE from 10.8% to 7.3%, and the model with the project reaches 5.4%. The 80% range contained 79.0% of test prices with the project and 81.1% without it (80% nominal).
 
 MdAPE is the median absolute percentage error. "Within 10%" is the share of estimates within 10% of the recorded price. MAE is the mean absolute error in dirhams. Median error is the median of (estimate - price) / price.
 
 ## Rolling-origin backtest
 
-Rolling-origin backtest over 5 test months (2026-04 to 2026-08, default settings, each month scored by models trained only on earlier months): MdAPE 5.4% to 6.9% with the project and 7.0% to 8.2% without it, against 7.0% to 7.6% for the project median and 10.8% to 12.3% for the community median.
+Rolling-origin backtest over 5 test months (2026-04 to 2026-08, default settings, each month scored by models trained only on earlier months): MdAPE 5.2% to 6.9% with the project and 7.0% to 8.2% without it, against 7.0% to 7.6% for the project median and 10.8% to 12.3% for the community median.
 
 | Test month | Training months | Rows | MdAPE with project | MdAPE no project | Project median | Community median | Within 10% with project |
 |---|---|---:|---:|---:|---:|---:|---:|
-| 2026-04 | 2026-01 to 2026-03 | 11,227 | 5.4% | 7.0% | 7.1% | 12.3% | 69.2% |
-| 2026-05 | 2026-01 to 2026-04 | 8,649 | 6.9% | 8.2% | 7.6% | 11.9% | 62.0% |
-| 2026-06 | 2026-01 to 2026-05 | 11,592 | 6.2% | 7.2% | 7.0% | 11.1% | 67.3% |
-| 2026-07 | 2026-01 to 2026-06 | 11,274 | 5.9% | 7.8% | 7.4% | 11.9% | 65.9% |
-| 2026-08 | 2026-01 to 2026-07 | 9,480 | 6.0% | 7.1% | 7.3% | 10.8% | 68.5% |
+| 2026-04 | 2026-01 to 2026-03 | 11,227 | 5.2% | 7.0% | 7.1% | 12.3% | 69.2% |
+| 2026-05 | 2026-01 to 2026-04 | 8,649 | 6.9% | 8.2% | 7.6% | 11.9% | 61.5% |
+| 2026-06 | 2026-01 to 2026-05 | 11,592 | 6.3% | 7.2% | 7.0% | 11.1% | 67.0% |
+| 2026-07 | 2026-01 to 2026-06 | 11,274 | 6.0% | 7.8% | 7.4% | 11.9% | 65.5% |
+| 2026-08 | 2026-01 to 2026-07 | 9,480 | 6.1% | 7.1% | 7.3% | 10.8% | 68.0% |
 
 ## Validation month
 
@@ -42,11 +42,11 @@ Rolling-origin backtest over 5 test months (2026-04 to 2026-08, default settings
 
 | Estimator | Rows | MdAPE | Within 10% | MAE (AED) | Median error | In 80% range |
 |---|---:|---:|---:|---:|---:|---:|
-| LightGBM, project given | 11,274 | 5.5% | 67.1% | 210,871 | -0.1% | n/a |
+| LightGBM, project given | 11,274 | 5.5% | 67.0% | 211,349 | -0.1% | n/a |
 | LightGBM, no project (community-level model) | 11,274 | 6.9% | 61.9% | 233,337 | -0.3% | n/a |
 | Baseline: project median | 11,274 | 7.4% | 59.5% | 239,160 | +1.3% | n/a |
 | Baseline: community median | 11,274 | 11.9% | 44.4% | 322,626 | +0.8% | n/a |
-| LightGBM with DLD's recorded location labels (reference) | 11,274 | 5.3% | 68.2% | 205,880 | -0.1% | n/a |
+| LightGBM with DLD's recorded location labels (reference) | 11,274 | 5.3% | 68.1% | 204,376 | -0.1% | n/a |
 
 ## Split
 
@@ -55,7 +55,7 @@ Rolling-origin backtest over 5 test months (2026-04 to 2026-08, default settings
 - Final fit on train + validation: 77,637 rows
 - Test: 2026-08 (9,480 rows, not trimmed)
 
-Chosen settings for the full model: `regression_l1` loss, 127 leaves, min 60 rows per leaf, 1361 boosting rounds (best of 12 settings on the validation month). The community-level model uses the same settings with 1543 rounds (early stopping on the validation month).
+Chosen settings for the full model: `regression_l1` loss, 127 leaves, min 60 rows per leaf, 1635 boosting rounds (best of 12 settings on the validation month). The community-level model uses the same settings with 1543 rounds (early stopping on the validation month).
 
 ## Data snapshot
 
@@ -96,47 +96,92 @@ MdAPE of each estimator per segment, inputs as in the headline.
 
 | Segment | Rows | MdAPE with project | MdAPE no project | Project median | Community median | Within 10% with project | In 80% range with project |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| off-plan | 7,093 | 4.5% | 5.3% | 6.1% | 9.2% | 76.5% | 84.4% |
-| ready | 2,387 | 10.1% | 11.2% | 11.5% | 20.4% | 49.8% | 63.4% |
+| off-plan | 7,093 | 4.4% | 5.3% | 6.1% | 9.2% | 76.2% | 84.2% |
+| ready | 2,387 | 10.0% | 11.2% | 11.5% | 20.4% | 50.1% | 63.5% |
 
 ### By price band
 
+Bands by the recorded sale price. Banding by the outcome moves sales that sold above their estimate into higher bands and can make the top band look harder than it is, so the next table bands by the estimate instead.
+
 | Segment | Rows | MdAPE with project | MdAPE no project | Project median | Community median | Within 10% with project | In 80% range with project |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| under 1.0M AED | 4,295 | 4.7% | 5.6% | 6.3% | 10.7% | 73.3% | 83.2% |
-| 1.0M-2.0M AED | 3,273 | 5.6% | 6.4% | 8.0% | 10.4% | 71.3% | 79.4% |
-| 2.0M-5.0M AED | 1,647 | 7.6% | 8.6% | 8.1% | 11.6% | 60.6% | 70.7% |
-| 5.0M AED and over | 265 | 9.4% | 12.4% | 10.6% | 16.2% | 51.3% | 60.0% |
+| under 1.0M AED | 4,295 | 4.7% | 5.6% | 6.3% | 10.7% | 73.3% | 83.1% |
+| 1.0M-2.0M AED | 3,273 | 5.4% | 6.4% | 8.0% | 10.4% | 70.9% | 79.6% |
+| 2.0M-5.0M AED | 1,647 | 7.6% | 8.6% | 8.1% | 11.6% | 60.4% | 70.4% |
+| 5.0M AED and over | 265 | 8.9% | 12.4% | 10.6% | 16.2% | 50.6% | 58.5% |
+
+### By estimated price band
+
+Bands by the estimate with the project, which is what a user sees before a sale.
+
+| Segment | Rows | MdAPE with project | MdAPE no project | Project median | Community median | Within 10% with project | In 80% range with project |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| under 1.0M AED | 4,141 | 4.4% | 5.3% | 5.9% | 9.9% | 75.1% | 84.7% |
+| 1.0M-2.0M AED | 3,619 | 6.0% | 7.1% | 8.9% | 11.3% | 67.1% | 75.8% |
+| 2.0M-5.0M AED | 1,458 | 6.7% | 7.9% | 7.9% | 11.6% | 63.9% | 74.6% |
+| 5.0M AED and over | 262 | 9.6% | 12.5% | 10.8% | 17.8% | 50.0% | 58.0% |
 
 ### By community data
 
 | Segment | Rows | MdAPE with project | MdAPE no project | Project median | Community median | Within 10% with project | In 80% range with project |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| thin (1-49 training sales) | 145 | 2.9% | 2.9% | 2.9% | 2.8% | 84.8% | 89.7% |
-| established (50+ training sales) | 9,335 | 5.6% | 6.6% | 7.4% | 11.0% | 69.5% | 78.9% |
+| thin (1-49 training sales) | 145 | 2.9% | 2.9% | 2.9% | 2.8% | 86.2% | 91.0% |
+| established (50+ training sales) | 9,335 | 5.5% | 6.6% | 7.4% | 11.0% | 69.4% | 78.8% |
 
-What these segments contain (a segment dominated by one project or made of a few unusual sales says little about communities in general):
+What these segments contain (a segment dominated by one project or made of a few unusual sales says little about the segment in general):
 
-| Segment | Rows | Communities | Largest single project | Median price (AED) |
-|---|---:|---:|---:|---:|
-| thin (1-49 training sales) | 145 | 18 | 70.3% of rows | 1,042,046 |
-| established (50+ training sales) | 9,335 | 93 | 5.8% of rows | 1,093,950 |
+| Segment | Rows | Communities | Largest single project |
+|---|---:|---:|---:|
+| thin (1-49 training sales) | 145 | 18 | 70.3% of rows |
+| established (50+ training sales) | 9,335 | 93 | 5.8% of rows |
+
+### By project data
+
+How well the full model knows each sale's building. A project needs a minimum number of training sales in its community for a level of its own; rarer projects share one level, and a project with no training sales in its community (or none recorded) goes to the community-level model, so its two model columns are equal.
+
+| Segment | Rows | MdAPE with project | MdAPE no project | Project median | Community median | Within 10% with project | In 80% range with project |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| own level (40+ training sales) | 5,374 | 3.7% | 4.7% | 6.1% | 9.3% | 83.5% | 90.5% |
+| grouped as other (1-39 training sales) | 2,913 | 9.5% | 10.5% | 8.3% | 15.1% | 52.0% | 60.7% |
+| new (no training sales in its community) | 639 | 9.9% | 9.9% | 8.7% | 8.7% | 51.3% | 74.2% |
+| not recorded in the sale | 554 | 10.3% | 10.3% | 23.0% | 23.0% | 48.2% | 69.5% |
+
+What these segments contain (a segment dominated by one project or made of a few unusual sales says little about the segment in general):
+
+| Segment | Rows | Communities | Largest single project |
+|---|---:|---:|---:|
+| own level (40+ training sales) | 5,374 | 72 | 7.8% of rows |
+| grouped as other (1-39 training sales) | 2,913 | 95 | 8.9% of rows |
+| new (no training sales in its community) | 639 | 22 | 28.3% of rows |
+| not recorded in the sale | 554 | 40 | 100.0% of rows |
 
 ### By rooms
 
 | Segment | Rows | MdAPE with project | MdAPE no project | Project median | Community median | Within 10% with project | In 80% range with project |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| studio | 3,544 | 4.0% | 4.8% | 5.3% | 8.7% | 78.6% | 88.0% |
-| 1 | 3,551 | 6.0% | 7.1% | 8.2% | 11.2% | 67.6% | 76.1% |
-| 2 | 1,870 | 7.2% | 8.1% | 10.2% | 13.9% | 61.1% | 71.6% |
-| 3 | 448 | 8.6% | 10.8% | 9.9% | 14.9% | 57.1% | 67.4% |
-| 4 | 56 | 12.2% | 15.1% | 13.8% | 17.5% | 41.1% | 55.4% |
-| 5+ | 6 | 13.0% | 35.6% | 18.9% | 27.7% | 50.0% | 50.0% |
-| penthouse | 5 | 12.8% | 10.2% | 8.6% | 29.1% | 40.0% | 40.0% |
+| studio | 3,544 | 4.0% | 4.8% | 5.3% | 8.7% | 78.3% | 87.8% |
+| 1 | 3,551 | 5.9% | 7.1% | 8.2% | 11.2% | 67.5% | 76.4% |
+| 2 | 1,870 | 7.1% | 8.1% | 10.2% | 13.9% | 61.6% | 71.1% |
+| 3 | 448 | 8.3% | 10.8% | 9.9% | 14.9% | 55.6% | 67.2% |
+| 4 | 56 | 10.5% | 15.1% | 13.8% | 17.5% | 44.6% | 55.4% |
+| 5+ | 6 | 17.0% | 35.6% | 18.9% | 27.7% | 16.7% | 16.7% |
+| penthouse | 5 | 11.1% | 10.2% | 8.6% | 29.1% | 40.0% | 60.0% |
+
+## Cold start: communities with little or no data
+
+The 111 communities of the test month were split at random into 5 groups. For each group, both models and both baselines were refitted on the final training rows with that group's communities cut to the stated number of randomly chosen sales (every other community kept all of its sales), with the chosen settings and 80% ranges, and the group's test sales were scored as served. A request for a community without training sales gets a 404 from the API; the last row shows what the models would have answered.
+
+| Training sales kept per community | Rows | MdAPE with project | MdAPE no project | Project median | Community median | Within 10% with project | In 80% range with project |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| all (the published models) | 9,480 | 5.4% | 6.5% | 7.3% | 10.8% | 69.6% | 79.0% |
+| 10 | 9,480 | 14.0% | 16.0% | 11.3% | 11.3% | 39.2% | 53.2% |
+| 0: a new community (the API refuses these) | 9,480 | 18.8% | 18.8% | 16.4% | 16.4% | 31.5% | 46.8% |
+
+Simulated cold start (each community in turn cut to 10 training sales, models refitted): MdAPE 14.0% with the project and 16.0% without it, against 11.3% for the community median (with all the data: 5.4%, 6.5% and 10.8%). The API refuses a community without training sales; had it answered, MdAPE would have been 18.8%.
 
 ## Estimate range
 
-The API returns an 80% range: the 10th and 90th percentiles of each model's residuals on the validation month, applied around the estimate (-14.2% to +12.7% for the full model, -16.0% to +20.4% for the community-level model). It has the same relative width for every estimate. The 80% range contained 79.1% of test prices with the project and 81.1% without it (80% nominal).
+The API returns an 80% range: the 10th and 90th percentiles of each model's residuals on the validation month, applied around the estimate (-14.1% to +12.7% for the full model, -16.0% to +20.4% for the community-level model). It has the same relative width for every estimate. The 80% range contained 79.0% of test prices with the project and 81.1% without it (80% nominal).
 
 ## What drives the estimates (SHAP)
 
@@ -144,17 +189,17 @@ Mean absolute SHAP value per feature of the full model on 5,000 test sales whose
 
 | Feature | Mean abs SHAP | Share |
 |---|---:|---:|
-| Community | 0.1976 | 42.5% |
-| Project | 0.0921 | 19.8% |
-| Size (sqm) | 0.0776 | 16.7% |
-| Off-plan or ready | 0.0355 | 7.6% |
-| Rooms | 0.0217 | 4.7% |
-| Nearest metro | 0.0153 | 3.3% |
-| Month of sale | 0.0121 | 2.6% |
-| Nearest landmark | 0.0075 | 1.6% |
-| Nearest mall | 0.0020 | 0.4% |
+| Community | 0.1985 | 42.2% |
+| Project | 0.0939 | 20.0% |
+| Size (sqm) | 0.0791 | 16.8% |
+| Off-plan or ready | 0.0343 | 7.3% |
+| Rooms | 0.0238 | 5.1% |
+| Nearest metro | 0.0155 | 3.3% |
+| Month of sale | 0.0125 | 2.7% |
+| Nearest landmark | 0.0074 | 1.6% |
 | Freehold | 0.0020 | 0.4% |
 | Flat or hotel apartment | 0.0019 | 0.4% |
+| Nearest mall | 0.0019 | 0.4% |
 
 ![Mean absolute SHAP value per feature](shap_importance.png)
 

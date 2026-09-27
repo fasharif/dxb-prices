@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-26T02:05:18+00:00",
+  "generated_at": "2026-09-27T20:24:30+00:00",
   "command": "dxb-prices train",
   "environment": {
     "python": "3.12.14",
@@ -199,7 +199,7 @@
       "final_fit": 77637
     },
     "final_fit_communities": 121,
-    "final_fit_projects": 2172,
+    "final_fit_projects": 2176,
     "communities_with_own_level": 99,
     "projects_with_own_level": 390
   },
@@ -210,12 +210,12 @@
         "num_leaves": 31,
         "min_data_in_leaf": 20
       },
-      "best_iteration": 1563,
+      "best_iteration": 1938,
       "rows": 11274,
-      "mdape": 0.060432010789540525,
-      "within_10pct": 0.6687954585772574,
-      "mae_aed": 209919.9403007816,
-      "median_error": -0.003609025475731081
+      "mdape": 0.058476450692423965,
+      "within_10pct": 0.6749157353202058,
+      "mae_aed": 209661.36746186556,
+      "median_error": -0.0032353564700147797
     },
     {
       "params": {
@@ -223,12 +223,12 @@
         "num_leaves": 31,
         "min_data_in_leaf": 60
       },
-      "best_iteration": 1234,
+      "best_iteration": 1123,
       "rows": 11274,
-      "mdape": 0.061357166460344656,
-      "within_10pct": 0.6617881852048962,
-      "mae_aed": 207947.62852825524,
-      "median_error": -0.0037055468102193713
+      "mdape": 0.06117567745580395,
+      "within_10pct": 0.6681745609366685,
+      "mae_aed": 206452.91038414926,
+      "median_error": -0.0035247014332666507
     },
     {
       "params": {
@@ -236,12 +236,12 @@
         "num_leaves": 127,
         "min_data_in_leaf": 20
       },
-      "best_iteration": 538,
+      "best_iteration": 739,
       "rows": 11274,
-      "mdape": 0.059030519744598976,
-      "within_10pct": 0.6766897285790314,
-      "mae_aed": 206355.54739078684,
-      "median_error": -0.0028573561354370528
+      "mdape": 0.05927055626923336,
+      "within_10pct": 0.6769558275678552,
+      "mae_aed": 205889.1136414155,
+      "median_error": -0.003812550546918678
     },
     {
       "params": {
@@ -249,12 +249,12 @@
         "num_leaves": 127,
         "min_data_in_leaf": 60
       },
-      "best_iteration": 666,
+      "best_iteration": 668,
       "rows": 11274,
-      "mdape": 0.05871178389150575,
-      "within_10pct": 0.6754479332978535,
-      "mae_aed": 206117.1306147116,
-      "median_error": -0.0033841950146944245
+      "mdape": 0.059132798081888024,
+      "within_10pct": 0.6714564484654958,
+      "mae_aed": 205976.47519390273,
+      "median_error": -0.0030105758070970183
     },
     {
       "params": {
@@ -263,26 +263,26 @@
         "min_data_in_leaf": 20,
         "alpha": 0.15
       },
-      "best_iteration": 2913,
+      "best_iteration": 2849,
       "rows": 11274,
-      "mdape": 0.056613180293249375,
+      "mdape": 0.05689708118832269,
+      "within_10pct": 0.6828100053219798,
+      "mae_aed": 203882.23338987236,
+      "median_error": -0.0012824951784564428
+    },
+    {
+      "params": {
+        "objective": "huber",
+        "num_leaves": 31,
+        "min_data_in_leaf": 60,
+        "alpha": 0.15
+      },
+      "best_iteration": 3256,
+      "rows": 11274,
+      "mdape": 0.05752737872218347,
       "within_10pct": 0.6882206847613979,
-      "mae_aed": 203556.72381163252,
-      "median_error": -0.0014712686524832128
-    },
-    {
-      "params": {
-        "objective": "huber",
-        "num_leaves": 31,
-        "min_data_in_leaf": 60,
-        "alpha": 0.15
-      },
-      "best_iteration": 1778,
-      "rows": 11274,
-      "mdape": 0.05826915669032946,
-      "within_10pct": 0.6844065992549229,
-      "mae_aed": 203840.3582959888,
-      "median_error": -0.0010322278286956478
+      "mae_aed": 200859.94542016243,
+      "median_error": -0.0011558090792259052
     },
     {
       "params": {
@@ -291,12 +291,12 @@
         "min_data_in_leaf": 20,
         "alpha": 0.15
       },
-      "best_iteration": 1055,
+      "best_iteration": 1030,
       "rows": 11274,
-      "mdape": 0.05630747248894457,
-      "within_10pct": 0.6883980840872804,
-      "mae_aed": 200885.56142297978,
-      "median_error": -0.0012553080142900207
+      "mdape": 0.05629725669107938,
+      "within_10pct": 0.6924782685825794,
+      "mae_aed": 202337.51430793636,
+      "median_error": -0.001445562929586325
     },
     {
       "params": {
@@ -305,12 +305,12 @@
         "min_data_in_leaf": 60,
         "alpha": 0.15
       },
-      "best_iteration": 963,
+      "best_iteration": 1163,
       "rows": 11274,
-      "mdape": 0.056149857177119275,
-      "within_10pct": 0.6934539648749335,
-      "mae_aed": 197456.03477375224,
-      "median_error": -0.001211605943975627
+      "mdape": 0.05619376191038856,
+      "within_10pct": 0.6911477736384601,
+      "mae_aed": 199796.41756125455,
+      "median_error": -0.0008663666775700316
     },
     {
       "params": {
@@ -318,12 +318,12 @@
         "num_leaves": 31,
         "min_data_in_leaf": 20
       },
-      "best_iteration": 3519,
+      "best_iteration": 2945,
       "rows": 11274,
-      "mdape": 0.05558862224586525,
-      "within_10pct": 0.6739400390278517,
-      "mae_aed": 212860.24798320307,
-      "median_error": -0.0009629388628955058
+      "mdape": 0.05638393745012802,
+      "within_10pct": 0.6731417420613802,
+      "mae_aed": 213622.646201634,
+      "median_error": -0.00032737573247460796
     },
     {
       "params": {
@@ -331,38 +331,38 @@
         "num_leaves": 31,
         "min_data_in_leaf": 60
       },
-      "best_iteration": 3658,
+      "best_iteration": 3651,
       "rows": 11274,
-      "mdape": 0.056385533776797954,
+      "mdape": 0.05564676650032112,
+      "within_10pct": 0.6757140322866773,
+      "mae_aed": 210542.28099631896,
+      "median_error": -0.0005576390821634657
+    },
+    {
+      "params": {
+        "objective": "regression_l1",
+        "num_leaves": 127,
+        "min_data_in_leaf": 20
+      },
+      "best_iteration": 1303,
+      "rows": 11274,
+      "mdape": 0.05374829589353686,
+      "within_10pct": 0.6816569097037432,
+      "mae_aed": 206344.86236161823,
+      "median_error": -0.0002845898458697113
+    },
+    {
+      "params": {
+        "objective": "regression_l1",
+        "num_leaves": 127,
+        "min_data_in_leaf": 60
+      },
+      "best_iteration": 1635,
+      "rows": 11274,
+      "mdape": 0.05278703106155172,
       "within_10pct": 0.6807699130743303,
-      "mae_aed": 207379.44945623702,
-      "median_error": 0.00015416995350511878
-    },
-    {
-      "params": {
-        "objective": "regression_l1",
-        "num_leaves": 127,
-        "min_data_in_leaf": 20
-      },
-      "best_iteration": 1281,
-      "rows": 11274,
-      "mdape": 0.05281474437008403,
-      "within_10pct": 0.6792620188043286,
-      "mae_aed": 207043.24124080307,
-      "median_error": -0.0014344693462773244
-    },
-    {
-      "params": {
-        "objective": "regression_l1",
-        "num_leaves": 127,
-        "min_data_in_leaf": 60
-      },
-      "best_iteration": 1361,
-      "rows": 11274,
-      "mdape": 0.052649603679852754,
-      "within_10pct": 0.6815682100408018,
-      "mae_aed": 205880.30815600773,
-      "median_error": -0.0013693601063210876
+      "mae_aed": 204376.22019630935,
+      "median_error": -0.0006431994198010669
     }
   ],
   "chosen": {
@@ -386,21 +386,25 @@
       "num_threads": 4,
       "seed": 42
     },
-    "num_boost_round": 1361,
+    "num_boost_round": 1635,
     "num_boost_round_community": 1543
   },
   "served": {
     "test_rows": 9480,
     "test_rows_project_known": 8287,
-    "min_project_rows_baseline": 5
+    "min_project_rows_baseline": 5,
+    "test_rows_the_api_would_refuse": {
+      "community without training sales (404)": 0,
+      "room count not recorded (422)": 0
+    }
   },
   "validation": {
     "model": {
       "rows": 11274,
-      "mdape": 0.054688666979584924,
-      "within_10pct": 0.6709242504878481,
-      "mae_aed": 210870.52123981566,
-      "median_error": -0.0011453918730498268
+      "mdape": 0.05486909471323885,
+      "within_10pct": 0.669948554195494,
+      "mae_aed": 211349.44672535948,
+      "median_error": -0.0012302034263439988
     },
     "model_no_project": {
       "rows": 11274,
@@ -425,19 +429,19 @@
     },
     "model_recorded": {
       "rows": 11274,
-      "mdape": 0.052649603679852754,
-      "within_10pct": 0.6815682100408018,
-      "mae_aed": 205880.30815600773,
-      "median_error": -0.0013693601063210876
+      "mdape": 0.05278703106155172,
+      "within_10pct": 0.6807699130743303,
+      "mae_aed": 204376.22019630935,
+      "median_error": -0.0006431994198010669
     }
   },
   "test": {
     "model": {
       "rows": 9480,
-      "mdape": 0.05554858621633915,
-      "within_10pct": 0.6977848101265823,
-      "mae_aed": 209339.51517112774,
-      "median_error": -0.0014989179980861669
+      "mdape": 0.0543345503593298,
+      "within_10pct": 0.6960970464135021,
+      "mae_aed": 209530.13612180194,
+      "median_error": -0.001760481790674246
     },
     "model_no_project": {
       "rows": 9480,
@@ -462,18 +466,18 @@
     },
     "model_recorded": {
       "rows": 9480,
-      "mdape": 0.05362345784847468,
-      "within_10pct": 0.7077004219409283,
-      "mae_aed": 198400.08227421416,
-      "median_error": -0.0007962245018332114
+      "mdape": 0.05245672330555863,
+      "within_10pct": 0.704324894514768,
+      "mae_aed": 198825.51346701512,
+      "median_error": -0.0013684861137841487
     }
   },
   "interval": {
     "nominal": 0.8,
     "quantiles": {
       "full": {
-        "q10": -0.15278494656967392,
-        "q90": 0.11929221782633549
+        "q10": -0.1522055181023725,
+        "q90": 0.11947599029814866
       },
       "community": {
         "q10": -0.1741565882069151,
@@ -481,7 +485,7 @@
       }
     },
     "test_coverage": {
-      "model": 0.7909282700421941,
+      "model": 0.789873417721519,
       "model_no_project": 0.8106540084388185
     }
   },
@@ -491,14 +495,13 @@
       "segment": "off-plan",
       "estimator": "model",
       "rows": 7093,
-      "mdape": 0.0445690367569557,
-      "within_10pct": 0.764979557310024,
-      "mae_aed": 179715.95901335083,
-      "median_error": -0.0021278942978786844,
-      "range_coverage": 0.8436486677005498,
+      "mdape": 0.0440463536558054,
+      "within_10pct": 0.761877907796419,
+      "mae_aed": 178941.9957583681,
+      "median_error": -0.0029304581481214287,
+      "range_coverage": 0.8419568588749471,
       "communities": 89,
-      "largest_project_share": 0.059354292964894965,
-      "median_price_aed": 1036000.0
+      "largest_project_share": 0.059354292964894965
     },
     {
       "dimension": "registration",
@@ -511,8 +514,7 @@
       "median_error": -0.0015979626035464301,
       "range_coverage": 0.860002819681376,
       "communities": 89,
-      "largest_project_share": 0.059354292964894965,
-      "median_price_aed": 1036000.0
+      "largest_project_share": 0.059354292964894965
     },
     {
       "dimension": "registration",
@@ -524,8 +526,7 @@
       "mae_aed": 202945.925242225,
       "median_error": 0.0007849785698343842,
       "communities": 89,
-      "largest_project_share": 0.059354292964894965,
-      "median_price_aed": 1036000.0
+      "largest_project_share": 0.059354292964894965
     },
     {
       "dimension": "registration",
@@ -537,22 +538,20 @@
       "mae_aed": 263928.8706564821,
       "median_error": -0.013528357385789327,
       "communities": 89,
-      "largest_project_share": 0.059354292964894965,
-      "median_price_aed": 1036000.0
+      "largest_project_share": 0.059354292964894965
     },
     {
       "dimension": "registration",
       "segment": "ready",
       "estimator": "model",
       "rows": 2387,
-      "mdape": 0.10052064344113777,
-      "within_10pct": 0.49811478843736906,
-      "mae_aed": 297366.27839991334,
-      "median_error": 0.005713386885476529,
-      "range_coverage": 0.634268956849602,
+      "mdape": 0.09984094275061296,
+      "within_10pct": 0.5006284038542103,
+      "mae_aed": 300423.1732386164,
+      "median_error": 0.006576116975810146,
+      "range_coverage": 0.6351068286552157,
       "communities": 82,
-      "largest_project_share": 0.2320904901550063,
-      "median_price_aed": 1200000.0
+      "largest_project_share": 0.2320904901550063
     },
     {
       "dimension": "registration",
@@ -565,8 +564,7 @@
       "median_error": 0.002979206112783982,
       "range_coverage": 0.6640134059488898,
       "communities": 82,
-      "largest_project_share": 0.2320904901550063,
-      "median_price_aed": 1200000.0
+      "largest_project_share": 0.2320904901550063
     },
     {
       "dimension": "registration",
@@ -578,8 +576,7 @@
       "mae_aed": 357631.77974353597,
       "median_error": 0.06000937646507286,
       "communities": 82,
-      "largest_project_share": 0.2320904901550063,
-      "median_price_aed": 1200000.0
+      "largest_project_share": 0.2320904901550063
     },
     {
       "dimension": "registration",
@@ -591,22 +588,20 @@
       "mae_aed": 517549.7066898322,
       "median_error": 0.16037890174186925,
       "communities": 82,
-      "largest_project_share": 0.2320904901550063,
-      "median_price_aed": 1200000.0
+      "largest_project_share": 0.2320904901550063
     },
     {
       "dimension": "price band",
       "segment": "under 1.0M AED",
       "estimator": "model",
       "rows": 4295,
-      "mdape": 0.047056995416901004,
-      "within_10pct": 0.7329452852153667,
-      "mae_aed": 66433.37182354732,
-      "median_error": 0.005874747853011504,
-      "range_coverage": 0.8321303841676367,
+      "mdape": 0.046613777312646563,
+      "within_10pct": 0.7334109429569267,
+      "mae_aed": 66599.25711642894,
+      "median_error": 0.005393126209065615,
+      "range_coverage": 0.8311990686845169,
       "communities": 64,
-      "largest_project_share": 0.07729918509895227,
-      "median_price_aed": 665000.0
+      "largest_project_share": 0.07729918509895227
     },
     {
       "dimension": "price band",
@@ -619,8 +614,7 @@
       "median_error": 0.010943542496469848,
       "range_coverage": 0.8479627473806752,
       "communities": 64,
-      "largest_project_share": 0.07729918509895227,
-      "median_price_aed": 665000.0
+      "largest_project_share": 0.07729918509895227
     },
     {
       "dimension": "price band",
@@ -632,8 +626,7 @@
       "mae_aed": 82669.46143903496,
       "median_error": -0.005355464475602888,
       "communities": 64,
-      "largest_project_share": 0.07729918509895227,
-      "median_price_aed": 665000.0
+      "largest_project_share": 0.07729918509895227
     },
     {
       "dimension": "price band",
@@ -645,22 +638,20 @@
       "mae_aed": 124723.58425297421,
       "median_error": -0.009087993853436204,
       "communities": 64,
-      "largest_project_share": 0.07729918509895227,
-      "median_price_aed": 665000.0
+      "largest_project_share": 0.07729918509895227
     },
     {
       "dimension": "price band",
       "segment": "1.0M-2.0M AED",
       "estimator": "model",
       "rows": 3273,
-      "mdape": 0.05564233831581522,
-      "within_10pct": 0.7128017109685304,
-      "mae_aed": 120812.99055041303,
-      "median_error": -0.008242717994966455,
-      "range_coverage": 0.7943782462572564,
+      "mdape": 0.053888205537564834,
+      "within_10pct": 0.7088298197372441,
+      "mae_aed": 120391.33548322575,
+      "median_error": -0.009618488863672454,
+      "range_coverage": 0.7956003666361137,
       "communities": 90,
-      "largest_project_share": 0.05224564619615032,
-      "median_price_aed": 1283000.0
+      "largest_project_share": 0.05224564619615032
     },
     {
       "dimension": "price band",
@@ -673,8 +664,7 @@
       "median_error": -0.0093488827720549,
       "range_coverage": 0.8261533761075466,
       "communities": 90,
-      "largest_project_share": 0.05224564619615032,
-      "median_price_aed": 1283000.0
+      "largest_project_share": 0.05224564619615032
     },
     {
       "dimension": "price band",
@@ -686,8 +676,7 @@
       "mae_aed": 171883.87855883522,
       "median_error": 0.04596792936597276,
       "communities": 90,
-      "largest_project_share": 0.05224564619615032,
-      "median_price_aed": 1283000.0
+      "largest_project_share": 0.05224564619615032
     },
     {
       "dimension": "price band",
@@ -699,22 +688,20 @@
       "mae_aed": 228018.0073271458,
       "median_error": 0.0529807676620848,
       "communities": 90,
-      "largest_project_share": 0.05224564619615032,
-      "median_price_aed": 1283000.0
+      "largest_project_share": 0.05224564619615032
     },
     {
       "dimension": "price band",
       "segment": "2.0M-5.0M AED",
       "estimator": "model",
       "rows": 1647,
-      "mdape": 0.0764287634793089,
-      "within_10pct": 0.6059502125075895,
-      "mae_aed": 343374.6516906886,
-      "median_error": -0.022726374842970867,
-      "range_coverage": 0.7073466909532483,
+      "mdape": 0.07633786199185501,
+      "within_10pct": 0.6041287188828173,
+      "mae_aed": 345403.3998786167,
+      "median_error": -0.02184916596777638,
+      "range_coverage": 0.7037037037037037,
       "communities": 86,
-      "largest_project_share": 0.10686095931997572,
-      "median_price_aed": 2579548.0
+      "largest_project_share": 0.10686095931997572
     },
     {
       "dimension": "price band",
@@ -727,8 +714,7 @@
       "median_error": -0.026463108484408162,
       "range_coverage": 0.7194899817850637,
       "communities": 86,
-      "largest_project_share": 0.10686095931997572,
-      "median_price_aed": 2579548.0
+      "largest_project_share": 0.10686095931997572
     },
     {
       "dimension": "price band",
@@ -740,8 +726,7 @@
       "mae_aed": 392214.37110744254,
       "median_error": 0.010669518028396894,
       "communities": 86,
-      "largest_project_share": 0.10686095931997572,
-      "median_price_aed": 2579548.0
+      "largest_project_share": 0.10686095931997572
     },
     {
       "dimension": "price band",
@@ -753,22 +738,20 @@
       "mae_aed": 513463.98130061297,
       "median_error": 0.006018947784263616,
       "communities": 86,
-      "largest_project_share": 0.10686095931997572,
-      "median_price_aed": 2579548.0
+      "largest_project_share": 0.10686095931997572
     },
     {
       "dimension": "price band",
       "segment": "5.0M AED and over",
       "estimator": "model",
       "rows": 265,
-      "mdape": 0.09414659689526932,
-      "within_10pct": 0.5132075471698113,
-      "mae_aed": 2785842.6506946743,
-      "median_error": -0.0601179925187443,
-      "range_coverage": 0.6,
+      "mdape": 0.08942395419860631,
+      "within_10pct": 0.5056603773584906,
+      "mae_aed": 2782572.228237511,
+      "median_error": -0.0579433038419655,
+      "range_coverage": 0.5849056603773585,
       "communities": 41,
-      "largest_project_share": 0.17358490566037735,
-      "median_price_aed": 7799000.0
+      "largest_project_share": 0.17358490566037735
     },
     {
       "dimension": "price band",
@@ -781,8 +764,7 @@
       "median_error": -0.06771980831557019,
       "range_coverage": 0.5811320754716981,
       "communities": 41,
-      "largest_project_share": 0.17358490566037735,
-      "median_price_aed": 7799000.0
+      "largest_project_share": 0.17358490566037735
     },
     {
       "dimension": "price band",
@@ -794,8 +776,7 @@
       "mae_aed": 2752996.8504650616,
       "median_error": -0.06438276059515398,
       "communities": 41,
-      "largest_project_share": 0.17358490566037735,
-      "median_price_aed": 7799000.0
+      "largest_project_share": 0.17358490566037735
     },
     {
       "dimension": "price band",
@@ -807,22 +788,220 @@
       "mae_aed": 3697255.5467346236,
       "median_error": -0.1319333419447979,
       "communities": 41,
-      "largest_project_share": 0.17358490566037735,
-      "median_price_aed": 7799000.0
+      "largest_project_share": 0.17358490566037735
+    },
+    {
+      "dimension": "estimated price band",
+      "segment": "under 1.0M AED",
+      "estimator": "model",
+      "rows": 4141,
+      "mdape": 0.04384877534517059,
+      "within_10pct": 0.7505433470176286,
+      "mae_aed": 52676.43989903185,
+      "median_error": 0.0002360277974805253,
+      "range_coverage": 0.8466553972470418,
+      "communities": 57,
+      "largest_project_share": 0.07872494566529824
+    },
+    {
+      "dimension": "estimated price band",
+      "segment": "under 1.0M AED",
+      "estimator": "model_no_project",
+      "rows": 4141,
+      "mdape": 0.05322708010798752,
+      "within_10pct": 0.7061096353537792,
+      "mae_aed": 59892.07725667776,
+      "median_error": 0.0036986366238222403,
+      "range_coverage": 0.8715286162762618,
+      "communities": 57,
+      "largest_project_share": 0.07872494566529824
+    },
+    {
+      "dimension": "estimated price band",
+      "segment": "under 1.0M AED",
+      "estimator": "project_baseline",
+      "rows": 4141,
+      "mdape": 0.058824440541055394,
+      "within_10pct": 0.6908959188601786,
+      "mae_aed": 62612.78923333216,
+      "median_error": -0.012721814985571697,
+      "communities": 57,
+      "largest_project_share": 0.07872494566529824
+    },
+    {
+      "dimension": "estimated price band",
+      "segment": "under 1.0M AED",
+      "estimator": "baseline",
+      "rows": 4141,
+      "mdape": 0.09892180957092886,
+      "within_10pct": 0.5025356194156001,
+      "mae_aed": 101639.26211574972,
+      "median_error": -0.018306806965114632,
+      "communities": 57,
+      "largest_project_share": 0.07872494566529824
+    },
+    {
+      "dimension": "estimated price band",
+      "segment": "1.0M-2.0M AED",
+      "estimator": "model",
+      "rows": 3619,
+      "mdape": 0.05971957475327632,
+      "within_10pct": 0.6711798839458414,
+      "mae_aed": 146197.9528585347,
+      "median_error": -0.008338584990334264,
+      "range_coverage": 0.7576678640508427,
+      "communities": 89,
+      "largest_project_share": 0.05194805194805195
+    },
+    {
+      "dimension": "estimated price band",
+      "segment": "1.0M-2.0M AED",
+      "estimator": "model_no_project",
+      "rows": 3619,
+      "mdape": 0.07099920509351412,
+      "within_10pct": 0.6009947499309202,
+      "mae_aed": 163318.44149035955,
+      "median_error": -0.00775796119253857,
+      "range_coverage": 0.7852998065764023,
+      "communities": 89,
+      "largest_project_share": 0.05194805194805195
+    },
+    {
+      "dimension": "estimated price band",
+      "segment": "1.0M-2.0M AED",
+      "estimator": "project_baseline",
+      "rows": 3619,
+      "mdape": 0.08926203303534408,
+      "within_10pct": 0.5440729483282675,
+      "mae_aed": 189999.78808371225,
+      "median_error": 0.048913212176696606,
+      "communities": 89,
+      "largest_project_share": 0.05194805194805195
+    },
+    {
+      "dimension": "estimated price band",
+      "segment": "1.0M-2.0M AED",
+      "estimator": "baseline",
+      "rows": 3619,
+      "mdape": 0.11286028525911941,
+      "within_10pct": 0.45040066316662064,
+      "mae_aed": 244966.28148637258,
+      "median_error": 0.057699825481678076,
+      "communities": 89,
+      "largest_project_share": 0.05194805194805195
+    },
+    {
+      "dimension": "estimated price band",
+      "segment": "2.0M-5.0M AED",
+      "estimator": "model",
+      "rows": 1458,
+      "mdape": 0.06715030441506792,
+      "within_10pct": 0.6385459533607681,
+      "mae_aed": 333124.58260738704,
+      "median_error": -0.0007396002517213347,
+      "range_coverage": 0.7462277091906722,
+      "communities": 84,
+      "largest_project_share": 0.11865569272976681
+    },
+    {
+      "dimension": "estimated price band",
+      "segment": "2.0M-5.0M AED",
+      "estimator": "model_no_project",
+      "rows": 1458,
+      "mdape": 0.07948772288404682,
+      "within_10pct": 0.565843621399177,
+      "mae_aed": 387144.82661816204,
+      "median_error": -0.004499951641226135,
+      "range_coverage": 0.7434842249657064,
+      "communities": 84,
+      "largest_project_share": 0.11865569272976681
+    },
+    {
+      "dimension": "estimated price band",
+      "segment": "2.0M-5.0M AED",
+      "estimator": "project_baseline",
+      "rows": 1458,
+      "mdape": 0.07931011791600047,
+      "within_10pct": 0.5850480109739369,
+      "mae_aed": 389961.82376906165,
+      "median_error": 0.028560351735002928,
+      "communities": 84,
+      "largest_project_share": 0.11865569272976681
+    },
+    {
+      "dimension": "estimated price band",
+      "segment": "2.0M-5.0M AED",
+      "estimator": "baseline",
+      "rows": 1458,
+      "mdape": 0.11605120680590553,
+      "within_10pct": 0.4547325102880658,
+      "mae_aed": 518227.3038164506,
+      "median_error": 0.030257002120272332,
+      "communities": 84,
+      "largest_project_share": 0.11865569272976681
+    },
+    {
+      "dimension": "estimated price band",
+      "segment": "5.0M AED and over",
+      "estimator": "model",
+      "rows": 262,
+      "mdape": 0.09592472304137216,
+      "within_10pct": 0.5,
+      "mae_aed": 2875673.740367114,
+      "median_error": -0.009616789265329478,
+      "range_coverage": 0.5801526717557252,
+      "communities": 34,
+      "largest_project_share": 0.17557251908396945
+    },
+    {
+      "dimension": "estimated price band",
+      "segment": "5.0M AED and over",
+      "estimator": "model_no_project",
+      "rows": 262,
+      "mdape": 0.1254656440194422,
+      "within_10pct": 0.42748091603053434,
+      "mae_aed": 3287184.036609521,
+      "median_error": -0.03842600940488973,
+      "range_coverage": 0.5725190839694656,
+      "communities": 34,
+      "largest_project_share": 0.17557251908396945
+    },
+    {
+      "dimension": "estimated price band",
+      "segment": "5.0M AED and over",
+      "estimator": "project_baseline",
+      "rows": 262,
+      "mdape": 0.10761442222724019,
+      "within_10pct": 0.46564885496183206,
+      "mae_aed": 2968356.387959722,
+      "median_error": -0.0432031843705574,
+      "communities": 34,
+      "largest_project_share": 0.17557251908396945
+    },
+    {
+      "dimension": "estimated price band",
+      "segment": "5.0M AED and over",
+      "estimator": "baseline",
+      "rows": 262,
+      "mdape": 0.1775942488161346,
+      "within_10pct": 0.26717557251908397,
+      "mae_aed": 3986420.089122787,
+      "median_error": -0.10751649489819928,
+      "communities": 34,
+      "largest_project_share": 0.17557251908396945
     },
     {
       "dimension": "community data",
       "segment": "thin (1-49 training sales)",
       "estimator": "model",
       "rows": 145,
-      "mdape": 0.028605620159613564,
-      "within_10pct": 0.8482758620689655,
-      "mae_aed": 471040.9410477024,
-      "median_error": -0.011835171588537094,
-      "range_coverage": 0.896551724137931,
+      "mdape": 0.028640287503181604,
+      "within_10pct": 0.8620689655172413,
+      "mae_aed": 495604.90107904683,
+      "median_error": -0.009652094409260455,
+      "range_coverage": 0.9103448275862069,
       "communities": 18,
-      "largest_project_share": 0.7034482758620689,
-      "median_price_aed": 1042046.0
+      "largest_project_share": 0.7034482758620689
     },
     {
       "dimension": "community data",
@@ -835,8 +1014,7 @@
       "median_error": -0.011456381885799817,
       "range_coverage": 0.8620689655172413,
       "communities": 18,
-      "largest_project_share": 0.7034482758620689,
-      "median_price_aed": 1042046.0
+      "largest_project_share": 0.7034482758620689
     },
     {
       "dimension": "community data",
@@ -848,8 +1026,7 @@
       "mae_aed": 224948.72595334105,
       "median_error": -6.132059268532201e-06,
       "communities": 18,
-      "largest_project_share": 0.7034482758620689,
-      "median_price_aed": 1042046.0
+      "largest_project_share": 0.7034482758620689
     },
     {
       "dimension": "community data",
@@ -861,22 +1038,20 @@
       "mae_aed": 430676.8469284075,
       "median_error": -6.132059268532201e-06,
       "communities": 18,
-      "largest_project_share": 0.7034482758620689,
-      "median_price_aed": 1042046.0
+      "largest_project_share": 0.7034482758620689
     },
     {
       "dimension": "community data",
       "segment": "established (50+ training sales)",
       "estimator": "model",
       "rows": 9335,
-      "mdape": 0.05609982470633056,
-      "within_10pct": 0.6954472415640064,
-      "mae_aed": 205274.5224820968,
-      "median_error": -0.0014841646845868395,
-      "range_coverage": 0.7892876272094269,
+      "mdape": 0.055003044372039296,
+      "within_10pct": 0.6935190144617033,
+      "mae_aed": 205086.55380591544,
+      "median_error": -0.001718748046990076,
+      "range_coverage": 0.7880021424745581,
       "communities": 93,
-      "largest_project_share": 0.05848955543652919,
-      "median_price_aed": 1093950.0
+      "largest_project_share": 0.05848955543652919
     },
     {
       "dimension": "community data",
@@ -889,8 +1064,7 @@
       "median_error": -0.0012742265343517547,
       "range_coverage": 0.8098553829673273,
       "communities": 93,
-      "largest_project_share": 0.05848955543652919,
-      "median_price_aed": 1093950.0
+      "largest_project_share": 0.05848955543652919
     },
     {
       "dimension": "community data",
@@ -902,8 +1076,7 @@
       "mae_aed": 242158.00114918986,
       "median_error": 0.010857586905766596,
       "communities": 93,
-      "largest_project_share": 0.05848955543652919,
-      "median_price_aed": 1093950.0
+      "largest_project_share": 0.05848955543652919
     },
     {
       "dimension": "community data",
@@ -915,22 +1088,220 @@
       "mae_aed": 326190.7323653389,
       "median_error": 0.00839493455324044,
       "communities": 93,
-      "largest_project_share": 0.05848955543652919,
-      "median_price_aed": 1093950.0
+      "largest_project_share": 0.05848955543652919
+    },
+    {
+      "dimension": "project data",
+      "segment": "own level (40+ training sales)",
+      "estimator": "model",
+      "rows": 5374,
+      "mdape": 0.03726314926753008,
+      "within_10pct": 0.8353181987346483,
+      "mae_aed": 85257.71272311015,
+      "median_error": -0.0009035589448223312,
+      "range_coverage": 0.904540379605508,
+      "communities": 72,
+      "largest_project_share": 0.07834015630815036
+    },
+    {
+      "dimension": "project data",
+      "segment": "own level (40+ training sales)",
+      "estimator": "model_no_project",
+      "rows": 5374,
+      "mdape": 0.04696185998415684,
+      "within_10pct": 0.7497208783029401,
+      "mae_aed": 114938.98209515636,
+      "median_error": -0.0016551812514920797,
+      "range_coverage": 0.9000744324525494,
+      "communities": 72,
+      "largest_project_share": 0.07834015630815036
+    },
+    {
+      "dimension": "project data",
+      "segment": "own level (40+ training sales)",
+      "estimator": "project_baseline",
+      "rows": 5374,
+      "mdape": 0.060761362932556184,
+      "within_10pct": 0.6831038332713063,
+      "mae_aed": 133276.49282598938,
+      "median_error": 0.003432137285491512,
+      "communities": 72,
+      "largest_project_share": 0.07834015630815036
+    },
+    {
+      "dimension": "project data",
+      "segment": "own level (40+ training sales)",
+      "estimator": "baseline",
+      "rows": 5374,
+      "mdape": 0.09282905254463322,
+      "within_10pct": 0.5297729810197246,
+      "mae_aed": 182553.67909947282,
+      "median_error": -0.01897058257992592,
+      "communities": 72,
+      "largest_project_share": 0.07834015630815036
+    },
+    {
+      "dimension": "project data",
+      "segment": "grouped as other (1-39 training sales)",
+      "estimator": "model",
+      "rows": 2913,
+      "mdape": 0.09500904166000843,
+      "within_10pct": 0.5200823892893924,
+      "mae_aed": 415584.19978397945,
+      "median_error": -0.0023364963464659098,
+      "range_coverage": 0.6069344318571919,
+      "communities": 95,
+      "largest_project_share": 0.08891177480260899
+    },
+    {
+      "dimension": "project data",
+      "segment": "grouped as other (1-39 training sales)",
+      "estimator": "model_no_project",
+      "rows": 2913,
+      "mdape": 0.1047509453650273,
+      "within_10pct": 0.4847236525918297,
+      "mae_aed": 456404.3420546386,
+      "median_error": 0.0035244103542774797,
+      "range_coverage": 0.6828012358393409,
+      "communities": 95,
+      "largest_project_share": 0.08891177480260899
+    },
+    {
+      "dimension": "project data",
+      "segment": "grouped as other (1-39 training sales)",
+      "estimator": "project_baseline",
+      "rows": 2913,
+      "mdape": 0.08254199742574163,
+      "within_10pct": 0.5602471678681772,
+      "mae_aed": 390581.9895598827,
+      "median_error": 0.01377027497389497,
+      "communities": 95,
+      "largest_project_share": 0.08891177480260899
+    },
+    {
+      "dimension": "project data",
+      "segment": "grouped as other (1-39 training sales)",
+      "estimator": "baseline",
+      "rows": 2913,
+      "mdape": 0.1507010825217876,
+      "within_10pct": 0.37590113285272914,
+      "mae_aed": 579205.5818737978,
+      "median_error": 0.06891400465270857,
+      "communities": 95,
+      "largest_project_share": 0.08891177480260899
+    },
+    {
+      "dimension": "project data",
+      "segment": "new (no training sales in its community)",
+      "estimator": "model",
+      "rows": 639,
+      "mdape": 0.09865254781013696,
+      "within_10pct": 0.513302034428795,
+      "mae_aed": 203984.2648272284,
+      "median_error": -0.02047590321408752,
+      "range_coverage": 0.7417840375586855,
+      "communities": 22,
+      "largest_project_share": 0.28325508607198746
+    },
+    {
+      "dimension": "project data",
+      "segment": "new (no training sales in its community)",
+      "estimator": "model_no_project",
+      "rows": 639,
+      "mdape": 0.09865254781013696,
+      "within_10pct": 0.513302034428795,
+      "mae_aed": 203984.2648272284,
+      "median_error": -0.02047590321408752,
+      "range_coverage": 0.7417840375586855,
+      "communities": 22,
+      "largest_project_share": 0.28325508607198746
+    },
+    {
+      "dimension": "project data",
+      "segment": "new (no training sales in its community)",
+      "estimator": "project_baseline",
+      "rows": 639,
+      "mdape": 0.0871442998235142,
+      "within_10pct": 0.5571205007824727,
+      "mae_aed": 176706.8280627443,
+      "median_error": 0.024662716159808973,
+      "communities": 22,
+      "largest_project_share": 0.28325508607198746
+    },
+    {
+      "dimension": "project data",
+      "segment": "new (no training sales in its community)",
+      "estimator": "baseline",
+      "rows": 639,
+      "mdape": 0.0871442998235142,
+      "within_10pct": 0.5571205007824727,
+      "mae_aed": 176706.8280627443,
+      "median_error": 0.024662716159808973,
+      "communities": 22,
+      "largest_project_share": 0.28325508607198746
+    },
+    {
+      "dimension": "project data",
+      "segment": "not recorded in the sale",
+      "estimator": "model",
+      "rows": 554,
+      "mdape": 0.10342844307515721,
+      "within_10pct": 0.48194945848375453,
+      "mae_aed": 337956.7203345793,
+      "median_error": -0.005010028778568042,
+      "range_coverage": 0.6949458483754513,
+      "communities": 40,
+      "largest_project_share": 1.0
+    },
+    {
+      "dimension": "project data",
+      "segment": "not recorded in the sale",
+      "estimator": "model_no_project",
+      "rows": 554,
+      "mdape": 0.10342844307515721,
+      "within_10pct": 0.48194945848375453,
+      "mae_aed": 337956.7203345793,
+      "median_error": -0.005010028778568042,
+      "range_coverage": 0.6949458483754513,
+      "communities": 40,
+      "largest_project_share": 1.0
+    },
+    {
+      "dimension": "project data",
+      "segment": "not recorded in the sale",
+      "estimator": "project_baseline",
+      "rows": 554,
+      "mdape": 0.22950173801384557,
+      "within_10pct": 0.26353790613718414,
+      "mae_aed": 588905.478021703,
+      "median_error": 0.1565597928047673,
+      "communities": 40,
+      "largest_project_share": 1.0
+    },
+    {
+      "dimension": "project data",
+      "segment": "not recorded in the sale",
+      "estimator": "baseline",
+      "rows": 554,
+      "mdape": 0.22950173801384557,
+      "within_10pct": 0.26353790613718414,
+      "mae_aed": 588905.478021703,
+      "median_error": 0.1565597928047673,
+      "communities": 40,
+      "largest_project_share": 1.0
     },
     {
       "dimension": "rooms",
       "segment": "studio",
       "estimator": "model",
       "rows": 3544,
-      "mdape": 0.03984981168611791,
-      "within_10pct": 0.7863995485327314,
-      "mae_aed": 45162.733288728836,
-      "median_error": 0.0008942275866749696,
-      "range_coverage": 0.8797968397291196,
+      "mdape": 0.04012532450904685,
+      "within_10pct": 0.7830135440180587,
+      "mae_aed": 45556.6525033417,
+      "median_error": 0.00100662327474331,
+      "range_coverage": 0.8775395033860045,
       "communities": 56,
-      "largest_project_share": 0.09198645598194131,
-      "median_price_aed": 649170.725
+      "largest_project_share": 0.09198645598194131
     },
     {
       "dimension": "rooms",
@@ -943,8 +1314,7 @@
       "median_error": 0.0024420257829798437,
       "range_coverage": 0.9015237020316027,
       "communities": 56,
-      "largest_project_share": 0.09198645598194131,
-      "median_price_aed": 649170.725
+      "largest_project_share": 0.09198645598194131
     },
     {
       "dimension": "rooms",
@@ -956,8 +1326,7 @@
       "mae_aed": 54855.04366113139,
       "median_error": -0.0214018851756942,
       "communities": 56,
-      "largest_project_share": 0.09198645598194131,
-      "median_price_aed": 649170.725
+      "largest_project_share": 0.09198645598194131
     },
     {
       "dimension": "rooms",
@@ -969,22 +1338,20 @@
       "mae_aed": 82593.75246885353,
       "median_error": -0.03970799498649036,
       "communities": 56,
-      "largest_project_share": 0.09198645598194131,
-      "median_price_aed": 649170.725
+      "largest_project_share": 0.09198645598194131
     },
     {
       "dimension": "rooms",
       "segment": "1",
       "estimator": "model",
       "rows": 3551,
-      "mdape": 0.05950412572658374,
-      "within_10pct": 0.6761475640664601,
-      "mae_aed": 138162.13422118282,
-      "median_error": -0.007000921087957832,
-      "range_coverage": 0.7614756406646015,
+      "mdape": 0.05882552873926982,
+      "within_10pct": 0.6747395099971839,
+      "mae_aed": 138015.10665229484,
+      "median_error": -0.007892343290892313,
+      "range_coverage": 0.7637285271754435,
       "communities": 99,
-      "largest_project_share": 0.0698394818361025,
-      "median_price_aed": 1200000.0
+      "largest_project_share": 0.0698394818361025
     },
     {
       "dimension": "rooms",
@@ -997,8 +1364,7 @@
       "median_error": -0.005156220257320793,
       "range_coverage": 0.7904815544916924,
       "communities": 99,
-      "largest_project_share": 0.0698394818361025,
-      "median_price_aed": 1200000.0
+      "largest_project_share": 0.0698394818361025
     },
     {
       "dimension": "rooms",
@@ -1010,8 +1376,7 @@
       "mae_aed": 171876.044018561,
       "median_error": 0.04665383982955248,
       "communities": 99,
-      "largest_project_share": 0.0698394818361025,
-      "median_price_aed": 1200000.0
+      "largest_project_share": 0.0698394818361025
     },
     {
       "dimension": "rooms",
@@ -1023,22 +1388,20 @@
       "mae_aed": 230680.69331225316,
       "median_error": 0.056971839859705505,
       "communities": 99,
-      "largest_project_share": 0.0698394818361025,
-      "median_price_aed": 1200000.0
+      "largest_project_share": 0.0698394818361025
     },
     {
       "dimension": "rooms",
       "segment": "2",
       "estimator": "model",
       "rows": 1870,
-      "mdape": 0.07196392939072553,
-      "within_10pct": 0.6112299465240641,
-      "mae_aed": 322168.40760914946,
-      "median_error": -0.0009624851717270452,
-      "range_coverage": 0.7155080213903743,
+      "mdape": 0.07069751394130314,
+      "within_10pct": 0.6155080213903743,
+      "mae_aed": 322005.0992267193,
+      "median_error": -0.001576876109389805,
+      "range_coverage": 0.7112299465240641,
       "communities": 104,
-      "largest_project_share": 0.09037433155080214,
-      "median_price_aed": 2047174.8399999999
+      "largest_project_share": 0.09037433155080214
     },
     {
       "dimension": "rooms",
@@ -1051,8 +1414,7 @@
       "median_error": -0.0025141416914339055,
       "range_coverage": 0.7240641711229947,
       "communities": 104,
-      "largest_project_share": 0.09037433155080214,
-      "median_price_aed": 2047174.8399999999
+      "largest_project_share": 0.09037433155080214
     },
     {
       "dimension": "rooms",
@@ -1064,8 +1426,7 @@
       "mae_aed": 365040.9128869656,
       "median_error": 0.05130414910300506,
       "communities": 104,
-      "largest_project_share": 0.09037433155080214,
-      "median_price_aed": 2047174.8399999999
+      "largest_project_share": 0.09037433155080214
     },
     {
       "dimension": "rooms",
@@ -1077,22 +1438,20 @@
       "mae_aed": 505283.872748127,
       "median_error": 0.06341988301305737,
       "communities": 104,
-      "largest_project_share": 0.09037433155080214,
-      "median_price_aed": 2047174.8399999999
+      "largest_project_share": 0.09037433155080214
     },
     {
       "dimension": "rooms",
       "segment": "3",
       "estimator": "model",
       "rows": 448,
-      "mdape": 0.08560293582196932,
-      "within_10pct": 0.5714285714285714,
-      "mae_aed": 959371.5144008541,
-      "median_error": -0.0130438393126751,
-      "range_coverage": 0.6741071428571429,
+      "mdape": 0.08296436602066737,
+      "within_10pct": 0.5558035714285714,
+      "mae_aed": 960339.5025371047,
+      "median_error": -0.010428488189303187,
+      "range_coverage": 0.671875,
       "communities": 73,
-      "largest_project_share": 0.09375,
-      "median_price_aed": 3600444.0
+      "largest_project_share": 0.09375
     },
     {
       "dimension": "rooms",
@@ -1105,8 +1464,7 @@
       "median_error": -0.015729694979675184,
       "range_coverage": 0.6517857142857143,
       "communities": 73,
-      "largest_project_share": 0.09375,
-      "median_price_aed": 3600444.0
+      "largest_project_share": 0.09375
     },
     {
       "dimension": "rooms",
@@ -1118,8 +1476,7 @@
       "mae_aed": 1093527.1950011791,
       "median_error": 0.0008764431200931556,
       "communities": 73,
-      "largest_project_share": 0.09375,
-      "median_price_aed": 3600444.0
+      "largest_project_share": 0.09375
     },
     {
       "dimension": "rooms",
@@ -1131,22 +1488,20 @@
       "mae_aed": 1427241.1277563958,
       "median_error": 0.001006850711793269,
       "communities": 73,
-      "largest_project_share": 0.09375,
-      "median_price_aed": 3600444.0
+      "largest_project_share": 0.09375
     },
     {
       "dimension": "rooms",
       "segment": "4",
       "estimator": "model",
       "rows": 56,
-      "mdape": 0.12200747264035078,
-      "within_10pct": 0.4107142857142857,
-      "mae_aed": 4542772.206784768,
-      "median_error": -0.06403321315204434,
+      "mdape": 0.10488730571218682,
+      "within_10pct": 0.44642857142857145,
+      "mae_aed": 4439446.154030558,
+      "median_error": -0.056141157468535194,
       "range_coverage": 0.5535714285714286,
       "communities": 24,
-      "largest_project_share": 0.17857142857142858,
-      "median_price_aed": 13039500.0
+      "largest_project_share": 0.17857142857142858
     },
     {
       "dimension": "rooms",
@@ -1159,8 +1514,7 @@
       "median_error": -0.06621630177509721,
       "range_coverage": 0.5535714285714286,
       "communities": 24,
-      "largest_project_share": 0.17857142857142858,
-      "median_price_aed": 13039500.0
+      "largest_project_share": 0.17857142857142858
     },
     {
       "dimension": "rooms",
@@ -1172,8 +1526,7 @@
       "mae_aed": 4649051.63976047,
       "median_error": -0.08950203154925872,
       "communities": 24,
-      "largest_project_share": 0.17857142857142858,
-      "median_price_aed": 13039500.0
+      "largest_project_share": 0.17857142857142858
     },
     {
       "dimension": "rooms",
@@ -1185,22 +1538,20 @@
       "mae_aed": 5428862.446943625,
       "median_error": -0.12124295848124264,
       "communities": 24,
-      "largest_project_share": 0.17857142857142858,
-      "median_price_aed": 13039500.0
+      "largest_project_share": 0.17857142857142858
     },
     {
       "dimension": "rooms",
       "segment": "5+",
       "estimator": "model",
       "rows": 6,
-      "mdape": 0.13046053305481353,
-      "within_10pct": 0.5,
-      "mae_aed": 7031106.412524,
-      "median_error": -0.08365188089096512,
-      "range_coverage": 0.5,
+      "mdape": 0.16971913452277204,
+      "within_10pct": 0.16666666666666666,
+      "mae_aed": 8135796.250752513,
+      "median_error": -0.13622068909232982,
+      "range_coverage": 0.16666666666666666,
       "communities": 5,
-      "largest_project_share": 0.16666666666666666,
-      "median_price_aed": 33371944.0
+      "largest_project_share": 0.16666666666666666
     },
     {
       "dimension": "rooms",
@@ -1213,8 +1564,7 @@
       "median_error": -0.12026176195003536,
       "range_coverage": 0.5,
       "communities": 5,
-      "largest_project_share": 0.16666666666666666,
-      "median_price_aed": 33371944.0
+      "largest_project_share": 0.16666666666666666
     },
     {
       "dimension": "rooms",
@@ -1226,8 +1576,7 @@
       "mae_aed": 8509714.231596174,
       "median_error": -0.1272257734955723,
       "communities": 5,
-      "largest_project_share": 0.16666666666666666,
-      "median_price_aed": 33371944.0
+      "largest_project_share": 0.16666666666666666
     },
     {
       "dimension": "rooms",
@@ -1239,22 +1588,20 @@
       "mae_aed": 17062321.50949208,
       "median_error": 0.12373981582977091,
       "communities": 5,
-      "largest_project_share": 0.16666666666666666,
-      "median_price_aed": 33371944.0
+      "largest_project_share": 0.16666666666666666
     },
     {
       "dimension": "rooms",
       "segment": "penthouse",
       "estimator": "model",
       "rows": 5,
-      "mdape": 0.12803974135285123,
+      "mdape": 0.1114604884363172,
       "within_10pct": 0.4,
-      "mae_aed": 1006579.1383664377,
-      "median_error": 0.08857507948965052,
-      "range_coverage": 0.4,
+      "mae_aed": 999175.0839451865,
+      "median_error": 0.09244741200177231,
+      "range_coverage": 0.6,
       "communities": 4,
-      "largest_project_share": 0.4,
-      "median_price_aed": 3250000.0
+      "largest_project_share": 0.4
     },
     {
       "dimension": "rooms",
@@ -1267,8 +1614,7 @@
       "median_error": 0.10179467048624359,
       "range_coverage": 0.6,
       "communities": 4,
-      "largest_project_share": 0.4,
-      "median_price_aed": 3250000.0
+      "largest_project_share": 0.4
     },
     {
       "dimension": "rooms",
@@ -1280,8 +1626,7 @@
       "mae_aed": 898506.2541290277,
       "median_error": 0.08602333291367659,
       "communities": 4,
-      "largest_project_share": 0.4,
-      "median_price_aed": 3250000.0
+      "largest_project_share": 0.4
     },
     {
       "dimension": "rooms",
@@ -1293,8 +1638,7 @@
       "mae_aed": 980827.0747942381,
       "median_error": 0.29103540961330615,
       "communities": 4,
-      "largest_project_share": 0.4,
-      "median_price_aed": 3250000.0
+      "largest_project_share": 0.4
     }
   ],
   "backtest": [
@@ -1309,16 +1653,16 @@
       ],
       "rows": 11227,
       "rounds": {
-        "full": 981,
+        "full": 1169,
         "community": 1561
       },
       "scores": {
         "model": {
           "rows": 11227,
-          "mdape": 0.05396755408856056,
-          "within_10pct": 0.6919034470472967,
-          "mae_aed": 255764.9317082645,
-          "median_error": -0.00346104174537047
+          "mdape": 0.05244363966662483,
+          "within_10pct": 0.6922597310056114,
+          "mae_aed": 254567.53559464784,
+          "median_error": -0.004671421471818321
         },
         "model_no_project": {
           "rows": 11227,
@@ -1343,10 +1687,10 @@
         },
         "model_recorded": {
           "rows": 11227,
-          "mdape": 0.050351654691922404,
-          "within_10pct": 0.7050859535049434,
-          "mae_aed": 254738.16791436338,
-          "median_error": -0.0039056054002333967
+          "mdape": 0.05003310959829633,
+          "within_10pct": 0.7064220183486238,
+          "mae_aed": 252954.87909590342,
+          "median_error": -0.003908916216321204
         }
       }
     },
@@ -1362,16 +1706,16 @@
       ],
       "rows": 8649,
       "rounds": {
-        "full": 1552,
+        "full": 1212,
         "community": 2062
       },
       "scores": {
         "model": {
           "rows": 8649,
-          "mdape": 0.06854858016153913,
-          "within_10pct": 0.6200716845878136,
-          "mae_aed": 218616.88790124992,
-          "median_error": 0.008951252032339619
+          "mdape": 0.06946447023295059,
+          "within_10pct": 0.6154468724708059,
+          "mae_aed": 219104.07995760647,
+          "median_error": 0.00827473577812231
         },
         "model_no_project": {
           "rows": 8649,
@@ -1396,10 +1740,10 @@
         },
         "model_recorded": {
           "rows": 8649,
-          "mdape": 0.06433763092102401,
-          "within_10pct": 0.6367210082090415,
-          "mae_aed": 196887.88375442158,
-          "median_error": 0.006515410302282455
+          "mdape": 0.06469072527815302,
+          "within_10pct": 0.6338305006359116,
+          "mae_aed": 198880.79988167557,
+          "median_error": 0.006346012199870171
         }
       }
     },
@@ -1416,16 +1760,16 @@
       ],
       "rows": 11592,
       "rounds": {
-        "full": 1069,
+        "full": 852,
         "community": 1627
       },
       "scores": {
         "model": {
           "rows": 11592,
-          "mdape": 0.06206125680762102,
-          "within_10pct": 0.6733091787439613,
-          "mae_aed": 209844.01078531885,
-          "median_error": -0.0005127993296453274
+          "mdape": 0.06259046294765616,
+          "within_10pct": 0.6704623878536922,
+          "mae_aed": 210084.88320827368,
+          "median_error": -0.0006215838553137031
         },
         "model_no_project": {
           "rows": 11592,
@@ -1450,10 +1794,10 @@
         },
         "model_recorded": {
           "rows": 11592,
-          "mdape": 0.05790552519592787,
-          "within_10pct": 0.6972049689440993,
-          "mae_aed": 192716.10334790894,
-          "median_error": 0.00014416529359929323
+          "mdape": 0.057835165170325664,
+          "within_10pct": 0.6957384403036577,
+          "mae_aed": 193426.90316533326,
+          "median_error": 0.00011706902913908172
         }
       }
     },
@@ -1471,16 +1815,16 @@
       ],
       "rows": 11274,
       "rounds": {
-        "full": 793,
+        "full": 640,
         "community": 832
       },
       "scores": {
         "model": {
           "rows": 11274,
-          "mdape": 0.05929866550463489,
-          "within_10pct": 0.6589497959907752,
-          "mae_aed": 218882.28233372254,
-          "median_error": -0.005142688592699787
+          "mdape": 0.0603838882298472,
+          "within_10pct": 0.6551357104843002,
+          "mae_aed": 220782.5914553896,
+          "median_error": -0.0059154897080182026
         },
         "model_no_project": {
           "rows": 11274,
@@ -1505,10 +1849,10 @@
         },
         "model_recorded": {
           "rows": 11274,
-          "mdape": 0.05950129668930344,
-          "within_10pct": 0.6716338477913784,
-          "mae_aed": 208854.66328984548,
-          "median_error": -0.0026888564360791484
+          "mdape": 0.05967437249791831,
+          "within_10pct": 0.6680858612737272,
+          "mae_aed": 208475.2436379747,
+          "median_error": -0.0031267768754357946
         }
       }
     },
@@ -1527,16 +1871,16 @@
       ],
       "rows": 9480,
       "rounds": {
-        "full": 946,
+        "full": 765,
         "community": 1107
       },
       "scores": {
         "model": {
           "rows": 9480,
-          "mdape": 0.06005389668627305,
-          "within_10pct": 0.685337552742616,
-          "mae_aed": 211092.9965076366,
-          "median_error": -0.006293128515196816
+          "mdape": 0.06062207817410614,
+          "within_10pct": 0.6804852320675105,
+          "mae_aed": 213179.47943701514,
+          "median_error": -0.007741850201717991
         },
         "model_no_project": {
           "rows": 9480,
@@ -1561,11 +1905,95 @@
         },
         "model_recorded": {
           "rows": 9480,
-          "mdape": 0.05814160926591433,
-          "within_10pct": 0.705590717299578,
-          "mae_aed": 197843.3967468894,
-          "median_error": -0.005250694620971559
+          "mdape": 0.05995719642775999,
+          "within_10pct": 0.6974683544303798,
+          "mae_aed": 200376.84569423765,
+          "median_error": -0.00627356816271128
         }
+      }
+    }
+  ],
+  "cold_start": [
+    {
+      "kept_rows": 0,
+      "groups": 5,
+      "communities": 111,
+      "rows": 9480,
+      "rows_full_model": 0,
+      "scores": {
+        "model": {
+          "rows": 9480,
+          "mdape": 0.18820114358480208,
+          "within_10pct": 0.31476793248945145,
+          "mae_aed": 593880.1003832428,
+          "median_error": -0.11949475683179368
+        },
+        "model_no_project": {
+          "rows": 9480,
+          "mdape": 0.18820114358480208,
+          "within_10pct": 0.31476793248945145,
+          "mae_aed": 593880.1003832428,
+          "median_error": -0.11949475683179368
+        },
+        "project_baseline": {
+          "rows": 9480,
+          "mdape": 0.1644219363363609,
+          "within_10pct": 0.3521097046413502,
+          "mae_aed": 533263.5899243965,
+          "median_error": 0.015798372673884883
+        },
+        "baseline": {
+          "rows": 9480,
+          "mdape": 0.1644219363363609,
+          "within_10pct": 0.3521097046413502,
+          "mae_aed": 533263.5899243965,
+          "median_error": 0.015798372673884883
+        }
+      },
+      "range_coverage": {
+        "model": 0.46824894514767934,
+        "model_no_project": 0.46824894514767934
+      }
+    },
+    {
+      "kept_rows": 10,
+      "groups": 5,
+      "communities": 111,
+      "rows": 9480,
+      "rows_full_model": 3934,
+      "scores": {
+        "model": {
+          "rows": 9480,
+          "mdape": 0.13975033162942102,
+          "within_10pct": 0.3919831223628692,
+          "mae_aed": 464417.57253303425,
+          "median_error": 0.0021400380429904007
+        },
+        "model_no_project": {
+          "rows": 9480,
+          "mdape": 0.1598876399137194,
+          "within_10pct": 0.3668776371308017,
+          "mae_aed": 501055.96500773844,
+          "median_error": 0.01037338899120251
+        },
+        "project_baseline": {
+          "rows": 9480,
+          "mdape": 0.11262773634794687,
+          "within_10pct": 0.4627637130801688,
+          "mae_aed": 337278.5691970146,
+          "median_error": 0.013883567762688799
+        },
+        "baseline": {
+          "rows": 9480,
+          "mdape": 0.11287150219154729,
+          "within_10pct": 0.4608649789029536,
+          "mae_aed": 337980.48689290497,
+          "median_error": 0.013236094657997424
+        }
+      },
+      "range_coverage": {
+        "model": 0.5315400843881857,
+        "model_no_project": 0.5389240506329114
       }
     }
   ],
@@ -1576,68 +2004,68 @@
       {
         "feature": "community",
         "label": "Community",
-        "mean_abs_shap": 0.19761534525442886,
-        "share": 0.4246968534937125
+        "mean_abs_shap": 0.1985218620596198,
+        "share": 0.4216798000135432
       },
       {
         "feature": "project",
         "label": "Project",
-        "mean_abs_shap": 0.09212487555020107,
-        "share": 0.19798636955190294
+        "mean_abs_shap": 0.09393447863089364,
+        "share": 0.19952599553774072
       },
       {
         "feature": "area_sqm",
         "label": "Size (sqm)",
-        "mean_abs_shap": 0.07755282475504852,
-        "share": 0.16666944872430267
+        "mean_abs_shap": 0.07907515161900618,
+        "share": 0.16796333549767528
       },
       {
         "feature": "is_off_plan",
         "label": "Off-plan or ready",
-        "mean_abs_shap": 0.03552549538811856,
-        "share": 0.07634815044709294
+        "mean_abs_shap": 0.03431819013656762,
+        "share": 0.0728951834497129
       },
       {
         "feature": "rooms",
         "label": "Rooms",
-        "mean_abs_shap": 0.021700829423457302,
-        "share": 0.046637440844890764
+        "mean_abs_shap": 0.02378067931588737,
+        "share": 0.05051248257533493
       },
       {
         "feature": "nearest_metro",
         "label": "Nearest metro",
-        "mean_abs_shap": 0.015326090421220235,
-        "share": 0.03293743393192531
+        "mean_abs_shap": 0.015481445791223536,
+        "share": 0.03288410101252782
       },
       {
         "feature": "month_index",
         "label": "Month of sale",
-        "mean_abs_shap": 0.012107186528243337,
-        "share": 0.026019659640228128
+        "mean_abs_shap": 0.012523753897962422,
+        "share": 0.02660167492044599
       },
       {
         "feature": "nearest_landmark",
         "label": "Nearest landmark",
-        "mean_abs_shap": 0.007465555781948029,
-        "share": 0.01604429072091031
-      },
-      {
-        "feature": "nearest_mall",
-        "label": "Nearest mall",
-        "mean_abs_shap": 0.001992206249837296,
-        "share": 0.004281467740913944
+        "mean_abs_shap": 0.0073938376498037,
+        "share": 0.015705232406924976
       },
       {
         "feature": "is_freehold",
         "label": "Freehold",
-        "mean_abs_shap": 0.0019766584981724114,
-        "share": 0.004248053932879569
+        "mean_abs_shap": 0.0019657762623604223,
+        "share": 0.004175500534719803
       },
       {
         "feature": "sub_type",
         "label": "Flat or hotel apartment",
-        "mean_abs_shap": 0.0019221135778477304,
-        "share": 0.004130830971240976
+        "mean_abs_shap": 0.0019254145138768027,
+        "share": 0.004089768243816455
+      },
+      {
+        "feature": "nearest_mall",
+        "label": "Nearest mall",
+        "mean_abs_shap": 0.0018675817479126367,
+        "share": 0.003966925807557844
       }
     ]
   },
@@ -1662,14 +2090,14 @@
       {
         "column": "community",
         "method": "Jensen-Shannon distance",
-        "value": 0.22624892977129155,
+        "value": 0.2262489297712915,
         "threshold": 0.1,
         "drifted": true
       },
       {
         "column": "rooms",
         "method": "Jensen-Shannon distance",
-        "value": 0.05471534583471062,
+        "value": 0.054715345834710605,
         "threshold": 0.1,
         "drifted": false
       },

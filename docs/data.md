@@ -19,6 +19,8 @@ with, or endorsed by, DLD, Digital Dubai or the Government of Dubai.
 - Requests carry only a User-Agent that names this project. They do not send
   the DLD page's Origin or Referer headers; a one-day request without them on
   26 September 2026 (UTC) returned the normal CSV.
+- Neither `dubailand.gov.ae` nor `gateway.dubailand.gov.ae` publishes a
+  `robots.txt`: both answered HTTP 404 on 27 September 2026 (UTC).
 - The page's date picker only offers dates in the current calendar year, so the
   downloader only asks for months of the current year. The January to August
   2026 snapshot used for the published results therefore cannot be downloaded
@@ -91,11 +93,18 @@ read on 25 September 2026 (UTC). In summary:
 - The drift report's HTML (`reports/drift/`) is also ignored, because it embeds
   distributions of the source data.
 - Committed results in `reports/` are this project's own evaluation output:
-  accuracy metrics, error analysis (including a few descriptive figures per
-  segment, such as its median price), SHAP importance and drift test
-  statistics. They contain no transaction records.
-- The README shows one illustrative API response. Like any response, it
-  includes a community's training median price per square metre.
+  accuracy metrics, error analysis (row counts and errors per segment), SHAP
+  importance and drift test statistics. They contain no transaction records
+  and no price statistics of the data, such as a median price per community,
+  project or segment.
+- The README shows one illustrative API response: the model's estimate, its
+  range and factors, and the model's starting price per square metre, which
+  belongs to the fitted model rather than to any community. The response's
+  community median price per square metre is left out of the README for the
+  reason above; `scripts/readme_sample.py` drops it.
+- The docs quote a few single figures about the data where a cleaning rule or
+  a design decision rests on them, such as the highest price per square metre
+  that passes the cleaning rules and the row counts of each cleaning step.
 - A running API serves values derived from the data it was trained on: each
   community's training median price per square metre, and the number of
   training sales per community and per project (`/communities`, `/projects`).
@@ -188,4 +197,8 @@ lists them). Validation and test rows are not trimmed.
   groups, how often optional columns are empty, and the most expensive sales per
   square metre that pass the cleaning rules.
 - Projects: English key only, because different projects can share generic
-  Arabic names.
+  Arabic names. A project is identified by its community and its name
+  together: in the January to July 2026 export, four names belong to
+  buildings in two communities each (Botanica in Dubai Marina and in Jumeirah
+  Village Circle, Imperial Residence, Indigo Tower and Living Legends Phase 7;
+  `python scripts/data_audit.py` lists them).
