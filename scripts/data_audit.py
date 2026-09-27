@@ -120,7 +120,10 @@ def shared_project_names(df: pd.DataFrame) -> None:
     )
     for name in shared.index:
         counts = earlier.loc[earlier["project"] == name, "community"].value_counts().sort_index()
-        print(f"  {name}: " + ", ".join(f"{c} ({n} sales)" for c, n in counts.items()))
+        print(
+            f"  {name}: "
+            + ", ".join(f"{c} ({n} sale{'' if n == 1 else 's'})" for c, n in counts.items())
+        )
     in_newest = cleaned[(cleaned["month"] == newest) & cleaned["project"].isin(shared.index)]
     print(f"  sales in {newest} with one of these names: {len(in_newest)}")
 
