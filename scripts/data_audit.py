@@ -8,6 +8,7 @@ Prints, for the cached raw files:
 * how often the optional columns are empty,
 * the most expensive apartment sales per square metre that pass the cleaning rules,
 * the sales in the newest month whose community had no sales in the earlier months,
+* project names recorded in more than one community before the newest month,
 * small communities whose every sale lies outside the overall 0.5% to 99.5% range of
   price per square metre (a trim against those percentiles would remove them entirely).
 
@@ -107,6 +108,23 @@ def new_communities(df: pd.DataFrame) -> None:
         print(f"  off-plan: {fresh['is_off_plan'].astype('boolean').mean():.0%}")
 
 
+def shared_project_names(df: pd.DataFrame) -> None:
+    cleaned, _ = clean.clean(df, config.DEFAULT_SETTINGS.cleaning)
+    newest = cleaned["month"].max()
+    earlier = cleaned[(cleaned["month"] < newest)].dropna(subset=["project"])
+    per_name = earlier.groupby("project")["community"].nunique()
+    shared = per_name[per_name > 1]
+    print(
+        f"\nProject names recorded in more than one community before {newest}: "
+        f"{len(shared)} of {len(per_name):,}"
+    )
+    for name in shared.index:
+        counts = earlier.loc[earlier["project"] == name, "community"].value_counts().sort_index()
+        print(f"  {name}: " + ", ".join(f"{c} ({n} sales)" for c, n in counts.items()))
+    in_newest = cleaned[(cleaned["month"] == newest) & cleaned["project"].isin(shared.index)]
+    print(f"  sales in {newest} with one of these names: {len(in_newest)}")
+
+
 def small_outlying_communities(df: pd.DataFrame, min_rows: int = 200) -> None:
     cleaned, _ = clean.clean(df, config.DEFAULT_SETTINGS.cleaning)
     ratio = (cleaned["price_aed"] / cleaned["area_sqm"]).to_numpy(np.float64)
@@ -151,6 +169,7 @@ def main(raw_dir: Path) -> None:
     empty_columns(df)
     luxury(df)
     new_communities(df)
+    shared_project_names(df)
     small_outlying_communities(df)
 
 

@@ -4,6 +4,10 @@ Sends one request with a project and the same request without it through the
 real FastAPI app (in process, no server needed) and writes both into the block
 between ``<!-- sample:start -->`` and ``<!-- sample:end -->``.
 
+The response's ``community_median_per_sqm_aed`` is left out of the README: it
+is a price statistic of the DLD data rather than a model output, and this
+repository does not publish those (docs/data.md, "Terms of use").
+
 Usage: python scripts/readme_sample.py [MODEL_DIR]  (default: artifacts/model)
 """
 
@@ -22,6 +26,7 @@ from dxb_prices.api.app import create_app
 
 README = Path(__file__).resolve().parents[1] / "README.md"
 START, END = "<!-- sample:start -->", "<!-- sample:end -->"
+LEFT_OUT = "community_median_per_sqm_aed"
 
 REQUEST: dict[str, Any] = {
     "community": "Business Bay",
@@ -39,6 +44,7 @@ def _json(data: Any) -> str:
 
 def render(with_project: dict[str, Any], without: dict[str, Any]) -> str:
     request_without = {k: v for k, v in REQUEST.items() if k != "project"}
+    shown = {k: v for k, v in with_project.items() if k != LEFT_OUT}
     return "\n".join(
         [
             START,
@@ -48,10 +54,12 @@ def render(with_project: dict[str, Any], without: dict[str, Any]) -> str:
             json.dumps(REQUEST, ensure_ascii=False),
             "```",
             "",
-            "Response:",
+            f"Response (without `{LEFT_OUT}`, the community's median price per square metre",
+            "over the training months, which this repository does not publish; see",
+            "[docs/data.md](docs/data.md#terms-of-use)):",
             "",
             "```json",
-            _json(with_project),
+            _json(shown),
             "```",
             "",
             "The same request without the project",
