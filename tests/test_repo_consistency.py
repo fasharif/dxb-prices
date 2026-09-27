@@ -37,6 +37,17 @@ def test_python_version_is_the_same_in_the_workflows_and_the_dockerfile() -> Non
     assert _env("ci.yml", "PYTHON_VERSION") == _env("retrain.yml", "PYTHON_VERSION")
 
 
+def test_the_test_matrix_starts_at_the_minimum_python_and_includes_the_images() -> None:
+    matrix = re.search(r"^\s+python: \[([^\]]+)\]$", _read(WORKFLOWS / "ci.yml"), re.MULTILINE)
+    assert matrix
+    versions = [v.strip().strip('"') for v in matrix.group(1).split(",")]
+    assert _env("ci.yml", "PYTHON_VERSION") in versions
+    minimum = re.search(r'^requires-python = ">=(\d+\.\d+)"$', _read(ROOT / "pyproject.toml"), re.M)
+    assert minimum
+    oldest = min(versions, key=lambda v: tuple(int(part) for part in v.split(".")))
+    assert oldest == minimum.group(1)
+
+
 def test_action_refs_are_major_tags_or_commit_pins() -> None:
     """setup-uv publishes no moving major tags (only exact releases), so it must be pinned."""
     refs = [

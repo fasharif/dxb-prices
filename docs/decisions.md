@@ -214,7 +214,7 @@ backtest metrics, the model and the reports. `dxb_prices.telemetry` sets
 database store without code changes. `mlflow ui` is started by the user, not by
 this code, so the README's command sets the same variables.
 
-## 12. Develop and train in the dev container; Python 3.12 only
+## 12. Develop and train in the dev container; test on Python 3.12 to 3.14
 
 **Context.** The pipeline needs compiled packages (LightGBM, SHAP with numba,
 pyarrow) and the results should not depend on the machine that produced them.
@@ -222,8 +222,9 @@ pyarrow) and the results should not depend on the machine that produced them.
 **Decision.** Dependencies are locked with uv (`uv.lock`) for Linux, Windows and
 Apple-silicon macOS. The Dockerfile's `dev` target (Python 3.12 on Debian
 bookworm) is the reference environment: the published training run and the test
-suite ran in it, and CI uses Python 3.12 on Ubuntu. `requires-python` is
-`>=3.12,<3.13` until CI covers later versions. Optional extras keep the API
+suite ran in it. CI runs the tests on Python 3.12, 3.13 and 3.14 on Ubuntu, and
+`requires-python` is `>=3.12`; one lockfile resolves the same package versions
+for all three. Optional extras keep the API
 image free of MLflow, Evidently and SHAP. Base images come from the AWS ECR
 mirror of the Docker Official Images to avoid Docker Hub rate limits.
 

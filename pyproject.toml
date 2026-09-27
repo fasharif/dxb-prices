@@ -6,8 +6,8 @@ readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Farah Sharif" }]
-# Only 3.12 is tested (CI and the Docker images); widen once CI covers more.
-requires-python = ">=3.12,<3.13"
+# CI tests 3.12, 3.13 and 3.14; the Docker images and the published run use 3.12.
+requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.141,<1",
     "lightgbm>=4.6,<5",
@@ -100,7 +100,8 @@ filterwarnings = [
     "ignore::DeprecationWarning:litestar.*",
     "ignore::PendingDeprecationWarning:shap.*",
     "ignore:Using `httpx` with `starlette.testclient` is deprecated",
-    "ignore:invalid escape sequence:SyntaxWarning",
+    # Python 3.12 and 3.13 say "invalid escape sequence"; 3.14 says '"\d" is an invalid ...'.
+    "ignore:.*invalid escape sequence:SyntaxWarning",
 ]
 
 [tool.coverage.run]

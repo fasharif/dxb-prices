@@ -196,7 +196,7 @@ and the evaluation both use it.
 
 | Tool | Why |
 |---|---|
-| Python 3.12, pandas | The standard for tabular data work. Only 3.12 is tested (CI and the images), so `requires-python` is pinned to it. |
+| Python 3.12 to 3.14, pandas | The standard for tabular data work. CI runs the tests on 3.12, 3.13 and 3.14; the Docker images and the published run use 3.12. |
 | LightGBM | Fast gradient boosting with native categorical splits, which suits many communities and projects without target encoding. |
 | SHAP (TreeSHAP) | Exact, additive per-estimate explanations for tree models; LightGBM computes them itself, so the API image does not need the `shap` package. |
 | MLflow | Records every search trial and the final run's parameters, metrics and artefacts in a plain local directory. |
@@ -209,7 +209,7 @@ and the evaluation both use it.
 
 ## Quick start
 
-Needs Python 3.12, [uv](https://docs.astral.sh/uv/) and Docker.
+Needs Python 3.12 or later (CI tests 3.12 to 3.14), [uv](https://docs.astral.sh/uv/) and Docker.
 
 ```bash
 git clone https://github.com/fasharif/dxb-prices.git && cd dxb-prices
