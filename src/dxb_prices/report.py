@@ -35,9 +35,9 @@ SEGMENT_DIMENSIONS: tuple[str, ...] = (
 )
 SEGMENT_NOTES: dict[str, str] = {
     "price band": (
-        "Bands by the recorded sale price. A sale that sold above its estimate lands in a "
-        "higher band, so the top band looks harder here than it is for a user, who only knows "
-        "the estimate; the next table bands by the estimate instead."
+        "Bands by the recorded sale price. Banding by the outcome moves sales that sold above "
+        "their estimate into higher bands and can make the top band look harder than it is, "
+        "so the next table bands by the estimate instead."
     ),
     "estimated price band": (
         "Bands by the estimate with the project, which is what a user sees before a sale."

@@ -314,8 +314,8 @@ def segment_scores(
     """Scores per segment. Price bands come twice: by the recorded price and by the estimate.
 
     Banding by the recorded price puts the sales that came in above their
-    estimate into the higher bands, which makes the top band look worse than
-    it is for a user, who only knows the estimate.
+    estimate into the higher bands, which can make the top band look worse
+    than it is for a user, who only knows the estimate.
     """
     frame = scored.copy()
     frame["registration"] = pd.Categorical(
