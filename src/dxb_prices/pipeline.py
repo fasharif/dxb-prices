@@ -22,6 +22,10 @@ labels and freehold flag, which the API cannot know, as a reference.
 A rolling-origin backtest repeats steps 2 and 3 with default settings for
 every month that has enough history before it, to show how much the scores
 move from one month to the next.
+
+A simulated cold start refits the chosen models with each community in turn
+cut to a few training sales (or none), and scores that community's test
+sales, to show how the models do where the data is thin.
 """
 
 from __future__ import annotations
@@ -58,6 +62,8 @@ ESTIMATORS: tuple[str, ...] = (
 )
 # Estimators that come with an 80% range.
 RANGED: tuple[str, ...] = ("model", "model_no_project")
+# Estimators shown in the error analysis (the recorded-labels reference is left out).
+SEGMENTED: tuple[str, ...] = ("model", "model_no_project", "project_baseline", "baseline")
 
 
 @dataclass
@@ -259,40 +265,75 @@ def _community_segment(frame: pd.DataFrame, rows: dict[str, int], thin: int) -> 
     return pd.Series(pd.Categorical(labels, categories=order), index=frame.index)
 
 
+def _project_segment(frame: pd.DataFrame, spec: FeatureSpec) -> pd.Series:
+    """How well the full model knows each sale's building, as the API would see it."""
+    order = [
+        f"own level ({spec.min_rows_project}+ training sales)",
+        f"grouped as other (1-{spec.min_rows_project - 1} training sales)",
+        "new (no training sales in its community)",
+        "not recorded in the sale",
+    ]
+    labels = []
+    for community, project in zip(
+        frame["community"].astype("object"), frame["project"].astype("object"), strict=True
+    ):
+        if not isinstance(project, str):
+            labels.append(order[3])
+        elif not spec.has_project(community, project):
+            labels.append(order[2])
+        elif spec.project_has_own_level(community, project):
+            labels.append(order[0])
+        else:
+            labels.append(order[1])
+    return pd.Series(pd.Categorical(labels, categories=order), index=frame.index)
+
+
 def _profile(part: pd.DataFrame) -> dict[str, Any]:
     """What a segment is made of, so a small or lopsided segment is visible."""
     projects = part["project"].astype("object").fillna("(no project)").value_counts()
     return {
         "communities": int(part["community"].nunique()),
         "largest_project_share": float(projects.iloc[0] / len(part)),
-        "median_price_aed": float(part["price_aed"].median()),
     }
 
 
+# Error-analysis dimensions, in report order: (name, column added by segment_scores).
+SEGMENT_DIMENSIONS: tuple[tuple[str, str], ...] = (
+    ("registration", "registration"),
+    ("price band", "price_band"),
+    ("estimated price band", "estimate_band"),
+    ("community data", "community_data"),
+    ("project data", "project_data"),
+    ("rooms", "rooms_segment"),
+)
+
+
 def segment_scores(
-    scored: pd.DataFrame, community_rows: dict[str, int], settings: Settings
+    scored: pd.DataFrame, spec: FeatureSpec, settings: Settings
 ) -> list[dict[str, Any]]:
+    """Scores per segment. Price bands come twice: by the recorded price and by the estimate.
+
+    Banding by the recorded price puts the sales that came in above their
+    estimate into the higher bands, which makes the top band look worse than
+    it is for a user, who only knows the estimate.
+    """
     frame = scored.copy()
     frame["registration"] = pd.Categorical(
         np.where(frame["is_off_plan"].astype("boolean").fillna(False), "off-plan", "ready"),
         categories=["off-plan", "ready"],
     )
-    frame["price_band"] = metrics.price_band_labels(
-        frame["price_aed"], settings.segments.price_bands
-    )
+    bands = settings.segments.price_bands
+    frame["price_band"] = metrics.price_band_labels(frame["price_aed"], bands)
+    frame["estimate_band"] = metrics.price_band_labels(frame["pred_model"], bands)
     frame["community_data"] = _community_segment(
-        frame, community_rows, settings.segments.thin_community_rows
+        frame, spec.community_rows, settings.segments.thin_community_rows
     )
+    frame["project_data"] = _project_segment(frame, spec)
     frame["rooms_segment"] = pd.Categorical(frame["rooms"], categories=clean_mod.ROOM_LEVELS)
-    columns = {name: f"pred_{name}" for name in ESTIMATORS if name != "model_recorded"}
+    columns = {name: f"pred_{name}" for name in SEGMENTED}
     coverage = {name: _in_range(frame, name) for name in RANGED if f"low_{name}" in frame}
     out: list[dict[str, Any]] = []
-    for dimension, col in (
-        ("registration", "registration"),
-        ("price band", "price_band"),
-        ("community data", "community_data"),
-        ("rooms", "rooms_segment"),
-    ):
+    for dimension, col in SEGMENT_DIMENSIONS:
         table = metrics.segment_table(frame, col, columns)
         profiles = {
             str(seg): _profile(part) for seg, part in frame.groupby(col, observed=True, sort=True)
@@ -363,8 +404,74 @@ def _refit_and_test(
         scored=scored,
         scores=_scores(scored),
         coverage={name: float(_in_range(scored, name).mean()) for name in RANGED},
-        segments=segment_scores(scored, fit.model.spec.community_rows, settings),
+        segments=segment_scores(scored, fit.model.spec, settings),
     )
+
+
+def _community_groups(communities: list[str], groups: int, seed: int) -> list[list[str]]:
+    order = np.random.default_rng(seed).permutation(len(communities))
+    n = max(1, min(groups, len(communities)))
+    return [sorted(communities[j] for j in order[i::n]) for i in range(n)]
+
+
+def cut_communities(
+    rows: pd.DataFrame, communities: set[str], kept: int, seed: int
+) -> pd.DataFrame:
+    """Keep at most ``kept`` randomly chosen rows of each community in ``communities``."""
+    inside = rows["community"].astype("object").isin(communities)
+    draw = pd.Series(np.random.default_rng(seed).random(len(rows)), index=rows.index)
+    rank = draw[inside].groupby(rows.loc[inside, "community"].astype("object")).rank(method="first")
+    keep = ~inside
+    keep.loc[rank.index] = rank <= kept
+    cut: pd.DataFrame = rows.loc[keep]
+    return cut
+
+
+def cold_start(
+    trainval: pd.DataFrame, test: pd.DataFrame, settings: Settings, selection: _Selection
+) -> list[dict[str, Any]]:
+    """Score each test sale with models refitted as if its community had little or no data.
+
+    The test month's communities are split into random groups. For each group
+    and each number of kept sales, both models and both baselines are refitted
+    on the final training rows with that group's communities cut down (other
+    communities keep all their rows), using the chosen settings, rounds and
+    80% ranges; the group's test sales are then scored as served.
+    """
+    rules = settings.cold_start
+    communities = sorted(str(c) for c in test["community"].dropna().unique())
+    groups = _community_groups(communities, rules.groups, settings.random_seed)
+    out: list[dict[str, Any]] = []
+    for kept in rules.kept_rows:
+        parts = []
+        for group in groups:
+            held = set(group)
+            rows = cut_communities(trainval, held, kept, settings.random_seed)
+            fit = _refit(rows, settings, selection.params, selection.rounds)
+            fit.model.metadata = {"residual_quantiles": selection.residual_quantiles}
+            parts.append(score_period(fit, test[test["community"].astype("object").isin(held)]))
+        scored = pd.concat(parts)
+        log.info(
+            "cold start with %d training sales per community: MdAPE %.4f with project (%d rows)",
+            kept,
+            metrics.mdape(scored["price_aed"], scored["pred_model"]),
+            len(scored),
+        )
+        out.append(
+            {
+                "kept_rows": kept,
+                "groups": len(groups),
+                "communities": len(communities),
+                "rows": len(scored),
+                "rows_full_model": int((scored["variant"] == FULL).sum()),
+                "scores": {
+                    name: metrics.score(scored["price_aed"], scored[f"pred_{name}"]).as_dict()
+                    for name in SEGMENTED
+                },
+                "range_coverage": {name: float(_in_range(scored, name).mean()) for name in RANGED},
+            }
+        )
+    return out
 
 
 def backtest(cleaned: pd.DataFrame, settings: Settings) -> list[dict[str, Any]]:
@@ -416,8 +523,9 @@ def _results(
     rows: dict[str, int],
     selection: _Selection,
     evaluation: _Evaluation,
-    folds: list[dict[str, Any]],
     *,
+    folds: list[dict[str, Any]],
+    cold: list[dict[str, Any]],
     command: str,
     data_info: dict[str, Any],
     cleaning_report: clean_mod.CleaningReport | None,
@@ -425,6 +533,7 @@ def _results(
     fit = evaluation.fit
     spec = fit.model.spec
     known = int((evaluation.scored["variant"] == FULL).sum())
+    pairs = fit.rows.dropna(subset=["project"])[["community", "project"]].drop_duplicates()
     return {
         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "command": command,
@@ -446,7 +555,8 @@ def _results(
                 "final_fit": len(fit.rows),
             },
             "final_fit_communities": int(fit.rows["community"].nunique()),
-            "final_fit_projects": int(fit.rows["project"].nunique()),
+            # A project is a name within a community (features.project_key).
+            "final_fit_projects": len(pairs),
             "communities_with_own_level": len(spec.levels["community"]) - 2,
             "projects_with_own_level": len(spec.levels["project"]) - 2,
         },
@@ -460,6 +570,7 @@ def _results(
             "test_rows": len(evaluation.scored),
             "test_rows_project_known": known,
             "min_project_rows_baseline": fit.project_baseline.min_rows,
+            "test_rows_the_api_would_refuse": serving.refusals(evaluation.scored, spec),
         },
         "validation": selection.scores,
         "test": evaluation.scores,
@@ -470,6 +581,7 @@ def _results(
         },
         "segments": evaluation.segments,
         "backtest": folds,
+        "cold_start": cold,
     }
 
 
@@ -565,8 +677,11 @@ def _log_to_mlflow(results: dict[str, Any], model_dir: Path, reports_dir: Path |
     for name, value in results["interval"]["test_coverage"].items():
         flat[f"test_{name}_interval80_coverage"] = value
     for fold in results["backtest"]:
-        for name in ("model", "model_no_project", "project_baseline", "baseline"):
+        for name in SEGMENTED:
             flat[f"backtest_{fold['test_month']}_{name}_mdape"] = fold["scores"][name]["mdape"]
+    for level in results["cold_start"]:
+        for name in SEGMENTED:
+            flat[f"cold_start_{level['kept_rows']}_{name}_mdape"] = level["scores"][name]["mdape"]
     tracking.log_metrics(flat)
     tracking.log_artifacts(model_dir, "model")
     if reports_dir is not None:
@@ -581,6 +696,7 @@ def train_and_evaluate(
     reports_dir: Path | None,
     search: bool = True,
     run_backtest: bool = False,
+    run_cold_start: bool = False,
     cleaning_report: clean_mod.CleaningReport | None = None,
     data_info: dict[str, Any] | None = None,
     track: bool = False,
@@ -597,6 +713,7 @@ def train_and_evaluate(
         "dxb-prices train"
         + ("" if search else " --no-search")
         + ("" if run_backtest else " --no-backtest")
+        + ("" if run_cold_start else " --no-cold-start")
     )
     with ExitStack() as stack:
         if track:
@@ -613,12 +730,14 @@ def train_and_evaluate(
         trainval = pd.concat([train, valid])
         evaluation = _refit_and_test(trainval, test, settings, selection)
         folds = backtest(cleaned, settings) if run_backtest else []
+        cold = cold_start(trainval, test, settings, selection) if run_cold_start else []
         results = _results(
             temporal,
             {"train": len(train), "valid": len(valid), "test": len(test)},
             selection,
             evaluation,
-            folds,
+            folds=folds,
+            cold=cold,
             command=command,
             data_info=data_info or {},
             cleaning_report=cleaning_report,

@@ -142,6 +142,20 @@ class SegmentRules:
 
 
 @dataclass(frozen=True)
+class ColdStartRules:
+    """Simulated cold start: each community in turn keeps only a few training sales.
+
+    The test month's communities are split at random into ``groups``. For each
+    group, the models are refitted with that group's communities cut to
+    ``kept_rows`` training sales, and the group's test sales are scored.
+    """
+
+    groups: int = 5
+    # 0 simulates a community the models have never seen.
+    kept_rows: tuple[int, ...] = (0, 10)
+
+
+@dataclass(frozen=True)
 class Settings:
     cleaning: CleaningRules = field(default_factory=CleaningRules)
     trim: TrainingTrim = field(default_factory=TrainingTrim)
@@ -149,6 +163,7 @@ class Settings:
     split: SplitRules = field(default_factory=SplitRules)
     segments: SegmentRules = field(default_factory=SegmentRules)
     baseline: BaselineRules = field(default_factory=BaselineRules)
+    cold_start: ColdStartRules = field(default_factory=ColdStartRules)
     random_seed: int = 42
 
 

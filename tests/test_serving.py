@@ -62,6 +62,30 @@ def test_a_project_recorded_only_in_another_community_uses_the_community_model(
     assert rows.loc[0, "nearest_landmark"] == "Burj Khalifa"  # Business Bay's, not Marina Walk
 
 
+def test_sales_the_api_would_refuse_are_counted(spec: features.FeatureSpec) -> None:
+    sales = pd.concat(
+        [
+            request(),
+            request(community="Al Jaddaf"),
+            request(rooms="unknown"),
+            request(community="Al Jaddaf", rooms="unknown"),
+        ],
+        ignore_index=True,
+    )
+    assert serving.refusals(sales, spec) == {
+        "community without training sales (404)": 2,
+        "room count not recorded (422)": 1,
+    }
+
+
+def test_the_api_accepts_the_same_room_counts_the_refusal_count_assumes() -> None:
+    from typing import get_args
+
+    from dxb_prices.api.schemas import RoomsLabel
+
+    assert get_args(RoomsLabel) == serving.API_ROOMS
+
+
 def test_a_given_freehold_flag_is_kept(spec: features.FeatureSpec) -> None:
     rows = serving.model_rows(request(is_freehold=False), spec)
     assert bool(rows.loc[0, "is_freehold"]) is False

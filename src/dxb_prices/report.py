@@ -12,6 +12,8 @@ from typing import Any
 
 README_START = "<!-- results:start -->"
 README_END = "<!-- results:end -->"
+HEADLINE_START = "<!-- headline:start -->"
+HEADLINE_END = "<!-- headline:end -->"
 
 LABELS: dict[str, str] = {
     "model": "LightGBM, project given",
@@ -22,6 +24,46 @@ LABELS: dict[str, str] = {
 }
 HEADLINE: tuple[str, ...] = tuple(LABELS)
 SEGMENT_ESTIMATORS: tuple[str, ...] = ("model", "model_no_project", "project_baseline", "baseline")
+# Error-analysis dimensions in report order (pipeline.SEGMENT_DIMENSIONS writes them).
+SEGMENT_DIMENSIONS: tuple[str, ...] = (
+    "registration",
+    "price band",
+    "estimated price band",
+    "community data",
+    "project data",
+    "rooms",
+)
+SEGMENT_NOTES: dict[str, str] = {
+    "price band": (
+        "Bands by the recorded sale price. A sale that sold above its estimate lands in a "
+        "higher band, so the top band looks harder here than it is for a user, who only knows "
+        "the estimate; the next table bands by the estimate instead."
+    ),
+    "estimated price band": (
+        "Bands by the estimate with the project, which is what a user sees before a sale."
+    ),
+    "project data": (
+        "How well the full model knows each sale's building. A project needs a minimum number "
+        "of training sales in its community for a level of its own; rarer projects share one "
+        "level, and a project with no training sales in its community (or none recorded) goes "
+        "to the community-level model, so its two model columns are equal."
+    ),
+}
+PROFILED: tuple[str, ...] = ("community data", "project data")
+_MONTHS = (
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+)
 
 
 def _pct(v: float) -> str:
@@ -55,6 +97,27 @@ def _beats(m: dict[str, float], b: dict[str, float], name: str) -> str:
     return f"beats {name} on {better} but not on {worse}"
 
 
+def building_share(test: dict[str, dict[str, float]]) -> str:
+    """How much of the model's gain over the community median the project median already has."""
+    base, proj, model = (test[k]["mdape"] for k in ("baseline", "project_baseline", "model"))
+    numbers = (
+        f"the project median alone moves MdAPE from {_pct(base)} to {_pct(proj)}, and the "
+        f"model with the project reaches {_pct(model)}"
+    )
+    total, from_building = base - model, base - proj
+    if total > 0 and from_building > total / 2:
+        return (
+            "Most of the gain over the community median comes from knowing the building: "
+            f"{numbers}."
+        )
+    if total > 0 and from_building > 0:
+        return (
+            "Knowing the building gives less than half of the gain over the community median: "
+            f"{numbers}."
+        )
+    return f"On MdAPE, {numbers}."
+
+
 def verdict(test: dict[str, dict[str, float]]) -> str:
     """Plain statement of which baselines each served path beats on the test month."""
     community = _beats(test["model"], test["baseline"], "the community-median baseline")
@@ -69,10 +132,7 @@ def verdict(test: dict[str, dict[str, float]]) -> str:
     without = _beats(test["model_no_project"], test["baseline"], "the community-median baseline")
     return (
         f"With the project, LightGBM {with_project}. Without the project, the community-level "
-        f"model {without}. Most of the gain over the community median comes from knowing the "
-        f"building: the project median alone moves MdAPE from {_pct(test['baseline']['mdape'])} "
-        f"to {_pct(test['project_baseline']['mdape'])}, and the model with the project reaches "
-        f"{_pct(test['model']['mdape'])}."
+        f"model {without}. {building_share(test)}"
     )
 
 
@@ -101,14 +161,31 @@ def scores_table(results: dict[str, Any], stage: str) -> str:
     return "\n".join(lines)
 
 
+def refusal_note(served: dict[str, Any]) -> str:
+    """Whether the API would have answered every test sale, and why not where it would not."""
+    if "test_rows_the_api_would_refuse" not in served:
+        return ""
+    refused = {k: v for k, v in served["test_rows_the_api_would_refuse"].items() if v}
+    if not refused:
+        return "The API would have answered every test sale."
+    total = sum(refused.values())
+    counts = "; ".join(f"{reason}: {n:,}" for reason, n in refused.items())
+    return (
+        f"The API would refuse {total:,} test sale{'' if total == 1 else 's'} ({counts}); "
+        "they are scored through the same code so that every estimator covers the same rows."
+    )
+
+
 def legend(results: dict[str, Any]) -> str:
     served = results["served"]
+    refused = refusal_note(served)
     return (
         "*Project given*: the request a user sends (community, project, size, rooms, off-plan "
         "or ready, date); the nearest metro, mall and landmark and the freehold flag are "
         "filled in from the training data, as the API does. Sales whose project had no "
-        f"training sales ({served['test_rows'] - served['test_rows_project_known']:,} of "
-        f"{served['test_rows']:,}) get the community-level model, as they would from the API. "
+        "training sales in its community, or none recorded "
+        f"({served['test_rows'] - served['test_rows_project_known']:,} of "
+        f"{served['test_rows']:,}), get the community-level model, as they would from the API. "
         "*No project*: the same request without the project, answered by the community-level "
         "model, which was trained without the project and the location labels. "
         "*Project median*: the project's training median price per sqm when it has at least "
@@ -117,6 +194,7 @@ def legend(results: dict[str, Any]) -> str:
         "times the size (the baseline the brief asks for). *Recorded location labels*: the "
         "full model given DLD's own nearest metro, mall, landmark and freehold flag for each "
         "sale, which an API user cannot supply. Median error below zero means estimates run low."
+        + (f" {refused}" if refused else "")
     )
 
 
@@ -180,16 +258,81 @@ def segments_table(results: dict[str, Any], dimension: str) -> str:
 
 def profile_table(results: dict[str, Any], dimension: str) -> str:
     lines = [
-        "| Segment | Rows | Communities | Largest single project | Median price (AED) |",
-        "|---|---:|---:|---:|---:|",
+        "| Segment | Rows | Communities | Largest single project |",
+        "|---|---:|---:|---:|",
     ]
     for seg, est in _segment_rows(results, dimension).items():
         m = est["model"]
         lines.append(
             f"| {seg} | {m['rows']:,} | {m['communities']:,} | "
-            f"{_pct(m['largest_project_share'])} of rows | {_aed(m['median_price_aed'])} |"
+            f"{_pct(m['largest_project_share'])} of rows |"
         )
     return "\n".join(lines)
+
+
+def _kept_label(kept: int) -> str:
+    return "0: a new community (the API refuses these)" if kept == 0 else f"{kept:,}"
+
+
+def cold_start_table(results: dict[str, Any]) -> str:
+    levels = results.get("cold_start") or []
+    lines = [
+        "| Training sales kept per community | Rows | MdAPE with project | MdAPE no project | "
+        "Project median | Community median | Within 10% with project | "
+        "In 80% range with project |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    test, cover = results["test"], results["interval"]["test_coverage"]
+    rows = [("all (the published models)", test, cover["model"])]
+    rows += [
+        (_kept_label(lv["kept_rows"]), lv["scores"], lv["range_coverage"]["model"])
+        for lv in sorted(levels, key=lambda lv: -int(lv["kept_rows"]))
+    ]
+    for label, scores, coverage in rows:
+        mdapes = " | ".join(_pct(scores[name]["mdape"]) for name in SEGMENT_ESTIMATORS)
+        lines.append(
+            f"| {label} | {scores['model']['rows']:,} | {mdapes} | "
+            f"{_pct(scores['model']['within_10pct'])} | {_pct(coverage)} |"
+        )
+    return "\n".join(lines)
+
+
+def cold_start_method(results: dict[str, Any]) -> str:
+    levels = results.get("cold_start") or []
+    if not levels:
+        return ""
+    first = levels[0]
+    return (
+        f"The {first['communities']:,} communities of the test month were split at random into "
+        f"{first['groups']} groups. For each group, both models and both baselines were refitted "
+        "on the final training rows with that group's communities cut to the stated number of "
+        "randomly chosen sales (every other community kept all of its sales), with the chosen "
+        "settings and 80% ranges, and the group's test sales were scored as served. A request "
+        "for a community without training sales gets a 404 from the API; the last row shows "
+        "what the models would have answered."
+    )
+
+
+def cold_start_summary(results: dict[str, Any]) -> str:
+    levels = {int(lv["kept_rows"]): lv["scores"] for lv in results.get("cold_start") or []}
+    thin = sorted(k for k in levels if k > 0)
+    if not thin:
+        return ""
+    k, test = thin[0], results["test"]
+    text = (
+        f"Simulated cold start (each community in turn cut to {k:,} training sales, models "
+        f"refitted): MdAPE {_pct(levels[k]['model']['mdape'])} with the project and "
+        f"{_pct(levels[k]['model_no_project']['mdape'])} without it, against "
+        f"{_pct(levels[k]['baseline']['mdape'])} for the community median (with all the data: "
+        f"{_pct(test['model']['mdape'])}, {_pct(test['model_no_project']['mdape'])} and "
+        f"{_pct(test['baseline']['mdape'])})."
+    )
+    if 0 in levels:
+        text += (
+            " The API refuses a community without training sales; had it answered, MdAPE would "
+            f"have been {_pct(levels[0]['model']['mdape'])}."
+        )
+    return text
 
 
 def _agreement(gap: float) -> str:
@@ -220,6 +363,23 @@ def snapshot_note(results: dict[str, Any], metrics_link: str) -> str:
         f"snapshot cannot be downloaded again with this tool after 31 December {year}. "
         f"The file sizes and SHA-256 checksums in [reports/metrics.md]({metrics_link}) "
         "identify it."
+    )
+
+
+def _month_name(month: str) -> str:
+    year, number = month.split("-")
+    return f"{_MONTHS[int(number) - 1]} {year}"
+
+
+def headline(results: dict[str, Any]) -> str:
+    """One sentence for the top of the README."""
+    test, split = results["test"], results["split"]
+    return (
+        f"On the {split['rows']['test']:,} sales of {_month_name(split['test_months'][-1])}, "
+        f"which the models had not seen, the median error was {_pct(test['model']['mdape'])} "
+        f"when the building is known and {_pct(test['model_no_project']['mdape'])} when it is "
+        f"not, against {_pct(test['baseline']['mdape'])} for the community's median price per "
+        "square metre."
     )
 
 
@@ -335,16 +495,32 @@ def metrics_markdown(results: dict[str, Any]) -> str:
         "MdAPE of each estimator per segment, inputs as in the headline.",
         "",
     ]
-    for dimension in ("registration", "price band", "community data", "rooms"):
-        parts += [f"### By {dimension}", "", segments_table(results, dimension), ""]
-        if dimension == "community data":
+    for dimension in SEGMENT_DIMENSIONS:
+        if not _segment_rows(results, dimension):
+            continue
+        parts += [f"### By {dimension}", ""]
+        if dimension in SEGMENT_NOTES:
+            parts += [SEGMENT_NOTES[dimension], ""]
+        parts += [segments_table(results, dimension), ""]
+        if dimension in PROFILED:
             parts += [
                 "What these segments contain (a segment dominated by one project or made of a "
-                "few unusual sales says little about communities in general):",
+                "few unusual sales says little about the segment in general):",
                 "",
                 profile_table(results, dimension),
                 "",
             ]
+    if results.get("cold_start"):
+        parts += [
+            "## Cold start: communities with little or no data",
+            "",
+            cold_start_method(results),
+            "",
+            cold_start_table(results),
+            "",
+            cold_start_summary(results),
+            "",
+        ]
     q = results["interval"]["quantiles"]
 
     def bounds(variant: str) -> str:
@@ -417,13 +593,21 @@ def readme_block(results: dict[str, Any]) -> str:
         "",
         scores_table(results, "test"),
         "",
+        "<details>",
+        "<summary>What each row means</summary>",
+        "",
         legend(results),
+        "",
+        "</details>",
         "",
         verdict(results["test"]) + " " + _coverage_line(results),
         "",
     ]
     if results.get("backtest"):
         lines += [backtest_summary(results), ""]
+    cold = cold_start_summary(results)
+    if cold:
+        lines += [cold, ""]
     note = snapshot_note(results, "reports/metrics.md")
     if note:
         lines += [note, ""]
@@ -450,14 +634,29 @@ def model_card_block(results: dict[str, Any]) -> str:
     ]
     if results.get("backtest"):
         lines += [backtest_summary(results), ""]
-    for dimension in ("registration", "price band", "community data"):
-        lines += [f"Test month by {dimension}:", "", segments_table(results, dimension), ""]
-    lines += [
-        "What the community-data segments contain:",
-        "",
-        profile_table(results, "community data"),
-        "",
-    ]
+    for dimension in SEGMENT_DIMENSIONS[:-1]:
+        if not _segment_rows(results, dimension):
+            continue
+        lines += [f"Test month by {dimension}:", ""]
+        if dimension in SEGMENT_NOTES:
+            lines += [SEGMENT_NOTES[dimension], ""]
+        lines += [segments_table(results, dimension), ""]
+        if dimension in PROFILED:
+            lines += [
+                f"What the {dimension} segments contain:",
+                "",
+                profile_table(results, dimension),
+                "",
+            ]
+    if results.get("cold_start"):
+        lines += [
+            "Simulated cold start:",
+            "",
+            cold_start_method(results),
+            "",
+            cold_start_table(results),
+            "",
+        ]
     note = snapshot_note(results, "../reports/metrics.md")
     if note:
         lines += [note, ""]
@@ -472,15 +671,17 @@ def model_card_block(results: dict[str, Any]) -> str:
     return _block(lines)
 
 
-def replace_block(text: str, block: str) -> str:
-    pattern = re.compile(re.escape(README_START) + r".*?" + re.escape(README_END), re.DOTALL)
+def replace_block(text: str, block: str, start: str = README_START, end: str = README_END) -> str:
+    pattern = re.compile(re.escape(start) + r".*?" + re.escape(end), re.DOTALL)
     if not pattern.search(text):
-        raise ValueError(f"document has no {README_START} ... {README_END} block")
+        raise ValueError(f"document has no {start} ... {end} block")
     return pattern.sub(lambda _: block, text)
 
 
 def update_readme(readme: str, results: dict[str, Any]) -> str:
-    return replace_block(readme, readme_block(results))
+    top = "\n".join([HEADLINE_START, headline(results), HEADLINE_END])
+    with_headline = replace_block(readme, top, HEADLINE_START, HEADLINE_END)
+    return replace_block(with_headline, readme_block(results))
 
 
 def update_model_card(card: str, results: dict[str, Any]) -> str:

@@ -90,12 +90,15 @@ def test_train_command_runs_end_to_end(tmp_path: Path) -> None:
             "--no-search",
             "--no-tracking",
             "--no-backtest",
+            "--no-cold-start",
         ]
     )
     assert code == 0
     assert (model / "model.lgb").exists()
     results = json.loads((reports / "metrics.json").read_text(encoding="utf-8"))
     assert results["split"]["test_months"] == ["2026-04"]
+    assert results["command"] == "dxb-prices train --no-search --no-backtest --no-cold-start"
+    assert results["backtest"] == [] and results["cold_start"] == []
     assert results["data"]["files"][0]["source"] == "not in manifest"
     assert (reports / "metrics.md").exists()
     assert (reports / "drift" / "drift_2026-04.html").exists()
@@ -131,8 +134,11 @@ def test_render_docs(tmp_path: Path) -> None:
     metrics = tmp_path / "metrics.json"
     metrics.write_text(json.dumps(results()), encoding="utf-8")
     readme, card = tmp_path / "README.md", tmp_path / "model-card.md"
-    for path in (readme, card):
-        path.write_text(f"x\n{report.README_START}\n{report.README_END}\n", encoding="utf-8")
+    block = f"{report.README_START}\n{report.README_END}\n"
+    readme.write_text(
+        f"x\n{report.HEADLINE_START}\n{report.HEADLINE_END}\n{block}", encoding="utf-8"
+    )
+    card.write_text(f"x\n{block}", encoding="utf-8")
     assert (
         cli.main(
             [
@@ -148,6 +154,9 @@ def test_render_docs(tmp_path: Path) -> None:
         == 0
     )
     assert "LightGBM" in readme.read_text(encoding="utf-8")
+    assert "the median error was 5.0% when the building is known" in readme.read_text(
+        encoding="utf-8"
+    )
     assert "Test month by community data" in card.read_text(encoding="utf-8")
     assert (tmp_path / "metrics.md").read_text(encoding="utf-8").startswith("# Training")
 

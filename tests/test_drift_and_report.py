@@ -90,13 +90,30 @@ def test_verdict_is_plain_and_honest(model: dict[str, float], expected: str) -> 
     assert "the project median alone moves MdAPE from 10.0% to 10.0%" in text
 
 
+@pytest.mark.parametrize(
+    ("project_mdape", "expected"),
+    [
+        (0.07, "Most of the gain over the community median comes from knowing the building"),
+        (0.09, "Knowing the building gives less than half of the gain"),
+        (0.11, "On MdAPE, the project median alone moves MdAPE from 10.0% to 11.0%"),
+    ],
+)
+def test_the_building_sentence_follows_the_numbers(project_mdape: float, expected: str) -> None:
+    test = {
+        "baseline": scores(0.10, 0.5, 2e5),
+        "project_baseline": scores(project_mdape, 0.5, 2e5),
+        "model": scores(0.05, 0.8, 1e5),
+    }
+    assert report.building_share(test).startswith(expected)
+
+
 ESTIMATORS = ("model", "model_no_project", "project_baseline", "baseline", "model_recorded")
 
 
 def results() -> dict[str, Any]:
     s = scores(0.05, 0.8, 1e5)
     by_estimator = dict.fromkeys(ESTIMATORS, s) | {"baseline": scores(0.1, 0.5, 2e5)}
-    profile = {"communities": 3, "largest_project_share": 0.4, "median_price_aed": 1.2e6}
+    profile = {"communities": 3, "largest_project_share": 0.4}
     return {
         "command": "dxb-prices train",
         "environment": {
@@ -124,7 +141,15 @@ def results() -> dict[str, Any]:
             "num_boost_round_community": 80,
         },
         "search": [{}],
-        "served": {"test_rows": 2, "test_rows_project_known": 1, "min_project_rows_baseline": 5},
+        "served": {
+            "test_rows": 2,
+            "test_rows_project_known": 1,
+            "min_project_rows_baseline": 5,
+            "test_rows_the_api_would_refuse": {
+                "community without training sales (404)": 1,
+                "room count not recorded (422)": 0,
+            },
+        },
         "validation": by_estimator,
         "test": by_estimator,
         "interval": {
@@ -138,7 +163,7 @@ def results() -> dict[str, Any]:
         "segments": [
             {"dimension": d, "segment": "x", "estimator": e, **s, **profile}
             | ({"range_coverage": 0.7} if e == "model" else {})
-            for d in ("registration", "price band", "community data", "rooms")
+            for d in report.SEGMENT_DIMENSIONS
             for e in ESTIMATORS[:4]
         ],
         "backtest": [
@@ -150,6 +175,18 @@ def results() -> dict[str, Any]:
                 "scores": by_estimator,
             }
             for m in ("2026-03", "2026-04")
+        ],
+        "cold_start": [
+            {
+                "kept_rows": kept,
+                "groups": 5,
+                "communities": 20,
+                "rows": 2,
+                "rows_full_model": 1 if kept else 0,
+                "scores": dict.fromkeys(ESTIMATORS[:4], scores(mdape, 0.6, 2e5)),
+                "range_coverage": {"model": 0.7, "model_no_project": 0.72},
+            }
+            for kept, mdape in ((0, 0.3), (10, 0.08))
         ],
     }
 
@@ -163,25 +200,41 @@ def test_markdown_report_contains_every_section() -> None:
         "## Split",
         "## Error analysis",
         "### By price band",
+        "### By estimated price band",
+        "### By project data",
+        "## Cold start",
         "## Estimate range",
     ):
         assert heading in md
+    assert "Median price" not in md
+    assert "| 0: a new community (the API refuses these) | 10 | 30.0% |" in md
+    assert "The API would refuse 1 test sale (community without training sales (404): 1)" in md
     assert "downloaded 2026-09-26" in md
     assert "contained 79.0% of test prices with the project and 81.0% without" in md
     assert "| LightGBM, no project (community-level model) | 10 | 5.0% |" in md
     assert "Largest single project" in md
-    assert "(1 of 2) get the community-level model" in md
+    assert "(1 of 2), get the community-level model" in md
 
 
-def test_readme_block_is_replaced_in_place() -> None:
-    readme = f"# Title\n\n{report.README_START}\nSTALE\n{report.README_END}\n\nMore text\n"
+def test_readme_blocks_are_replaced_in_place() -> None:
+    readme = (
+        f"# Title\n\nPitch.\n{report.HEADLINE_START}\nOLD\n{report.HEADLINE_END}\n\n"
+        f"{report.README_START}\nSTALE\n{report.README_END}\n\nMore text\n"
+    )
     updated = report.update_readme(readme, results())
-    assert "STALE" not in updated
+    assert "STALE" not in updated and "OLD" not in updated
     assert updated.startswith("# Title") and updated.endswith("More text\n")
+    assert (
+        "On the 2 sales of March 2026, which the models had not seen, the median error was 5.0% "
+        "when the building is known and 5.0% when it is not, against 10.0%"
+    ) in updated
     assert "| LightGBM, project given | 10 | 5.0% | 80.0% | 100,000 | -2.0% | 79.0% |" in updated
+    assert "<summary>What each row means</summary>" in updated
     assert "Rolling-origin backtest over 2 test months (2026-03 to 2026-04" in updated
+    assert "each community in turn cut to 10 training sales" in updated
+    assert "had it answered, MdAPE would have been 30.0%" in updated
     assert "cannot be downloaded again with this tool after 31 December 2026" in updated
-    with pytest.raises(ValueError, match="results:start"):
+    with pytest.raises(ValueError, match="headline:start"):
         report.update_readme("# no block", results())
 
 

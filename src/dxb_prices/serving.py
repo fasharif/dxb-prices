@@ -24,10 +24,14 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
+from dxb_prices.clean import ROOM_LEVELS
 from dxb_prices.features import COMMUNITY, CONTEXT_COLUMNS, FULL, FeatureSpec
 from dxb_prices.model import PriceModel
 
 FloatArray = npt.NDArray[np.float64]
+
+# Room counts the API accepts; a sale recorded as "unknown" cannot be requested.
+API_ROOMS: tuple[str, ...] = tuple(r for r in ROOM_LEVELS if r != "unknown")
 
 REQUEST_COLUMNS: tuple[str, ...] = (
     "community",
@@ -86,6 +90,23 @@ def model_rows(requests: pd.DataFrame, spec: FeatureSpec) -> pd.DataFrame:
     out["project"] = project
     out["variant"] = np.where(known, FULL, COMMUNITY)
     return out
+
+
+def refusals(sales: pd.DataFrame, spec: FeatureSpec) -> dict[str, int]:
+    """How many recorded sales the API would refuse, by reason.
+
+    The API answers 404 for a community without training sales and 422 for a
+    room count it does not accept. The evaluation still scores such sales, so
+    that every estimator is compared on the same rows; the report says how
+    many there were.
+    """
+    community = sales["community"].astype("object")
+    unknown = ~community.map(lambda c: isinstance(c, str) and c in spec.community_rows)
+    rooms = ~sales["rooms"].astype("object").isin(API_ROOMS)
+    return {
+        "community without training sales (404)": int(unknown.sum()),
+        "room count not recorded (422)": int((rooms & ~unknown).sum()),
+    }
 
 
 def requests_from_sales(sales: pd.DataFrame, *, with_project: bool) -> pd.DataFrame:

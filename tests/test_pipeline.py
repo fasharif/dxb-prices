@@ -21,6 +21,7 @@ def run(tmp_path_factory: pytest.TempPathFactory, clean_fixture: pd.DataFrame) -
         reports_dir=root / "reports",
         search=False,
         run_backtest=True,
+        run_cold_start=True,
         data_info={
             "period_start": "2026-01-01",
             "period_end": "2026-04-30",
@@ -86,10 +87,57 @@ def test_backtest_tests_each_month_once_with_earlier_data_only(run: dict[str, An
     assert set(fold["scores"]) == set(pipeline.ESTIMATORS)
 
 
+def test_sales_the_api_would_refuse_are_counted_and_still_scored(run: dict[str, Any]) -> None:
+    results = run["results"]
+    refused = results["served"]["test_rows_the_api_would_refuse"]
+    # Al Jaddaf only appears in the test month of the fixture: the API answers 404 there.
+    assert refused["community without training sales (404)"] > 0
+    assert results["test"]["model"]["rows"] == results["split"]["rows"]["test"]
+
+
+def test_cutting_communities_keeps_a_random_few_of_their_rows(clean_fixture: pd.DataFrame) -> None:
+    cut = pipeline.cut_communities(clean_fixture, {"Business Bay"}, 4, seed=1)
+    assert (cut["community"] == "Business Bay").sum() == 4
+    others = clean_fixture[clean_fixture["community"] != "Business Bay"]
+    pd.testing.assert_frame_equal(cut[cut["community"] != "Business Bay"], others)
+    pd.testing.assert_frame_equal(
+        cut, pipeline.cut_communities(clean_fixture, {"Business Bay"}, 4, seed=1)
+    )
+    gone = pipeline.cut_communities(clean_fixture, {"Business Bay"}, 0, seed=1)
+    assert "Business Bay" not in set(gone["community"])
+
+
+def test_cold_start_scores_every_test_sale_at_each_level(run: dict[str, Any]) -> None:
+    results = run["results"]
+    levels = {lv["kept_rows"]: lv for lv in results["cold_start"]}
+    assert set(levels) == {0, 10}
+    for level in levels.values():
+        assert level["rows"] == results["split"]["rows"]["test"]
+        assert set(level["scores"]) == set(pipeline.SEGMENTED)
+        assert set(level["range_coverage"]) == set(pipeline.RANGED)
+    new = levels[0]
+    # A community without training sales has no known project, and both baselines fall
+    # back to the median of all training sales.
+    assert new["rows_full_model"] == 0
+    assert new["scores"]["model"] == new["scores"]["model_no_project"]
+    assert new["scores"]["project_baseline"] == new["scores"]["baseline"]
+    assert levels[10]["rows_full_model"] > 0
+
+
 def test_segments_cover_the_required_breakdowns(run: dict[str, Any]) -> None:
     segments = run["results"]["segments"]
     dims = {s["dimension"] for s in segments}
-    assert {"registration", "price band", "community data"} <= dims
+    assert {
+        "registration",
+        "price band",
+        "estimated price band",
+        "community data",
+        "project data",
+        "rooms",
+    } == dims
+    projects = {s["segment"] for s in segments if s["dimension"] == "project data"}
+    assert {"new (no training sales in its community)", "not recorded in the sale"} <= projects
+    assert all("median_price_aed" not in s for s in segments)
     community = {s["segment"] for s in segments if s["dimension"] == "community data"}
     # Al Jaddaf only appears in the test month of the fixture.
     assert "new (no training sales)" in community
@@ -108,7 +156,13 @@ def test_reports_are_written(run: dict[str, Any]) -> None:
     saved = json.loads((reports / "metrics.json").read_text(encoding="utf-8"))
     assert saved["test"] == run["results"]["test"]
     md = (reports / "metrics.md").read_text(encoding="utf-8")
-    for heading in ("## Headline", "## Rolling-origin backtest", "## Drift", "## What drives"):
+    for heading in (
+        "## Headline",
+        "## Rolling-origin backtest",
+        "## Cold start",
+        "## Drift",
+        "## What drives",
+    ):
         assert heading in md
     assert (reports / "shap_importance.png").exists()
     assert (reports / "drift" / "drift.html").stat().st_size > 10_000
@@ -138,6 +192,7 @@ def test_mlflow_run_is_recorded(run: dict[str, Any]) -> None:
     assert "metrics.test_baseline_mdape" in parent.columns
     assert "metrics.test_model_no_project_mdape" in parent.columns
     assert "metrics.backtest_2026-04_model_mdape" in parent.columns
+    assert "metrics.cold_start_0_model_mdape" in parent.columns
     client = mlflow.tracking.MlflowClient()
     artifacts = {a.path for a in client.list_artifacts(row["run_id"])}
     assert {"model", "reports"} <= artifacts
