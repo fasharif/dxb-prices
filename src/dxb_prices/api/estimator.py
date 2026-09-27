@@ -91,33 +91,35 @@ class Estimator:
         return found
 
     def projects(self, community_name: str) -> list[ProjectInfo]:
-        """Training projects recorded in a community, by name, with their training sales."""
+        """Projects with training sales in a community, by name, with their training sales."""
         community = self.resolve_community(community_name)
-        names = sorted(
-            p for p, ctx in self.spec.project_context.items() if ctx.get("community") == community
-        )
-        return [
-            ProjectInfo(name=p, training_sales=int(self.spec.project_rows.get(p, 0))) for p in names
-        ]
+        rows = self.spec.project_rows.get(community, {})
+        return [ProjectInfo(name=p, training_sales=int(n)) for p, n in sorted(rows.items())]
 
     def _project(self, req: EstimateRequest, community: str, warnings: list[str]) -> str | None:
+        """The project to use, or None for the community-level model; warns about weak inputs.
+
+        The routing matches ``serving.model_rows``: only a project with training
+        sales in this community goes to the full model.
+        """
+        fallback = (
+            ", so the estimate comes from the community-level model, which does not know "
+            "the building." + self._community_model_note
+        )
         if not req.project:
-            warnings.append(
-                "No project given, so the estimate comes from the community-level model, "
-                "which does not know the building." + self._community_model_note
-            )
+            warnings.append("No project given" + fallback)
             return None
         project = normalise.resolve_name(req.project, self.spec.project_names)
         if project is None:
+            warnings.append(f"Project '{req.project}' is not in the training data" + fallback)
+            return None
+        if not self.spec.has_project(community, project):
+            elsewhere = sorted(c for c, rows in self.spec.project_rows.items() if project in rows)
             warnings.append(
-                f"Project '{req.project}' is not in the training data, so the estimate comes "
-                "from the community-level model, which does not know the building."
-                + self._community_model_note
+                f"Project '{project}' has no training sales in {community} (it is recorded in "
+                f"{', '.join(elsewhere)})" + fallback
             )
             return None
-        recorded = self.spec.project_context.get(project, {}).get("community")
-        if recorded and recorded != community:
-            warnings.append(f"Project '{project}' is recorded in {recorded}, not {community}.")
         return project
 
     def _date(self, req: EstimateRequest, warnings: list[str]) -> date:

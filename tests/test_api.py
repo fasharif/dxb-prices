@@ -174,7 +174,11 @@ def test_warnings_explain_weak_inputs(client: TestClient) -> None:
         for w in unknown["warnings"]
     )
     elsewhere = client.post("/estimate", json=VALID | {"project": "Marina Crest"}).json()
-    assert any("is recorded in Marsa Dubai" in w for w in elsewhere["warnings"])
+    assert elsewhere["model_variant"] == "community" and elsewhere["project"] is None
+    assert any(
+        "has no training sales in Business Bay (it is recorded in Marsa Dubai)" in w
+        for w in elsewhere["warnings"]
+    )
     later = client.post("/estimate", json=VALID | {"transaction_date": "2027-06-01"}).json()
     assert any("after the newest training data" in w for w in later["warnings"])
 
@@ -216,6 +220,23 @@ def test_the_api_answers_what_the_evaluation_scores(
         answer = client.post("/estimate", json=body).json()
         assert answer["model_variant"] == variant
         assert answer["estimate_aed"] == round(estimate, -3)
+
+
+def test_one_project_name_in_two_communities(tiny_model_dir: Path) -> None:
+    """A building is found in the community asked for, with that community's labels."""
+    model = PriceModel.load(tiny_model_dir)
+    spec = model.spec
+    spec.project_rows["Marsa Dubai"]["Canal Heights"] = 12
+    spec.project_context["Marsa Dubai"]["Canal Heights"] = spec.project_context["Business Bay"][
+        "Canal Heights"
+    ] | {"nearest_landmark": "Marina Walk"}
+    estimator = Estimator(model)
+    listed = {p.name: p.training_sales for p in estimator.projects("Marsa Dubai")}
+    assert listed["Canal Heights"] == 12
+    request = VALID | {"community": "Marsa Dubai", "project": "Canal Heights"}
+    out = estimator.estimate(EstimateRequest.model_validate(request))
+    assert out.model_variant == "full" and out.project == "Canal Heights"
+    assert not any("recorded in" in w for w in out.warnings)
 
 
 def test_thin_communities_are_flagged(tiny_model_dir: Path) -> None:

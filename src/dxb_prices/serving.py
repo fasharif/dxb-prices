@@ -3,15 +3,16 @@
 A caller gives the community, size, rooms, off-plan status and date, and
 optionally the project, sub-type and freehold status. Nobody types in DLD's
 nearest metro, mall or landmark, so those come from the training rows: the
-project's most common values when the project is known, otherwise the
-community's. A missing freehold flag is filled the same way.
+project's most common values when the project has training sales in that
+community, otherwise the community's. A missing freehold flag is filled the
+same way.
 
 Each row is then routed to one of the two models:
 
-* ``full`` when the project is in the training data;
-* ``community`` when it is not given or not in the training data. That model
-  was trained without the project and the location labels, so it does not
-  have to guess them.
+* ``full`` when the project has training sales in the given community;
+* ``community`` when it is not given, not in the training data, or only
+  recorded in other communities. That model was trained without the project
+  and the location labels, so it does not have to guess them.
 
 The evaluation scores the test month through these same functions, so the
 published accuracy is the accuracy of what the API returns.
@@ -19,13 +20,11 @@ published accuracy is the accuracy of what the API returns.
 
 from __future__ import annotations
 
-from typing import Any
-
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
-from dxb_prices.features import COMMUNITY, FULL, POI_COLUMNS, FeatureSpec
+from dxb_prices.features import COMMUNITY, CONTEXT_COLUMNS, FULL, FeatureSpec
 from dxb_prices.model import PriceModel
 
 FloatArray = npt.NDArray[np.float64]
@@ -42,9 +41,19 @@ REQUEST_COLUMNS: tuple[str, ...] = (
 )
 
 
-def _context_column(context: dict[str, dict[str, Any]], keys: pd.Series, column: str) -> pd.Series:
-    lookup = {k: v.get(column) for k, v in context.items()}
-    return keys.map(lambda k: lookup.get(k) if isinstance(k, str) else None)
+def _project_column(
+    spec: FeatureSpec, community: pd.Series, project: pd.Series, column: str
+) -> pd.Series:
+    values = [
+        spec.project_context[c][p].get(column) if spec.has_project(c, p) else None
+        for c, p in zip(community, project, strict=True)
+    ]
+    return pd.Series(values, index=community.index, dtype=object)
+
+
+def _community_column(spec: FeatureSpec, community: pd.Series, column: str) -> pd.Series:
+    lookup = {k: v.get(column) for k, v in spec.community_context.items()}
+    return community.map(lambda k: lookup.get(k) if isinstance(k, str) else None)
 
 
 def model_rows(requests: pd.DataFrame, spec: FeatureSpec) -> pd.DataFrame:
@@ -53,13 +62,17 @@ def model_rows(requests: pd.DataFrame, spec: FeatureSpec) -> pd.DataFrame:
     if missing:
         raise KeyError(f"requests are missing columns: {sorted(missing)}")
     out = requests[list(REQUEST_COLUMNS)].copy()
-    project = out["project"].astype("object")
-    known = project.map(lambda p: isinstance(p, str) and p in spec.project_context).astype(bool)
-    project = project.where(known, None)
     community = out["community"].astype("object")
-    for col in (*POI_COLUMNS, "is_freehold"):
-        from_project = _context_column(spec.project_context, project, col)
-        from_community = _context_column(spec.community_context, community, col)
+    project = out["project"].astype("object")
+    known = pd.Series(
+        [spec.has_project(c, p) for c, p in zip(community, project, strict=True)],
+        index=out.index,
+        dtype=bool,
+    )
+    project = project.where(known, None)
+    for col in CONTEXT_COLUMNS:
+        from_project = _project_column(spec, community, project, col)
+        from_community = _community_column(spec, community, col)
         filled = from_project.where(from_project.notna(), from_community)
         if col == "is_freehold":
             given = out["is_freehold"].astype("object")

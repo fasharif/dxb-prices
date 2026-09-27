@@ -9,11 +9,16 @@ There are two feature sets. The full model uses everything, including the
 project and DLD's nearest metro, mall and landmark. The community-level model
 leaves out the project and the location labels; it serves requests whose
 project is not given or not in the training data (see ``serving``).
+
+A project is identified by its community and its name together. Different
+buildings in different communities can share a name (in the 2026 export,
+"Botanica" in Dubai Marina and in Jumeirah Village Circle), so the model's
+project levels, the lookup tables and the training counts all use both.
 """
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, fields
 from typing import Any
 
 import numpy as np
@@ -48,26 +53,72 @@ FULL = "full"
 COMMUNITY = "community"
 VARIANT_FEATURES: dict[str, tuple[str, ...]] = {FULL: FEATURES, COMMUNITY: COMMUNITY_FEATURES}
 
+# Joins community and project into the model's project level. DLD names contain
+# "|" and "/", but never this control character.
+PROJECT_KEY_SEP = "\x1f"
+
+
+def project_key(community: str, project: str) -> str:
+    """The model's level for a project: its community and name together."""
+    return f"{community}{PROJECT_KEY_SEP}{project}"
+
+
+def project_keys(frame: pd.DataFrame) -> pd.Series:
+    """``project_key`` for every row; missing where the community or project is missing."""
+    pairs = zip(frame["community"].astype(object), frame["project"].astype(object), strict=True)
+    keys = [
+        project_key(c, p) if isinstance(c, str) and isinstance(p, str) else None for c, p in pairs
+    ]
+    return pd.Series(keys, index=frame.index, dtype=object)
+
 
 @dataclass
 class FeatureSpec:
-    """Everything needed to rebuild features for new rows. JSON-serialisable."""
+    """Everything needed to rebuild features for new rows. JSON-serialisable.
+
+    ``project_context`` and ``project_rows`` are keyed by community, then by
+    project name. ``project_names`` maps any spelling of a project name to its
+    canonical name; the community comes from the request.
+    """
 
     reference_month: str
     levels: dict[str, list[str]]
     community_rows: dict[str, int]
-    project_context: dict[str, dict[str, Any]] = field(default_factory=dict)
+    project_context: dict[str, dict[str, dict[str, Any]]] = field(default_factory=dict)
     community_context: dict[str, dict[str, Any]] = field(default_factory=dict)
     community_names: dict[str, str] = field(default_factory=dict)
     project_names: dict[str, str] = field(default_factory=dict)
-    project_rows: dict[str, int] = field(default_factory=dict)
+    project_rows: dict[str, dict[str, int]] = field(default_factory=dict)
+    # Training sales a project needs for a level of its own; rarer projects share OTHER.
+    min_rows_project: int = 1
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> FeatureSpec:
+        expected = {f.name for f in fields(cls)}
+        nested = set(data) == expected and all(
+            isinstance(counts, dict) for counts in data["project_rows"].values()
+        )
+        if not nested:
+            raise ValueError(
+                "the saved feature spec was written by an older version of dxb-prices "
+                "(its project tables are not keyed by community); train the model again"
+            )
         return cls(**data)
+
+    def has_project(self, community: object, project: object) -> bool:
+        """True when this project has training sales in this community."""
+        return (
+            isinstance(community, str)
+            and isinstance(project, str)
+            and project in self.project_rows.get(community, {})
+        )
+
+    def project_has_own_level(self, community: str, project: str) -> bool:
+        """True when the full model learned this project itself rather than as OTHER."""
+        return project_key(community, project) in self.levels["project"]
 
 
 def month_number(values: pd.Series) -> pd.Series:
@@ -98,12 +149,29 @@ def _mode(values: pd.Series) -> Any:
     return bool(value) if isinstance(value, (bool, np.bool_)) else str(value)
 
 
-def _context(train: pd.DataFrame, key: str) -> dict[str, dict[str, Any]]:
-    cols = [*POI_COLUMNS, "is_freehold"] + (["community"] if key == "project" else [])
+CONTEXT_COLUMNS: tuple[str, ...] = (*POI_COLUMNS, "is_freehold")
+
+
+def _community_context(train: pd.DataFrame) -> dict[str, dict[str, Any]]:
     out: dict[str, dict[str, Any]] = {}
-    for name, part in train.dropna(subset=[key]).groupby(key):
-        out[str(name)] = {c: _mode(part[c]) for c in cols}
+    for name, part in train.dropna(subset=["community"]).groupby("community"):
+        out[str(name)] = {c: _mode(part[c]) for c in CONTEXT_COLUMNS}
     return out
+
+
+def _project_tables(
+    train: pd.DataFrame,
+) -> tuple[dict[str, dict[str, dict[str, Any]]], dict[str, dict[str, int]]]:
+    """Each (community, project)'s usual location labels and freehold flag, and its row count."""
+    context: dict[str, dict[str, dict[str, Any]]] = {}
+    rows: dict[str, dict[str, int]] = {}
+    known = train.dropna(subset=["community", "project"])
+    for (community, project), part in known.groupby(["community", "project"]):
+        context.setdefault(str(community), {})[str(project)] = {
+            c: _mode(part[c]) for c in CONTEXT_COLUMNS
+        }
+        rows.setdefault(str(community), {})[str(project)] = len(part)
+    return context, rows
 
 
 def fit(train: pd.DataFrame, rules: FeatureRules) -> FeatureSpec:
@@ -111,18 +179,19 @@ def fit(train: pd.DataFrame, rules: FeatureRules) -> FeatureSpec:
         raise ValueError("cannot fit features on an empty training set")
     levels = {
         "community": _levels(train["community"], rules.min_rows_community),
-        "project": _levels(train["project"], rules.min_rows_project),
+        "project": _levels(project_keys(train), rules.min_rows_project),
         "rooms": [*ROOM_LEVELS, OTHER, MISSING],
         "sub_type": [*SUB_TYPES, OTHER, MISSING],
     }
     for col in POI_COLUMNS:
         levels[col] = _levels(train[col], rules.min_rows_poi)
+    project_context, project_rows = _project_tables(train)
     return FeatureSpec(
         reference_month=str(train["month"].min()),
         levels=levels,
         community_rows={str(k): int(v) for k, v in train["community"].value_counts().items()},
-        project_context=_context(train, "project"),
-        community_context=_context(train, "community"),
+        project_context=project_context,
+        community_context=_community_context(train),
         # Every English and Arabic spelling seen in training resolves at serving time.
         community_names=normalise.lookup_table(
             train["community"],
@@ -130,7 +199,8 @@ def fit(train: pd.DataFrame, rules: FeatureRules) -> FeatureSpec:
             train.get("community_ar"),
         ),
         project_names=normalise.lookup_table(train["project"], train["project"], None),
-        project_rows={str(k): int(v) for k, v in train["project"].value_counts().items()},
+        project_rows=project_rows,
+        min_rows_project=rules.min_rows_project,
     )
 
 
@@ -163,5 +233,6 @@ def transform(
     x["is_freehold"] = frame["is_freehold"].astype("Float64").astype("float64")
     x["month_index"] = month_index(frame["month"], spec.reference_month)
     for col in CATEGORICAL_FEATURES:
-        x[col] = _categorical(frame[col], spec.levels[col])
+        values = project_keys(frame) if col == "project" else frame[col]
+        x[col] = _categorical(values, spec.levels[col])
     return x[list(columns)]

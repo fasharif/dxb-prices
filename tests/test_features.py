@@ -52,7 +52,12 @@ def training_frame() -> pd.DataFrame:
 def test_levels_keep_only_common_training_categories() -> None:
     spec = features.fit(training_frame(), RULES)
     assert spec.levels["community"] == ["Business Bay", "Marsa Dubai", OTHER, MISSING]
-    assert "Tiny Project" not in spec.levels["project"]
+    assert spec.levels["project"] == [
+        features.project_key("Business Bay", "Canal Heights"),
+        features.project_key("Marsa Dubai", "Marina Crest"),
+        OTHER,
+        MISSING,
+    ]
     assert spec.reference_month == "2026-01"
     assert spec.community_rows == {"Business Bay": 4, "Marsa Dubai": 3}
 
@@ -105,7 +110,10 @@ def test_community_level_features_leave_out_project_and_location_labels() -> Non
     assert list(x.columns) == list(features.COMMUNITY_FEATURES)
     assert "project" not in x.columns
     assert not set(features.POI_COLUMNS) & set(x.columns)
-    assert spec.project_rows == {"Canal Heights": 3, "Marina Crest": 3, "Tiny Project": 1}
+    assert spec.project_rows == {
+        "Business Bay": {"Canal Heights": 3, "Tiny Project": 1},
+        "Marsa Dubai": {"Marina Crest": 3},
+    }
 
 
 def test_no_price_information_reaches_the_features() -> None:
@@ -118,16 +126,53 @@ def test_no_price_information_reaches_the_features() -> None:
 
 def test_context_lookups_come_from_training_rows() -> None:
     spec = features.fit(training_frame(), RULES)
-    assert spec.project_context["Marina Crest"]["community"] == "Marsa Dubai"
+    assert set(spec.project_context["Marsa Dubai"]) == {"Marina Crest"}
+    assert spec.project_context["Marsa Dubai"]["Marina Crest"]["nearest_mall"] == "Dubai Mall"
+    assert spec.has_project("Marsa Dubai", "Marina Crest")
+    assert not spec.has_project("Business Bay", "Marina Crest")
+    assert spec.project_has_own_level("Marsa Dubai", "Marina Crest")
+    assert not spec.project_has_own_level("Business Bay", "Tiny Project")
     assert spec.community_context["Business Bay"]["nearest_mall"] == "Dubai Mall"
     assert spec.community_context["Business Bay"]["is_freehold"] is True
     assert spec.community_names["الخليج التجاري"] == "Business Bay"
+
+
+def test_one_name_in_two_communities_is_two_projects() -> None:
+    """Botanica in Dubai Marina and Botanica in Jumeirah Village Circle are different buildings."""
+    train = pd.concat(
+        [
+            training_frame(),
+            frame([{"project": "Marina Crest", "nearest_landmark": "Bay Avenue"}] * 2),
+        ],
+        ignore_index=True,
+    )
+    spec = features.fit(train, RULES)
+    assert spec.project_rows["Business Bay"]["Marina Crest"] == 2
+    assert spec.project_rows["Marsa Dubai"]["Marina Crest"] == 3
+    context = spec.project_context
+    assert context["Business Bay"]["Marina Crest"]["nearest_landmark"] == "Bay Avenue"
+    assert context["Marsa Dubai"]["Marina Crest"]["nearest_landmark"] == "Burj Khalifa"
+    # Three sales in Marsa Dubai give that building a level; two in Business Bay do not.
+    rows = frame([{"community": "Marsa Dubai"}, {}]).assign(project="Marina Crest")
+    x = features.transform(rows, spec)
+    assert x["project"].tolist() == [features.project_key("Marsa Dubai", "Marina Crest"), OTHER]
 
 
 def test_spec_round_trips_through_json() -> None:
     spec = features.fit(training_frame(), RULES)
     again = features.FeatureSpec.from_dict(json.loads(json.dumps(spec.to_dict())))
     assert again == spec
+    assert again.min_rows_project == RULES.min_rows_project
+
+
+def test_a_spec_from_an_older_version_is_refused() -> None:
+    data = features.fit(training_frame(), RULES).to_dict()
+    data["project_rows"] = {"Canal Heights": 3, "Marina Crest": 3}
+    with pytest.raises(ValueError, match="train the model again"):
+        features.FeatureSpec.from_dict(data)
+    del data["min_rows_project"]
+    with pytest.raises(ValueError, match="older version"):
+        features.FeatureSpec.from_dict(data)
 
 
 def test_transform_reports_missing_columns() -> None:

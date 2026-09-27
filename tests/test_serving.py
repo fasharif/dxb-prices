@@ -36,7 +36,7 @@ def spec() -> features.FeatureSpec:
 def test_a_known_project_uses_the_full_model_and_its_own_location_labels(
     spec: features.FeatureSpec,
 ) -> None:
-    rows = serving.model_rows(request(project="Marina Crest"), spec)
+    rows = serving.model_rows(request(community="Marsa Dubai", project="Marina Crest"), spec)
     assert rows.loc[0, "variant"] == FULL
     assert rows.loc[0, "nearest_landmark"] == "Marina Walk"
     assert bool(rows.loc[0, "is_freehold"]) is True
@@ -50,6 +50,16 @@ def test_a_missing_or_unknown_project_uses_the_community_model(
         assert rows.loc[0, "variant"] == COMMUNITY
         assert pd.isna(rows.loc[0, "project"])
         assert rows.loc[0, "nearest_mall"] == "Dubai Mall"  # the community's usual value
+
+
+def test_a_project_recorded_only_in_another_community_uses_the_community_model(
+    spec: features.FeatureSpec,
+) -> None:
+    # Marina Crest has training sales in Marsa Dubai, none in Business Bay.
+    rows = serving.model_rows(request(community="Business Bay", project="Marina Crest"), spec)
+    assert rows.loc[0, "variant"] == COMMUNITY
+    assert pd.isna(rows.loc[0, "project"])
+    assert rows.loc[0, "nearest_landmark"] == "Burj Khalifa"  # Business Bay's, not Marina Walk
 
 
 def test_a_given_freehold_flag_is_kept(spec: features.FeatureSpec) -> None:

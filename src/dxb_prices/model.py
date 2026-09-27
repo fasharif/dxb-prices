@@ -140,7 +140,8 @@ def _display_value(feature: str, raw: Any, encoded: Any) -> str:
     elif encoded == features.MISSING:
         text = "not recorded"
     else:
-        text = str(encoded)
+        # The raw value: the model's project level also carries the community.
+        text = str(raw)
     return text
 
 
