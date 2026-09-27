@@ -222,6 +222,22 @@ def test_the_api_answers_what_the_evaluation_scores(
         assert answer["estimate_aed"] == round(estimate, -3)
 
 
+def test_a_project_without_a_level_of_its_own_is_flagged(tiny_model_dir: Path) -> None:
+    from dxb_prices.features import project_key
+
+    model = PriceModel.load(tiny_model_dir)  # a private copy: the spec is edited below
+    model.spec.levels["project"].remove(project_key("Business Bay", "Canal Heights"))
+    out = Estimator(model).estimate(
+        EstimateRequest.model_validate(VALID | {"project": "Canal Heights"})
+    )
+    assert out.model_variant == "full"
+    sales = model.spec.project_rows["Business Bay"]["Canal Heights"]
+    assert any(
+        f"has only {sales} training sales, fewer than the 5 the model needs" in w
+        for w in out.warnings
+    )
+
+
 def test_one_project_name_in_two_communities(tiny_model_dir: Path) -> None:
     """A building is found in the community asked for, with that community's labels."""
     model = PriceModel.load(tiny_model_dir)

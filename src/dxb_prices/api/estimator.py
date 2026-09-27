@@ -120,6 +120,13 @@ class Estimator:
                 f"{', '.join(elsewhere)})" + fallback
             )
             return None
+        if not self.spec.project_has_own_level(community, project):
+            sales = self.spec.project_rows[community][project]
+            warnings.append(
+                f"Project '{project}' has only {sales} training sales, fewer than the "
+                f"{self.spec.min_rows_project} the model needs to learn a building on its own, "
+                "so the estimate draws on its community and location rather than the building."
+            )
         return project
 
     def _date(self, req: EstimateRequest, warnings: list[str]) -> date:
