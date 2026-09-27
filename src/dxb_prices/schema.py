@@ -15,6 +15,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from dxb_prices.errors import MissingInputError, UserFacingError
+
 log = logging.getLogger(__name__)
 
 # Columns requested from the DLD export, in this order. The export returns
@@ -139,7 +141,7 @@ _FREEHOLD_VALUES = {
 }
 
 
-class SchemaError(ValueError):
+class SchemaError(UserFacingError, ValueError):
     """The input does not match any known source layout."""
 
 
@@ -205,7 +207,7 @@ def to_canonical(raw: pd.DataFrame) -> pd.DataFrame:
 def read_raw_csvs(paths: list[Path]) -> pd.DataFrame:
     """Read one or more raw CSV files (UTF-8, with or without a BOM) into one frame."""
     if not paths:
-        raise FileNotFoundError(
+        raise MissingInputError(
             "no raw CSV files found; run `dxb-prices download` first or place DLD exports "
             "in data/raw/dld/"
         )

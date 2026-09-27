@@ -198,6 +198,36 @@ def test_csv_without_expected_columns_is_rejected(tmp_path: Path) -> None:
         )
 
 
+@pytest.mark.parametrize(
+    "body",
+    [
+        pytest.param(b"\xff\xfe\x00binary\x00", id="binary"),
+        pytest.param("\u00c1rea,Pre\u00e7o\n".encode("latin-1"), id="latin-1"),
+    ],
+)
+def test_a_body_that_is_not_utf8_csv_is_a_download_error(tmp_path: Path, body: bytes) -> None:
+    with pytest.raises(DownloadError, match=r"not a UTF-8 CSV.*by hand"):
+        download.download_months(
+            [Month(2026, 1)],
+            tmp_path,
+            today=date(2026, 9, 26),
+            client=client_for(Recorder(csv_response(body))),
+            sleep=lambda _: None,
+        )
+    assert not (tmp_path / "transactions_2026-01.csv").exists()
+
+
+def test_at_least_one_attempt_is_required(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="attempts must be at least 1"):
+        download.download_months(
+            [Month(2026, 1)],
+            tmp_path,
+            today=date(2026, 9, 26),
+            client=client_for(Recorder(csv_response())),
+            attempts=0,
+        )
+
+
 def test_server_errors_are_retried_with_backoff(tmp_path: Path) -> None:
     waits: list[float] = []
     handler = Recorder(httpx.Response(503), httpx.ConnectError("reset"), csv_response())

@@ -9,9 +9,10 @@ import numpy as np
 import pandas as pd
 
 from dxb_prices.config import SplitRules, TrainingTrim
+from dxb_prices.errors import UserFacingError
 
 
-class InsufficientDataError(ValueError):
+class InsufficientDataError(UserFacingError, ValueError):
     """Not enough distinct months for a temporal split."""
 
 

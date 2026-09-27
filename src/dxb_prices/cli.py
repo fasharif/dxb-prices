@@ -5,12 +5,15 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import sys
 from datetime import date
 from pathlib import Path
 from typing import Any
 
 from dxb_prices import config, telemetry
+from dxb_prices.errors import MissingInputError, UserFacingError
 
+EXIT_ERROR = 1
 EXIT_NOT_ENOUGH_DATA = 3
 
 
@@ -165,6 +168,8 @@ def cmd_render_docs(args: argparse.Namespace) -> int:
     from dxb_prices import report
 
     metrics_path = Path(args.metrics)
+    if not metrics_path.exists():
+        raise MissingInputError(f"{metrics_path} does not exist; run `dxb-prices train` first")
     results = json.loads(metrics_path.read_text(encoding="utf-8"))
     report_md = metrics_path.with_suffix(".md")
     report_md.write_text(report.metrics_markdown(results), encoding="utf-8")
@@ -254,7 +259,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     for noisy in ("httpx", "httpcore", "matplotlib", "PIL"):
         logging.getLogger(noisy).setLevel(logging.WARNING)
-    result: int = args.func(args)
+    try:
+        result: int = args.func(args)
+    except UserFacingError as exc:
+        # Missing data, a bad month or an unusable download: say what to do, no traceback.
+        print(f"dxb-prices {args.command}: error: {exc}", file=sys.stderr)
+        return EXIT_ERROR
     return result
 
 

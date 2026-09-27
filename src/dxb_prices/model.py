@@ -29,6 +29,7 @@ import numpy.typing as npt
 import pandas as pd
 
 from dxb_prices import features
+from dxb_prices.errors import MissingInputError
 from dxb_prices.features import COMMUNITY, FULL, OTHER, VARIANT_FEATURES, FeatureSpec
 
 MODEL_FILES: dict[str, str] = {FULL: "model.lgb", COMMUNITY: "model_community.lgb"}
@@ -223,7 +224,7 @@ class PriceModel:
         needed = [*MODEL_FILES.values(), SPEC_FILE, META_FILE]
         missing = [f for f in needed if not (directory / f).exists()]
         if missing:
-            raise FileNotFoundError(
+            raise MissingInputError(
                 f"model directory {directory} is missing {missing}; train one with "
                 "`dxb-prices train` (real data) or `dxb-prices train-fixture` (synthetic)"
             )

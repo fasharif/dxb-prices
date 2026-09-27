@@ -27,6 +27,7 @@ from typing import Any
 import httpx
 
 from dxb_prices import config
+from dxb_prices.errors import UserFacingError
 from dxb_prices.schema import EXPORT_COLUMNS
 
 log = logging.getLogger(__name__)
@@ -40,8 +41,18 @@ PROVISIONAL_DAYS = 7
 RETRY_STATUS = frozenset({429, 500, 502, 503, 504})
 
 
-class DownloadError(RuntimeError):
+MANUAL_DOWNLOAD = (
+    f"Download the month by hand from {config.DLD_PAGE_URL} and save it under data/raw/dld/ "
+    "with the name transactions_YYYY-MM.csv"
+)
+
+
+class DownloadError(UserFacingError, RuntimeError):
     """The source did not return a usable CSV."""
+
+
+class MonthError(UserFacingError, ValueError):
+    """A month argument that is malformed or outside what the DLD page offers."""
 
 
 @dataclass(frozen=True, order=True)
@@ -67,9 +78,9 @@ class Month:
             year_s, month_s = text.split("-")
             month = cls(int(year_s), int(month_s))
         except ValueError as exc:
-            raise ValueError(f"expected a month as YYYY-MM, got {text!r}") from exc
+            raise MonthError(f"expected a month as YYYY-MM, got {text!r}") from exc
         if not 1 <= month.month <= 12:
-            raise ValueError(f"month out of range in {text!r}")
+            raise MonthError(f"month out of range in {text!r}")
         return month
 
 
@@ -82,12 +93,12 @@ def available_months(today: date, include_partial: bool = False) -> list[Month]:
 def check_in_window(months: Iterable[Month], today: date) -> None:
     for m in months:
         if m.year != today.year:
-            raise ValueError(
+            raise MonthError(
                 f"{m.label} is outside {today.year}: the DLD open data page only offers "
                 "dates in the current calendar year, so this tool does not request others"
             )
         if m.first_day > today:
-            raise ValueError(f"{m.label} is in the future")
+            raise MonthError(f"{m.label} is in the future")
 
 
 def export_body(start: date, end: date) -> dict[str, Any]:
@@ -150,10 +161,15 @@ def sha256_of(path: Path) -> str:
 
 
 def _count_csv_rows(content: bytes) -> tuple[list[str], int]:
-    text = content.decode("utf-8-sig")
-    reader = csv.reader(io.StringIO(text))
-    header = next(reader, [])
-    return header, sum(1 for _ in reader)
+    try:
+        text = content.decode("utf-8-sig")
+        reader = csv.reader(io.StringIO(text))
+        header = next(reader, [])
+        return header, sum(1 for _ in reader)
+    except (UnicodeDecodeError, csv.Error) as exc:
+        raise DownloadError(
+            f"the portal returned something that is not a UTF-8 CSV ({exc}). {MANUAL_DOWNLOAD}"
+        ) from exc
 
 
 def validate_csv(content: bytes, content_type: str) -> tuple[list[str], int]:
@@ -163,8 +179,7 @@ def validate_csv(content: bytes, content_type: str) -> tuple[list[str], int]:
     ):
         raise DownloadError(
             "the portal returned an HTML page instead of CSV; it may be showing a "
-            f"challenge or maintenance page. Download the month by hand from {config.DLD_PAGE_URL} "
-            "and save it under data/raw/dld/ with the name transactions_YYYY-MM.csv"
+            f"challenge or maintenance page. {MANUAL_DOWNLOAD}"
         )
     header, rows = _count_csv_rows(content)
     missing = REQUIRED_COLUMNS - set(header)
@@ -180,7 +195,10 @@ def _post_with_retries(
     attempts: int,
     sleep: Callable[[float], None],
 ) -> httpx.Response:
+    if attempts < 1:
+        raise ValueError(f"attempts must be at least 1, got {attempts}")
     last_error: str = ""
+    attempt = 0
     for attempt in range(1, attempts + 1):
         try:
             response = client.post(url, json=body)
@@ -236,6 +254,8 @@ def download_months(
     sleep: Callable[[float], None] = time.sleep,
 ) -> list[ManifestEntry]:
     """Fetch each month into ``raw_dir`` unless a final, unchanged copy is cached."""
+    if attempts < 1:
+        raise ValueError(f"attempts must be at least 1, got {attempts}")
     today = today or date.today()
     months = sorted(set(months))
     check_in_window(months, today)

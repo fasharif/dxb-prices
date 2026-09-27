@@ -152,6 +152,41 @@ def test_render_docs(tmp_path: Path) -> None:
     assert (tmp_path / "metrics.md").read_text(encoding="utf-8").startswith("# Training")
 
 
-def test_download_refuses_other_years(tmp_path: Path) -> None:
-    with pytest.raises(ValueError, match="current calendar year"):
-        cli.main(["download", "--months", "2020-01", "--raw-dir", str(tmp_path)])
+def test_download_refuses_other_years(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    code = cli.main(["download", "--months", "2020-01", "--raw-dir", str(tmp_path)])
+    assert code == cli.EXIT_ERROR
+    assert "current calendar year" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    ("argv", "message"),
+    [
+        (["train"], "run `dxb-prices download` first"),
+        (["download", "--months", "2026-13"], "month out of range"),
+        (["render-docs", "--metrics", "{tmp}/metrics.json"], "run `dxb-prices train` first"),
+    ],
+)
+def test_user_errors_print_a_message_instead_of_a_traceback(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], argv: list[str], message: str
+) -> None:
+    args = [a.replace("{tmp}", str(tmp_path)) for a in argv]
+    if args[0] in {"train", "download"}:
+        args += ["--raw-dir", str(tmp_path / "raw")]
+    assert cli.main(args) == cli.EXIT_ERROR
+    err = capsys.readouterr().err
+    assert err.startswith(f"dxb-prices {args[0]}: error: ")
+    assert message in err
+    assert "Traceback" not in err
+
+
+def test_train_with_too_few_months_says_how_many_it_needs(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    lines = FIXTURE_CSV.read_text(encoding="utf-8").splitlines()
+    january = [lines[0], *(line for line in lines[1:] if '"2026-01-' in line)]
+    (raw / "transactions_2026-01.csv").write_text("\n".join(january) + "\n", encoding="utf-8")
+    code = cli.main(["train", "--raw-dir", str(raw), "--no-tracking", "--no-backtest"])
+    assert code == cli.EXIT_ERROR
+    assert "need at least 4 months" in capsys.readouterr().err
