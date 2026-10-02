@@ -1,0 +1,87 @@
+name: Monthly retrain
+
+# Downloads this year's DLD transactions, retrains and evaluates the model,
+# and uploads the metrics report as an artefact. It never deploys anything:
+# a person reads the report and decides whether to ship the new model.
+
+on:
+  schedule:
+    # 05:00 UTC on the 10th of each month. By then the previous month ended more
+    # than 7 days ago, so the downloader treats it as final (late registrations
+    # arrive in the first days after a month ends). A temporal split needs four
+    # complete months (two to train, one to validate, one to test), so the runs
+    # from January to April skip training; the first retrain of a year is in May.
+    - cron: "0 5 10 * *"
+  workflow_dispatch:
+    inputs:
+      search:
+        description: Run the hyper-parameter search (slower)
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: retrain
+  cancel-in-progress: false
+
+# Keep in step with ci.yml and the Dockerfile (tests/test_repo_consistency.py checks).
+env:
+  UV_VERSION: "0.12.19"
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  retrain:
+    name: Download, retrain and report
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - name: Install dependencies from the lockfile
+        run: uv sync --frozen --all-extras
+      - name: Download this year's complete months
+        # Exits 0 with a message when no month of the year is complete yet (January).
+        run: uv run dxb-prices download
+      - name: Check there are enough months for a temporal split
+        id: check
+        run: |
+          set +e
+          uv run dxb-prices check-data
+          code=$?
+          set -e
+          if [ "$code" -eq 0 ]; then
+            echo "enough=true" >> "$GITHUB_OUTPUT"
+          elif [ "$code" -eq 3 ]; then
+            echo "enough=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Not enough final months this year yet; skipping training."
+          else
+            exit "$code"
+          fi
+      - name: Train and evaluate
+        if: steps.check.outputs.enough == 'true'
+        env:
+          SEARCH: ${{ github.event_name != 'workflow_dispatch' || inputs.search }}
+        run: |
+          args=()
+          if [ "$SEARCH" = "false" ]; then args+=(--no-search); fi
+          uv run dxb-prices train "${args[@]}"
+      - name: Add the report to the run summary
+        if: steps.check.outputs.enough == 'true'
+        run: cat reports/metrics.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload the metrics report
+        if: steps.check.outputs.enough == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: metrics-report-${{ github.run_id }}
+          path: |
+            reports/metrics.json
+            reports/metrics.md
+            reports/shap_importance.png
+          if-no-files-found: error
+          retention-days: 90

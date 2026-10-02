@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Keep in step with retrain.yml and the Dockerfile (tests/test_repo_consistency.py checks).
+env:
+  UV_VERSION: "0.12.19"
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  lint:
+    name: Lint and type-check
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - name: Check the lockfile matches pyproject.toml
+        run: uv lock --check
+      - name: Install dependencies from the lockfile
+        run: uv sync --frozen --all-extras
+      - name: Ruff lint
+        run: uv run ruff check .
+      - name: Ruff format
+        run: uv run ruff format --check .
+      - name: Mypy (strict)
+        run: uv run mypy
+      - name: Lint workflow files
+        run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12 -color
+
+  test:
+    name: Tests (Python ${{ matrix.python }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: ${{ matrix.python }}
+          enable-cache: true
+      - name: Install dependencies from the lockfile
+        run: uv sync --frozen --all-extras
+      - name: Check the synthetic fixture is reproducible
+        run: |
+          uv run python scripts/make_fixture.py
+          git diff --exit-code tests/fixtures/
+      - name: Pytest with coverage
+        run: uv run pytest --cov --cov-report=term-missing
+
+  docker:
+    name: Docker images and API smoke test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - name: Train the small synthetic-fixture model (base dependencies only)
+        run: |
+          uv sync --frozen --no-dev
+          uv run --no-dev dxb-prices train-fixture --model-dir artifacts/fixture-model
+      - name: Build the API and UI images
+        run: |
+          docker build --target api -t dxb-prices-api:ci .
+          docker build --target ui -t dxb-prices-ui:ci .
+      - name: Start the API container
+        run: |
+          docker run -d --name dxb-prices-api -p 8000:8000 --memory 768m \
+            -v "$PWD/artifacts/fixture-model:/model:ro" dxb-prices-api:ci
+          for _ in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/health; then exit 0; fi
+            sleep 2
+          done
+          docker logs dxb-prices-api
+          exit 1
+      - name: Request estimates with and without a project
+        run: |
+          curl -fsS -X POST http://127.0.0.1:8000/estimate \
+            -H 'Content-Type: application/json' \
+            -d '{"community": "Marsa Dubai", "size_sqm": 80, "rooms": "1", "off_plan": false}' \
+            | tee estimate.json
+          python3 -c "import json; d = json.load(open('estimate.json')); assert d['estimate_aed'] > 0 and len(d['top_factors']) == 5 and d['model_variant'] == 'community'"
+          curl -fsS 'http://127.0.0.1:8000/projects?community=Marsa%20Dubai' | tee projects.json
+          python3 -c "import json; assert 'Marina Crest' in [p['name'] for p in json.load(open('projects.json'))]"
+          curl -fsS -X POST http://127.0.0.1:8000/estimate \
+            -H 'Content-Type: application/json' \
+            -d '{"community": "Marsa Dubai", "project": "Marina Crest", "size_sqm": 80, "rooms": "1", "off_plan": false}' \
+            | tee estimate_project.json
+          python3 -c "import json; d = json.load(open('estimate_project.json')); assert d['model_variant'] == 'full' and d['project'] == 'Marina Crest'"
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:8000/estimate \
+            -H 'Content-Type: application/json' -d '{"community": "Marsa Dubai", "size_sqm": 2}')
+          test "$code" = 422
+      - name: Stop the API container
+        if: always()
+        run: docker rm -f dxb-prices-api || true

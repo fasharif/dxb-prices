@@ -1,0 +1,6 @@
+# Applies when the page is started from the repository root.
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "viewer"
