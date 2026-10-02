@@ -7,7 +7,7 @@
 # Base images come from the AWS ECR mirror of the Docker Official Images
 # (same images, no Docker Hub pull-rate limit).
 
-FROM ghcr.io/astral-sh/uv:0.12.19 AS uv
+FROM ghcr.io/astral-sh/uv:0.12.22 AS uv
 
 FROM public.ecr.aws/docker/library/python:3.12-slim-bookworm AS base
 # LightGBM's Linux wheel links against the GNU OpenMP runtime.
