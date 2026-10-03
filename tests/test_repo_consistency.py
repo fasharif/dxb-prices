@@ -1,7 +1,7 @@
 """Version pins that live in several files must agree.
 
-Dependabot updates the uv image in the Dockerfile but not the version strings
-in the workflows, so a mismatch fails here instead of drifting silently.
+Dependabot updates the uv image in the Dockerfile but not the workflows, so the
+workflows read the uv version from the Dockerfile and the tests check they still do.
 """
 
 from __future__ import annotations
@@ -24,11 +24,17 @@ def _env(workflow: str, name: str) -> str:
     return match.group(1)
 
 
-def test_uv_version_is_the_same_in_the_workflows_and_the_dockerfile() -> None:
+def test_the_workflows_take_the_uv_version_from_the_dockerfile() -> None:
     dockerfile = _read(ROOT / "Dockerfile")
     image = re.search(r"^FROM ghcr\.io/astral-sh/uv:(\S+) AS uv$", dockerfile, re.MULTILINE)
-    assert image
-    assert _env("ci.yml", "UV_VERSION") == _env("retrain.yml", "UV_VERSION") == image.group(1)
+    assert image, "the workflows read the uv version from this FROM line"
+    for workflow in ("ci.yml", "retrain.yml"):
+        text = _read(WORKFLOWS / workflow)
+        assert "UV_VERSION:" not in text, f"{workflow} must not pin uv itself"
+        setups = text.count("uses: astral-sh/setup-uv@")
+        reads = text.count("name: Read the uv version from the Dockerfile")
+        assert setups and reads == setups, f"{workflow}: each uv setup needs the read step"
+        assert text.count("version: ${{ env.UV_VERSION }}") == setups
 
 
 def test_python_version_is_the_same_in_the_workflows_and_the_dockerfile() -> None:
