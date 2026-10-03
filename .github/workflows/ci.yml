@@ -12,9 +12,10 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# Keep in step with retrain.yml and the Dockerfile (tests/test_repo_consistency.py checks).
+# PYTHON_VERSION: keep in step with retrain.yml and the Dockerfile (tests/test_repo_consistency.py
+# checks). The uv version is read from the Dockerfile in each job, so Dependabot's uv image
+# updates need no workflow change.
 env:
-  UV_VERSION: "0.12.19"
   PYTHON_VERSION: "3.12"
 
 jobs:
@@ -23,6 +24,11 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
+      - name: Read the uv version from the Dockerfile
+        run: |
+          version="$(sed -nE 's#^FROM ghcr\.io/astral-sh/uv:([^ ]+) AS uv$#\1#p' Dockerfile)"
+          test -n "$version" || { echo "::error::no uv version in the Dockerfile"; exit 1; }
+          echo "UV_VERSION=$version" >> "$GITHUB_ENV"
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           version: ${{ env.UV_VERSION }}
@@ -50,6 +56,11 @@ jobs:
         python: ["3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v7
+      - name: Read the uv version from the Dockerfile
+        run: |
+          version="$(sed -nE 's#^FROM ghcr\.io/astral-sh/uv:([^ ]+) AS uv$#\1#p' Dockerfile)"
+          test -n "$version" || { echo "::error::no uv version in the Dockerfile"; exit 1; }
+          echo "UV_VERSION=$version" >> "$GITHUB_ENV"
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           version: ${{ env.UV_VERSION }}
@@ -69,6 +80,11 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
+      - name: Read the uv version from the Dockerfile
+        run: |
+          version="$(sed -nE 's#^FROM ghcr\.io/astral-sh/uv:([^ ]+) AS uv$#\1#p' Dockerfile)"
+          test -n "$version" || { echo "::error::no uv version in the Dockerfile"; exit 1; }
+          echo "UV_VERSION=$version" >> "$GITHUB_ENV"
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           version: ${{ env.UV_VERSION }}
